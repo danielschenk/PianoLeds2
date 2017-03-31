@@ -1,0 +1,11 @@
+#!python
+
+Import('base_env')
+env = base_env.Clone()
+
+env.Append(CPPPATH=['Interfaces', 'PC'])
+
+sources = Glob('PC/*.cpp')
+
+lib = env.Library('Drivers', sources)
+Return('lib')

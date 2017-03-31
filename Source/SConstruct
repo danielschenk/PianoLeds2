@@ -1,0 +1,12 @@
+#!python
+
+import os
+join = os.path.join
+
+env = Environment()
+
+if ARGUMENTS.get('VERBOSE') != '1':
+    env['CCCOMSTR'] = 'Compiling $TARGET'
+    env['LINKCOMSTR'] = 'Linking $TARGET'
+
+SConscript('PC.scons', variant_dir=Dir('Build/PC'), exports={'base_env': env}, duplicate=False)

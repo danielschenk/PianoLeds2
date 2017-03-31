@@ -1,0 +1,13 @@
+#!python
+
+import os
+join = os.path.join
+
+Import('base_env')
+Import('libs')
+env = base_env.Clone()
+
+env.Append(CPPPATH=[join('Drivers', 'PC')])
+env.Append(LIBS=[libs])
+
+env.Program('MidiInputMonitor', Glob('*.cpp'))

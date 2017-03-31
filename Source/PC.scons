@@ -1,0 +1,68 @@
+#!python
+
+import platform
+
+Import('base_env')
+env = base_env.Clone()
+
+symbols = [
+]
+flags = [
+    '-Wall',
+    '-std=c++11',
+]
+link_flags = [
+    '-Wl,-dead_strip',
+]
+
+if platform.system() == 'Darwin':
+    link_flags += [
+        '-F/System/Library/Frameworks',
+        '-Wl,-framework,CoreMIDI',
+        '-Wl,-framework,CoreAudio',
+        '-Wl,-framework,CoreFoundation',
+    ]
+    symbols += [
+        '__MACOSX_CORE__',
+    ]
+else:
+    raise Exception('Platform for RtMidi not configured or not supported')
+
+symbols_debug = symbols + [
+    'DEBUG',
+]
+symbols_release = symbols + [
+]
+flags_debug = [
+    '-O1',
+    '-g3',
+]
+flags_release = [
+    '-Os',
+]
+
+
+env['CFLAGS'] = flags
+env['CXXFLAGS'] = flags
+env['LINKFLAGS'] = link_flags
+
+env.Append(CPPPATH=['#/ExternalComponents', '#'])
+
+env_debug = env.Clone()
+env_debug.Append(CFLAGS=flags_debug, CXXFLAGS=flags_debug,
+                 CDEFINES=symbols_debug, CPPDEFINES=symbols_debug)
+env_release = env.Clone()
+env_release.Append(CFLAGS=flags_release, CXXFLAGS=flags_release,
+                   CDEFINES=symbols_release, CPPDEFINES=symbols_release)
+
+
+for env, name in [(env_debug, 'Debug'), (env_release, 'Release')]:
+    rtmidi = SConscript('ExternalComponents/RtMidi.scons', variant_dir=name + '/RtMidi', exports={'base_env': env}, duplicate=False)
+    drivers = SConscript('Drivers/PC.scons', variant_dir=name + '/Drivers', exports={'base_env': env}, duplicate=False)
+
+    libs = [
+        rtmidi,
+        drivers,
+    ]
+
+    SConscript('MidiInputMonitor/MidiInputMonitor.scons', variant_dir=name + '/MidiInputMonitor', exports={'base_env': env, 'libs': libs}, duplicate=False)

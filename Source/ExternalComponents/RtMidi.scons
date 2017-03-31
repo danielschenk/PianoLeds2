@@ -1,0 +1,8 @@
+#!python
+
+Import('base_env')
+env = base_env.Clone()
+env.Append(CPPPATH=['rtmidi'])
+
+lib = env.Library('RtMidi', ['rtmidi/RtMidi.cpp', 'rtmidi/rtmidi_c.cpp'])
+Return('lib')
