@@ -1,9 +1,9 @@
 /**
  * @file
  * @copyright (c) Daniel Schenk, 2017
- * This file is part of Source.
+ * This file is part of mlc2.
  * 
- * @brief <brief description of the file>
+ * @brief Simple test program using RtMidiMidiInput which prints received messages to stdout.
  */
 
 #include <iostream>
@@ -30,11 +30,18 @@ int main()
     {
         gs_pMidiInput->subscribeNoteOnOff(&OnNoteReceived);
         gs_pMidiInput->openPort(0);
-        std::cout << "Opened port 0, incoming notes will be printed to stdout.\n";
+        std::cout << "Opened port 0, incoming notes will be printed to stdout. Type <q> <ENTER> to quit.\n";
 
-        while(1);
+        while(std::getchar() != 'q')
+        {
+            // Wait for input
+        }
+
+        return 0;
     }
-
-    return 0;
+    else
+    {
+        return 1;
+    }
 }
 

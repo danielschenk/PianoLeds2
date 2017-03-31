@@ -2,8 +2,6 @@
  * @file
  * @copyright (c) Daniel Schenk, 2017
  * This file is part of mlc2.
- * 
- * @brief <brief description of the file>
  */
 
 #include <cstdio>
