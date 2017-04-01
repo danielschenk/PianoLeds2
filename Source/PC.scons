@@ -40,6 +40,7 @@ symbols_debug = [
     'DEBUG',
 ]
 symbols_release = [
+    'NDEBUG',
 ]
 flags_debug = [
     '-O1',
