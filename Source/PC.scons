@@ -2,9 +2,9 @@
 
 import platform
 
+# Create base environment
 Import('base_env')
 env = base_env.Clone()
-
 symbols = [
 ]
 flags = [
@@ -28,10 +28,18 @@ if platform.system() == 'Darwin':
 else:
     raise Exception('Platform for RtMidi not configured or not supported')
 
-symbols_debug = symbols + [
+env.Append(CDEFINES=symbols)
+env.Append(CPPDEFINES=symbols)
+env.Append(CFLAGS=flags)
+env.Append(CXXFLAGS=flags)
+env.Append(LINKFLAGS=link_flags)
+env.Append(CPPPATH=['#/ExternalComponents', '#'])
+
+# Create derived environments for debug/release
+symbols_debug = [
     'DEBUG',
 ]
-symbols_release = symbols + [
+symbols_release = [
 ]
 flags_debug = [
     '-O1',
@@ -40,13 +48,6 @@ flags_debug = [
 flags_release = [
     '-Os',
 ]
-
-
-env['CFLAGS'] = flags
-env['CXXFLAGS'] = flags
-env['LINKFLAGS'] = link_flags
-
-env.Append(CPPPATH=['#/ExternalComponents', '#'])
 
 env_debug = env.Clone()
 env_debug.Append(CFLAGS=flags_debug, CXXFLAGS=flags_debug,
@@ -57,9 +58,11 @@ env_release.Append(CFLAGS=flags_release, CXXFLAGS=flags_release,
 
 
 for env, name in [(env_debug, 'Debug'), (env_release, 'Release')]:
+    # Define library builds
     rtmidi = SConscript('ExternalComponents/RtMidi.scons', variant_dir=name + '/RtMidi', exports={'base_env': env}, duplicate=False)
     drivers = SConscript('Drivers/PC.scons', variant_dir=name + '/Drivers', exports={'base_env': env}, duplicate=False)
 
+    # Build MidiInputMonitor test app against the libraries
     libs = [
         rtmidi,
         drivers,
