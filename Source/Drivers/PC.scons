@@ -5,7 +5,7 @@ env = base_env.Clone()
 
 env.Append(CPPPATH=['Interfaces', 'PC'])
 
-sources = Glob('PC/*.cpp')
+sources = Glob('PC/*.cpp') + Glob('Common/*.cpp')
 
 lib = env.Library('Drivers', sources)
 Return('lib')

@@ -20,6 +20,7 @@ public:
     {
         NOTE_OFF = 0x80,
         NOTE_ON = 0x90,
+        CONTROL_CHANGE = 0xB0,
     };
 
     /** Controller number type. */

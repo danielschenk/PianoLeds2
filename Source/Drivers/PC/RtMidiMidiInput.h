@@ -9,9 +9,9 @@
 #ifndef SOURCE_DRIVERS_SOURCE_RTMIDIMIDIINPUT_H_
 #define SOURCE_DRIVERS_SOURCE_RTMIDIMIDIINPUT_H_
 
-#include <vector>
+#include <list>
 
-#include <Drivers/Interfaces/IMidiInput.h>
+#include <Drivers/Common/BaseMidiInput.h>
 
 class RtMidiIn;
 
@@ -19,7 +19,7 @@ class RtMidiIn;
  * MIDI input implementation which uses RtMidi.
  */
 class RtMidiMidiInput
-    : public IMidiInput
+    : public BaseMidiInput
 {
 public:
     /**
@@ -40,10 +40,6 @@ public:
     virtual unsigned int getPortCount() const;
     virtual void openPort(int number);
 
-    // IMidiInput implementation.
-    virtual void subscribeNoteOnOff(IMidiInput::TNoteOnOffFunction callback);
-//    virtual void unsubscribeNoteOnOff(IMidiInput::TNoteOnOffFunction callback);
-
 private:
     /** The common callback for all instances. */
     static void RtMidiCommonCallback(double deltatime, std::vector<unsigned char> *message, void *userData);
@@ -53,9 +49,6 @@ private:
 
     /** Pointer to the RtMidiIn instance. */
     RtMidiIn* m_pRtMidiIn;
-
-    /** Collection of note on/off subscribers. */
-    std::vector<IMidiInput::TNoteOnOffFunction> m_noteOnOffSubscribers;
 };
 
 #endif /* SOURCE_DRIVERS_SOURCE_RTMIDIMIDIINPUT_H_ */

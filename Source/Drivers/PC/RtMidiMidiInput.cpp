@@ -12,7 +12,6 @@
 
 RtMidiMidiInput::RtMidiMidiInput()
     : m_pRtMidiIn(new RtMidiIn())
-    , m_noteOnOffSubscribers()
 {
     assert(m_pRtMidiIn != nullptr);
     m_pRtMidiIn->setCallback(&RtMidiCommonCallback, (void*)this);
@@ -31,11 +30,6 @@ unsigned int RtMidiMidiInput::getPortCount() const
 void RtMidiMidiInput::openPort(int number)
 {
     m_pRtMidiIn->openPort(number);
-}
-
-void RtMidiMidiInput::subscribeNoteOnOff(IMidiInput::TNoteOnOffFunction callback)
-{
-    m_noteOnOffSubscribers.push_back(callback);
 }
 
 void RtMidiMidiInput::RtMidiCommonCallback(double deltatime, std::vector<unsigned char> *message, void *userData)
@@ -57,21 +51,18 @@ void RtMidiMidiInput::RtMidiCallback(double deltatime, std::vector<unsigned char
     switch(status)
     {
         case NOTE_OFF:
-            for(const auto& it : m_noteOnOffSubscribers)
-            {
-                // Channel, pitch, velocity, note off
-                it(channel, pMessage->at(1), pMessage->at(2), false);
-            }
+            // Channel, pitch, velocity, note off
+            notifyNoteOnOff(channel, pMessage->at(1), pMessage->at(2), false);
             break;
         case NOTE_ON:
-            for(const auto& it : m_noteOnOffSubscribers)
-            {
-                // Channel, pitch, velocity, note on
-                it(channel, pMessage->at(1), pMessage->at(2), true);
-            }
+            // Channel, pitch, velocity, note on
+            notifyNoteOnOff(channel, pMessage->at(1), pMessage->at(2), true);
+            break;
+        case CONTROL_CHANGE:
+            // Channel, controller number, value
+            notifyControlChange(channel, (IMidiInterface::TControllerNumber)pMessage->at(1), pMessage->at(2));
             break;
         default:
             break;
     }
 }
-
