@@ -9,8 +9,6 @@
 #ifndef SOURCE_DRIVERS_SOURCE_RTMIDIMIDIINPUT_H_
 #define SOURCE_DRIVERS_SOURCE_RTMIDIMIDIINPUT_H_
 
-#include <list>
-
 #include <Drivers/Common/BaseMidiInput.h>
 
 class RtMidiIn;
