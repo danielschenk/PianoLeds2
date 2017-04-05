@@ -43,7 +43,7 @@ IMidiInput::TSubscriptionToken BaseMidiInput::subscribeControlChange(IMidiInput:
 {
     // If the counter wrapped around, and there are very old subscriptions in the list (rare),
     // we might be adding an existing token. Try to find a new one in that case.
-    while(m_noteOnOffSubscribers.find(m_nextOnOffToken) != m_noteOnOffSubscribers.cend())
+    while(m_controlChangeSubscribers.find(m_nextControlChangeToken) != m_controlChangeSubscribers.cend())
     {
         m_nextControlChangeToken++;
     }
