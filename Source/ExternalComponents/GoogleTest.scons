@@ -1,0 +1,24 @@
+#!python
+
+import os
+
+Import('base_env')
+gtest_env = base_env.Clone()
+
+gtest_path = os.path.join('googletest', 'googletest')
+gtest_include_path = os.path.join(gtest_path, 'include')
+
+gtest_env['CPPPATH'] = [
+    gtest_path,
+    gtest_include_path,
+]
+gtest_env['CXXFLAGS'] = [
+    '-pthread',
+    '-Os',
+]
+
+gtest_all = gtest_env.Object('gtest-all.o', os.path.join(gtest_path, 'src', 'gtest-all.cc'))
+gtest_main = gtest_env.Object('gtest_main.o', os.path.join(gtest_path, 'src', 'gtest_main.cc'))
+lib = gtest_env.StaticLibrary('GoogleTest', [gtest_all, gtest_main])
+
+Return('lib')

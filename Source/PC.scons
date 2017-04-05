@@ -10,6 +10,8 @@ symbols = [
 flags = [
     '-Wall',
     '-std=c++11',
+    '-Os',
+    '-g3',
 ]
 link_flags = [
     '-Wl,-dead_strip',
@@ -35,38 +37,18 @@ env.Append(CXXFLAGS=flags)
 env.Append(LINKFLAGS=link_flags)
 env.Append(CPPPATH=['#/ExternalComponents', '#'])
 
-# Create derived environments for debug/release
-symbols_debug = [
-    'DEBUG',
-]
-symbols_release = [
-    'NDEBUG',
-]
-flags_debug = [
-    '-O1',
-    '-g3',
-]
-flags_release = [
-    '-Os',
-]
+googletest = SConscript('ExternalComponents/GoogleTest.scons',
+                        exports={'base_env': env},
+                        duplicate=False)
 
-env_debug = env.Clone()
-env_debug.Append(CFLAGS=flags_debug, CXXFLAGS=flags_debug,
-                 CDEFINES=symbols_debug, CPPDEFINES=symbols_debug)
-env_release = env.Clone()
-env_release.Append(CFLAGS=flags_release, CXXFLAGS=flags_release,
-                   CDEFINES=symbols_release, CPPDEFINES=symbols_release)
+rtmidi = SConscript('ExternalComponents/RtMidi.scons',
+                    exports={'base_env': env},
+                    duplicate=False)
+drivers = SConscript('Drivers/PC.scons',
+                     exports={'base_env': env},
+                     duplicate=False)
 
-
-for env, name in [(env_debug, 'Debug'), (env_release, 'Release')]:
-    # Define library builds
-    rtmidi = SConscript('ExternalComponents/RtMidi.scons', variant_dir=name + '/RtMidi', exports={'base_env': env}, duplicate=False)
-    drivers = SConscript('Drivers/PC.scons', variant_dir=name + '/Drivers', exports={'base_env': env}, duplicate=False)
-
-    # Build MidiInputMonitor test app against the libraries
-    libs = [
-        rtmidi,
-        drivers,
-    ]
-
-    SConscript('MidiInputMonitor/MidiInputMonitor.scons', variant_dir=name + '/MidiInputMonitor', exports={'base_env': env, 'libs': libs}, duplicate=False)
+# Build MidiInputMonitor test app against the libraries
+monitor = SConscript('MidiInputMonitor/MidiInputMonitor.scons',
+                     exports={'base_env': env, 'libs': [rtmidi, drivers]},
+                     duplicate=False)

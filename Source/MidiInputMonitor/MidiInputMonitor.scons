@@ -10,4 +10,5 @@ env = base_env.Clone()
 env.Append(CPPPATH=[join('Drivers', 'PC')])
 env.Append(LIBS=[libs])
 
-env.Program('MidiInputMonitor', Glob('*.cpp'))
+app = env.Program('MidiInputMonitor', Glob('*.cpp'))
+Return('app')
