@@ -30,6 +30,13 @@ typedef struct TRgb
         b = 0;
     };
 
+    bool operator==(const TRgb& other) const
+    {
+        return (other.r == r) &&
+               (other.g == g) &&
+               (other.b == b);
+    }
+
     uint8_t r;
     uint8_t g;
     uint8_t b;

@@ -17,7 +17,7 @@ EqualRangeRgbSource::~EqualRangeRgbSource()
 
 void EqualRangeRgbSource::execute(Processing::TRgbStrip& output)
 {
-    for(auto it : output)
+    for(auto& it : output)
     {
         it.r = m_color.r;
         it.g = m_color.g;
