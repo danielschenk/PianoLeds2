@@ -28,6 +28,13 @@ public:
     typedef uint32_t TSubscriptionToken;
 
     /**
+     * Destructor.
+     */
+    virtual ~IMidiInput()
+    {
+    };
+
+    /**
      * Subscribe to note receive events.
      *
      * @param   callback    [in]    The function to be called.

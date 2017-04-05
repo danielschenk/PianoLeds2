@@ -30,6 +30,13 @@ public:
     };
 
     /**
+     * Destructor.
+     */
+    virtual ~IMidiInterface()
+    {
+    };
+
+    /**
      * Get number of available ports.
      *
      * @return Number of available ports.
