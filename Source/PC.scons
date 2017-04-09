@@ -39,6 +39,7 @@ env.Append(CPPPATH=[
     '#',
     '#/ExternalComponents',
     '#/ExternalComponents/googletest/googletest/include',
+    '#/ExternalComponents/googletest/googlemock/include',
 ])
 
 googletest = SConscript('ExternalComponents/GoogleTest.scons',
@@ -59,6 +60,7 @@ monitor = SConscript('MidiInputMonitor/MidiInputMonitor.scons',
 
 component_paths_with_test = [
     'Processing',
+    'Common',
 ]
 
 tests = []

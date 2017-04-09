@@ -6,11 +6,15 @@ Import('base_env')
 gtest_env = base_env.Clone()
 
 gtest_path = os.path.join('googletest', 'googletest')
+gmock_path = os.path.join('googletest', 'googlemock')
 gtest_include_path = os.path.join(gtest_path, 'include')
+gmock_include_path = os.path.join(gmock_path, 'include')
 
 gtest_env['CPPPATH'] = [
     gtest_path,
     gtest_include_path,
+    gmock_path,
+    gmock_include_path,
 ]
 gtest_env['CXXFLAGS'] = [
     '-pthread',
@@ -18,7 +22,8 @@ gtest_env['CXXFLAGS'] = [
 ]
 
 gtest_all = gtest_env.Object('gtest-all.o', os.path.join(gtest_path, 'src', 'gtest-all.cc'))
+gmock_all = gtest_env.Object('gmock-all.o', os.path.join(gmock_path, 'src', 'gmock-all.cc'))
 gtest_main = gtest_env.Object('gtest_main.o', os.path.join(gtest_path, 'src', 'gtest_main.cc'))
-lib = gtest_env.StaticLibrary('GoogleTest', [gtest_all, gtest_main])
+lib = gtest_env.StaticLibrary('GoogleTest', [gtest_all, gmock_all, gtest_main])
 
 Return('lib')
