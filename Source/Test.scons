@@ -1,0 +1,50 @@
+#!python
+
+# Create base environment
+Import('base_env')
+env = base_env.Clone()
+
+symbols = [
+]
+flags = [
+    '-Wall',
+    '-std=c++11',
+    '-O2',
+    '-g3',
+]
+link_flags = [
+    '-Wl,-dead_strip',
+]
+
+component_paths_with_test = [
+    'Processing',
+    'Common',
+]
+
+env.Append(CDEFINES=symbols)
+env.Append(CPPDEFINES=symbols)
+env.Append(CFLAGS=flags)
+env.Append(CXXFLAGS=flags)
+env.Append(LINKFLAGS=link_flags)
+env.Append(CPPPATH=[
+    '#',
+    '#/ExternalComponents/googletest/googletest/include',
+    '#/ExternalComponents/googletest/googlemock/include',
+])
+
+googletest = SConscript('ExternalComponents/GoogleTest.scons',
+                        exports={'base_env': env},
+                        duplicate=False)
+
+common = SConscript('Common/Common.Scons',
+                    exports={'base_env': env},
+                    duplicate=False)
+
+test_env = env.Clone()
+test_env.Append(LIBS=[googletest, common])
+for path in component_paths_with_test:
+    test_name = path + 'Test'
+    sources = Glob(path + '/*.cpp') + Glob(path + '/Test/*.cpp')
+    test_program = test_env.Program(test_name, sources)
+    test_result = test_env.Command(test_name + '_result.xml', test_program, './$SOURCE --gtest_output=xml:$TARGET')
+    test_env.AlwaysBuild(test_result)

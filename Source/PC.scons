@@ -42,10 +42,6 @@ env.Append(CPPPATH=[
     '#/ExternalComponents/googletest/googlemock/include',
 ])
 
-googletest = SConscript('ExternalComponents/GoogleTest.scons',
-                        exports={'base_env': env},
-                        duplicate=False)
-
 rtmidi = SConscript('ExternalComponents/RtMidi.scons',
                     exports={'base_env': env},
                     duplicate=False)
@@ -57,20 +53,3 @@ drivers = SConscript('Drivers/PC.scons',
 monitor = SConscript('MidiInputMonitor/MidiInputMonitor.scons',
                      exports={'base_env': env, 'libs': [rtmidi, drivers]},
                      duplicate=False)
-
-component_paths_with_test = [
-    'Processing',
-    'Common',
-]
-
-tests = []
-
-test_env = env.Clone()
-test_env.Append(LIBS=googletest)
-for path in component_paths_with_test:
-    test_name = path + 'Test'
-    sources = Glob(path + '/*.cpp') + Glob(path + '/Test/*.cpp')
-    test_program = test_env.Program(test_name, sources)
-    test_result = test_env.Command(test_name + '_result.xml', test_program, './$SOURCE --gtest_output=xml:$TARGET')
-    test_env.AlwaysBuild(test_result)
-    test_env.Alias('test', tests)

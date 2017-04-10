@@ -11,3 +11,8 @@ if ARGUMENTS.get('VERBOSE') != '1':
     env['LINKCOMSTR'] = 'Linking $TARGET'
 
 SConscript('PC.scons', variant_dir=Dir('Build/PC'), exports={'base_env': env}, duplicate=False)
+SConscript('Test.scons', variant_dir=Dir('Build/Test'), exports={'base_env': env}, duplicate=False)
+
+pc = env.Alias('pc', 'Build/PC')
+test = env.Alias('test', 'Build/Test')
+env.Default(pc)
