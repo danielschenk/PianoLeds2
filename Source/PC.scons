@@ -12,6 +12,8 @@ flags = [
     '-std=c++11',
     '-Os',
     '-g3',
+    '-fdata-sections',
+    '-ffunction-sections',
 ]
 link_flags = [
     '-Wl,-dead_strip',
