@@ -155,7 +155,41 @@ TEST_F(ObserverListTest, subscribeAfterUnsubscribe)
     EXPECT_CALL(observer3, callback(_, _))
         .Times(1);
     EXPECT_CALL(observer4, callback(_, _))
-            .Times(1);
+        .Times(1);
+
+    m_observerList.notifySubscribers(42, nullptr);
+}
+
+TEST_F(ObserverListTest, unsubscribeInvalidToken)
+{
+    StrictMock<MockObserver> observer1, observer2, observer3;
+
+    auto subscription1 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    auto subscription2 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    auto subscription3 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
+
+    // Don't assume anything about the way tokens are generated, make sure we find an unused one
+    unsigned int invalidToken = 0;
+    bool found = false;
+    for(unsigned int i = 0; i < 1000; ++i)
+    {
+        if(i != subscription1 && i != subscription2 && i != subscription3)
+        {
+            invalidToken = i;
+            found = true;
+            break;
+        }
+    }
+    ASSERT_EQ(true, found);
+
+    m_observerList.unsubscribe(invalidToken);
+
+    EXPECT_CALL(observer1, callback(_, _))
+        .Times(1);
+    EXPECT_CALL(observer2, callback(_, _))
+        .Times(1);
+    EXPECT_CALL(observer3, callback(_, _))
+        .Times(1);
 
     m_observerList.notifySubscribers(42, nullptr);
 }
