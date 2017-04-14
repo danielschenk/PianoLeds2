@@ -145,9 +145,10 @@ TEST_F(ObserverListTest, subscribeAfterUnsubscribe)
     m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
     auto subscription2 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
     m_observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer4, std::placeholders::_1, std::placeholders::_2));
 
     m_observerList.unsubscribe(subscription2);
+
+    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer4, std::placeholders::_1, std::placeholders::_2));
 
     EXPECT_CALL(observer1, callback(_, _))
         .Times(1);
