@@ -49,6 +49,10 @@ drivers = SConscript('Drivers/PC.scons',
                      exports={'base_env': env},
                      duplicate=False)
 
+common = SConscript('Common/Common.Scons',
+                    exports={'base_env': env},
+                    duplicate=False)
+
 # Build MidiInputMonitor test app against the libraries
 monitor = SConscript('MidiInputMonitor/MidiInputMonitor.scons',
                      exports={'base_env': env, 'libs': [rtmidi, drivers]},

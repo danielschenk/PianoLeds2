@@ -10,6 +10,7 @@
 #define DRIVERS_COMMON_BASEMIDIINPUT_H_
 
 #include <map>
+#include <Common/ObserverList.h>
 
 #include "../Interfaces/IMidiInput.h"
 
@@ -44,33 +45,27 @@ protected:
     /**
      * Notify all note on/off subscribers.
      *
-     * @param   channel     [in]    The channel the message was received on.
-     * @param   pitch       [in]    The pitch of the note.
-     * @param   pitch       [in]    The pitch of the note.
+     * @param[in]   channel     The channel the message was received on.
+     * @param[in]   pitch       The pitch of the note.
+     * @param[in]   velocity    The pitch of the note.
      */
     virtual void notifyNoteOnOff(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) const;
 
     /**
      * Notify all control change subscribers.
      *
-     * @param   channel     [in]    The channel the message was received on.
-     * @param   controller  [in]    The number of the controller.
-     * @param   value       [in]    The value of the controller.
+     * @param[in]   channel     The channel the message was received on.
+     * @param[in]   controller  The number of the controller.
+     * @param[in]   value       The value of the controller.
      */
     virtual void notifyControlChange(uint8_t channel, IMidiInput::TControllerNumber control, uint8_t value) const;
 
 private:
-    /** The next value to be used for an on/off subscription. */
-    TSubscriptionToken m_nextOnOffToken;
-
     /** Collection of note on/off subscribers. */
-    std::map<IMidiInput::TSubscriptionToken, IMidiInput::TNoteOnOffFunction> m_noteOnOffSubscribers;
-
-    /** The next value to be used for a control change subscription. */
-    TSubscriptionToken m_nextControlChangeToken;
+    ObserverList<uint8_t, uint8_t, uint8_t, bool> m_noteOnOffSubscribers;
 
     /** Collection of control change subscribers. */
-    std::map<IMidiInput::TSubscriptionToken, IMidiInput::TControlChangeFunction> m_controlChangeSubscribers;
+    ObserverList<uint8_t, IMidiInput::TControllerNumber, uint8_t> m_controlChangeSubscribers;
 };
 
 #endif /* DRIVERS_COMMON_BASEMIDIINPUT_H_ */

@@ -25,7 +25,7 @@ public:
     typedef std::function<void(uint8_t, TControllerNumber, uint8_t)> TControlChangeFunction;
 
     /** Type of subscription token which can be used to unsubscribe. */
-    typedef uint32_t TSubscriptionToken;
+    typedef unsigned int TSubscriptionToken;
 
     /**
      * Destructor.
@@ -37,28 +37,28 @@ public:
     /**
      * Subscribe to note receive events.
      *
-     * @param   callback    [in]    The function to be called.
+     * @param[in]   callback    The function to be called.
      */
     virtual TSubscriptionToken subscribeNoteOnOff(TNoteOnOffFunction callback) = 0;
 
     /**
      * Unsubscribe from note receive events.
      *
-     * @param   token       [in]    The subscription to be removed.
+     * @param[in]   token       The subscription to be removed.
      */
     virtual void unsubscribeNoteOnOff(TSubscriptionToken token) = 0;
 
     /**
      * Subscribe to control change events.
      *
-     * @param   callback    [in]    The function to be called.
+     * @param[in]   callback    The function to be called.
      */
     virtual TSubscriptionToken subscribeControlChange(TControlChangeFunction callback) = 0;
 
     /**
      * Unsubscribe from control change events.
      *
-     * @param   token       [in]    The subscription to be removed.
+     * @param[in]   token       The subscription to be removed.
      */
     virtual void unsubscribeControlChange(TSubscriptionToken token) = 0;
 };

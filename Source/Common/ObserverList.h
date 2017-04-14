@@ -48,7 +48,7 @@ public:
     /**
      * Subscribe for events.
      *
-     * @param[in]   The callback function to register.
+     * @param[in]   callback    The callback function to register.
      */
      TSubscriptionToken subscribe(TCallbackFunction callback)
      {
@@ -78,7 +78,7 @@ public:
      /**
       * Unsubscribe from events.
       *
-      * @param[in]  The token of the subscription to cancel.
+      * @param[in]  token   The token of the subscription to cancel.
       */
      void unsubscribe(TSubscriptionToken token)
      {
