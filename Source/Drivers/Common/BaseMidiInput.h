@@ -22,11 +22,6 @@ class BaseMidiInput
 {
 public:
     /**
-     * Constructor.
-     */
-    BaseMidiInput();
-
-    /**
      * Destructor.
      */
     virtual ~BaseMidiInput();
@@ -42,6 +37,11 @@ public:
     virtual void unsubscribeControlChange(TSubscriptionToken token);
 
 protected:
+    /**
+     * Constructor.
+     */
+    BaseMidiInput();
+
     /**
      * Notify all note on/off subscribers.
      *
