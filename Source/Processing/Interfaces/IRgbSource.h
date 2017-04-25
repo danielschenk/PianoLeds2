@@ -9,7 +9,6 @@
 #ifndef PROCESSING_IRGBSOURCE_H_
 #define PROCESSING_IRGBSOURCE_H_
 
-#include <cstdint>
 #include <vector>
 
 #include "ProcessingTypes.h"

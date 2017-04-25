@@ -26,8 +26,13 @@ public:
     /** Controller number type. */
     enum TControllerNumber
     {
-        TODO,
+        DAMPER_PEDAL = 0x40,
     };
+
+    static constexpr unsigned int c_numNotes = 256;
+    static constexpr unsigned int c_maxNoteNumber = 255;
+    static constexpr unsigned int c_numVelocities = 256;
+    static constexpr unsigned int c_maxVelocity = 255;
 
     /**
      * Destructor.
