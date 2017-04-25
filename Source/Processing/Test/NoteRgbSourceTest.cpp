@@ -19,9 +19,11 @@ class NoteRgbSourceTest
     : public ::testing::Test
 {
 public:
+    static constexpr unsigned int c_StripSize = 50;
+
     NoteRgbSourceTest()
         : m_mockMidiInput()
-        , m_strip(50)
+        , m_strip(c_StripSize)
     {
         // Store callbacks so we can simulate events
         EXPECT_CALL(m_mockMidiInput, subscribeNoteOnOff(_))
@@ -30,7 +32,7 @@ public:
             .WillOnce(DoAll(SaveArg<0>(&m_controlChangeCallback), Return(69)));
         m_pNoteRgbSource = new NoteRgbSource(m_mockMidiInput);
 
-        for(int i = 0; i < m_strip.size(); ++i)
+        for(int i = 0; i < c_StripSize; ++i)
         {
             // Default: simple 1-to-1 mapping
             m_noteToLightMap[i] = i;
@@ -63,17 +65,19 @@ public:
     Processing::TNoteToLightMap m_noteToLightMap;
 };
 
-TEST_F(NoteRgbSourceTest, noEventsNoChange)
+TEST_F(NoteRgbSourceTest, noNotesSounding)
 {
     Processing::TNoteToLightMap noteToLightMap;
 
-    for(int i = 0; i < m_strip.size(); ++i)
-    {
-        m_strip[i] = {12, 23, 34};
-    }
-    auto reference = m_strip;
+    // m_strip is initialized with zeroes
+    auto darkStrip = m_strip;
+
+    m_strip[0] = {4, 5, 6};
+    m_strip[6] = {7, 8, 9};
+    m_strip[c_StripSize-1] = {11, 12, 13};
 
     m_pNoteRgbSource->execute(m_strip);
-    ASSERT_EQ(reference, m_strip);
-}
 
+    // No notes sounding should cause darkness
+    ASSERT_EQ(darkStrip, m_strip);
+}
