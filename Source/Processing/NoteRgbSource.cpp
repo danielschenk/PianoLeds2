@@ -16,7 +16,7 @@ NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput)
     , m_channel(0)
     , m_scheduler()
     , m_noteState()
-    , m_pRgbFunction(new LinearRgbFunction({0, 0}, {0, 0}, {0, 0}))
+    , m_pRgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}))
 {
     m_noteOnOffSubscription = m_rMidiInput.subscribeNoteOnOff(
             std::bind(&NoteRgbSource::handleNoteOnOff, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3, std::placeholders::_4));

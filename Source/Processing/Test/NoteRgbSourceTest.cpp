@@ -67,8 +67,6 @@ public:
 
 TEST_F(NoteRgbSourceTest, noNotesSounding)
 {
-    Processing::TNoteToLightMap noteToLightMap;
-
     // m_strip is initialized with zeroes
     auto darkStrip = m_strip;
 
@@ -80,4 +78,46 @@ TEST_F(NoteRgbSourceTest, noNotesSounding)
 
     // No notes sounding should cause darkness
     ASSERT_EQ(darkStrip, m_strip);
+}
+
+TEST_F(NoteRgbSourceTest, noteOn)
+{
+    // (channel, number, velocity, on/off)
+    m_noteOnOffCallback(0, 42, 1, true);
+    m_noteOnOffCallback(0, 43, 6, true);
+
+    m_pNoteRgbSource->execute(m_strip);
+
+    // Default: white, factor 255, so any velocity >0 will cause full on
+    for(int i = 0; i < c_StripSize; ++i)
+    {
+        Processing::TRgb color;
+        if(i == 42 || i == 43)
+        {
+            color = {255, 255, 255};
+        }
+        EXPECT_EQ(color, m_strip[i]) << "where i is" << i;
+    }
+}
+
+TEST_F(NoteRgbSourceTest, noteOff)
+{
+    // (channel, number, velocity, on/off)
+    m_noteOnOffCallback(0, 42, 1, true);
+    m_noteOnOffCallback(0, 43, 6, true);
+
+    m_noteOnOffCallback(0, 42, 8, false);
+
+    m_pNoteRgbSource->execute(m_strip);
+
+    // Default: white, factor 255, so any velocity >0 will cause full on
+    for(int i = 0; i < c_StripSize; ++i)
+    {
+        Processing::TRgb color;
+        if(i == 43)
+        {
+            color = {255, 255, 255};
+        }
+        EXPECT_EQ(color, m_strip[i]) << "where i is " << i;
+    }
 }
