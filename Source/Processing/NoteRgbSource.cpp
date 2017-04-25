@@ -85,7 +85,7 @@ void NoteRgbSource::handleControlChange(uint8_t channel, IMidiInput::TController
                     {
                         if(!m_noteState[note].pressed)
                         {
-                            m_noteState[note].pressed = false;
+                            m_noteState[note].sounding = false;
                         }
                     }
                 }

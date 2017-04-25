@@ -19,7 +19,7 @@ class NoteRgbSourceTest
     : public ::testing::Test
 {
 public:
-    static constexpr unsigned int c_StripSize = 50;
+    static constexpr unsigned int c_StripSize = 10;
 
     NoteRgbSourceTest()
         : m_mockMidiInput()
@@ -83,41 +83,89 @@ TEST_F(NoteRgbSourceTest, noNotesSounding)
 TEST_F(NoteRgbSourceTest, noteOn)
 {
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 42, 1, true);
-    m_noteOnOffCallback(0, 43, 6, true);
+    m_noteOnOffCallback(0, 0, 1, true);
+    m_noteOnOffCallback(0, 5, 6, true);
 
     m_pNoteRgbSource->execute(m_strip);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
-    for(int i = 0; i < c_StripSize; ++i)
-    {
-        Processing::TRgb color;
-        if(i == 42 || i == 43)
-        {
-            color = {255, 255, 255};
-        }
-        EXPECT_EQ(color, m_strip[i]) << "where i is" << i;
-    }
+    auto reference = Processing::TRgbStrip(c_StripSize);
+    reference[0] = {0xff, 0xff, 0xff};
+    reference[5] = {0xff, 0xff, 0xff};
+
+    EXPECT_EQ(reference, m_strip);
 }
 
 TEST_F(NoteRgbSourceTest, noteOff)
 {
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 42, 1, true);
-    m_noteOnOffCallback(0, 43, 6, true);
+    m_noteOnOffCallback(0, 0, 1, true);
+    m_noteOnOffCallback(0, 5, 6, true);
 
-    m_noteOnOffCallback(0, 42, 8, false);
+    m_noteOnOffCallback(0, 0, 8, false);
 
     m_pNoteRgbSource->execute(m_strip);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
-    for(int i = 0; i < c_StripSize; ++i)
-    {
-        Processing::TRgb color;
-        if(i == 43)
-        {
-            color = {255, 255, 255};
-        }
-        EXPECT_EQ(color, m_strip[i]) << "where i is " << i;
-    }
+    auto reference = Processing::TRgbStrip(c_StripSize);
+    reference[5] = {0xff, 0xff, 0xff};
+
+    EXPECT_EQ(reference, m_strip);
+}
+
+TEST_F(NoteRgbSourceTest, ignoreOtherChannel)
+{
+    m_noteOnOffCallback(1, 0, 1, true);
+
+    auto darkStrip = m_strip;
+    m_pNoteRgbSource->execute(m_strip);
+    EXPECT_EQ(darkStrip, m_strip);
+}
+
+TEST_F(NoteRgbSourceTest, ignorePedal)
+{
+    auto darkStrip = m_strip;
+
+    m_noteOnOffCallback(0, 0, 1, true);
+    m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0xff);
+    m_noteOnOffCallback(0, 0, 1, false);
+
+    m_pNoteRgbSource->execute(m_strip);
+    EXPECT_EQ(darkStrip, m_strip);
+}
+
+TEST_F(NoteRgbSourceTest, usePedal)
+{
+    m_pNoteRgbSource->setUsingPedal(true);
+
+    // Press a key
+    m_noteOnOffCallback(0, 0, 1, true);
+    // Press pedal
+    m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0xff);
+    // Press another key
+    m_noteOnOffCallback(0, 2, 1, true);
+
+    auto reference = Processing::TRgbStrip(c_StripSize);
+    // Both notes are still sounding
+    reference[0] = {0xff, 0xff, 0xff};
+    reference[2] = {0xff, 0xff, 0xff};
+    m_pNoteRgbSource->execute(m_strip);
+    EXPECT_EQ(reference, m_strip);
+
+    // Release keys
+    m_noteOnOffCallback(0, 0, 1, false);
+    m_noteOnOffCallback(0, 2, 1, false);
+
+    // Both notes are still sounding
+    m_pNoteRgbSource->execute(m_strip);
+    EXPECT_EQ(reference, m_strip);
+
+    // Release pedal
+    m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0);
+
+    // Notes are not sounding anymore
+    reference[0] = {0, 0, 0};
+    reference[2] = {0, 0, 0};
+    m_pNoteRgbSource->execute(m_strip);
+    EXPECT_EQ(reference, m_strip);
 }
