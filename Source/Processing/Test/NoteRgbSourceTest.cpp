@@ -190,3 +190,24 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
 
     EXPECT_EQ(reference, m_strip);
 }
+
+TEST_F(NoteRgbSourceTest, otherNoteToLightMap)
+{
+    Processing::TNoteToLightMap newMap;
+    newMap[0] = 9;
+    newMap[5] = 8;
+    m_pNoteRgbSource->setNoteToLightMap(newMap);
+
+    // (channel, number, velocity, on/off)
+    m_noteOnOffCallback(0, 0, 1, true);
+    m_noteOnOffCallback(0, 5, 6, true);
+
+    m_pNoteRgbSource->execute(m_strip);
+
+    // Default: white, factor 255, so any velocity >0 will cause full on
+    auto reference = Processing::TRgbStrip(c_StripSize);
+    reference[9] = {0xff, 0xff, 0xff};
+    reference[8] = {0xff, 0xff, 0xff};
+
+    EXPECT_EQ(reference, m_strip);
+}
