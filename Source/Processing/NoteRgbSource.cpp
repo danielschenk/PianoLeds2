@@ -117,6 +117,8 @@ void NoteRgbSource::setUsingPedal(bool usingPedal)
 
 void NoteRgbSource::setRgbFunction(IRgbFunction* pRgbFunction)
 {
+    // We have ownership
+    delete m_pRgbFunction;
     m_pRgbFunction = pRgbFunction;
 }
 

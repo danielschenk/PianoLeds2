@@ -10,6 +10,7 @@
 #include <Drivers/Mock/MockMidiInput.h>
 
 #include "../NoteRgbSource.h"
+#include "../LinearRgbFunction.h"
 
 using ::testing::_;
 using ::testing::SaveArg;
@@ -139,8 +140,10 @@ TEST_F(NoteRgbSourceTest, usePedal)
     m_pNoteRgbSource->setUsingPedal(true);
 
     // Press a key
+    // (channel, number, velocity, on/off)
     m_noteOnOffCallback(0, 0, 1, true);
     // Press pedal
+    // (channel, number, value)
     m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0xff);
     // Press another key
     m_noteOnOffCallback(0, 2, 1, true);
@@ -167,5 +170,23 @@ TEST_F(NoteRgbSourceTest, usePedal)
     reference[0] = {0, 0, 0};
     reference[2] = {0, 0, 0};
     m_pNoteRgbSource->execute(m_strip);
+    EXPECT_EQ(reference, m_strip);
+}
+
+TEST_F(NoteRgbSourceTest, otherRgbFunction)
+{
+    // LinearRgbFunction takes a factor&offset pair for each color
+    m_pNoteRgbSource->setRgbFunction(new LinearRgbFunction({0, 0}, {10, 0}, {1, 10}));
+
+    // (channel, number, velocity, on/off)
+    m_noteOnOffCallback(0, 0, 1, true);
+    m_noteOnOffCallback(0, 5, 6, true);
+
+    m_pNoteRgbSource->execute(m_strip);
+
+    auto reference = Processing::TRgbStrip(c_StripSize);
+    reference[0] = {0, 10, 11};
+    reference[5] = {0, 60, 16};
+
     EXPECT_EQ(reference, m_strip);
 }
