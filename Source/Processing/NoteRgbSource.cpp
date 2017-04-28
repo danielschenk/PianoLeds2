@@ -8,10 +8,11 @@
 
 #include "NoteRgbSource.h"
 #include "LinearRgbFunction.h"
+#include "RgbFunctionFactory.h"
 
-NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput)
+NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap)
     : m_usingPedal(false)
-    , m_noteToLightMap()
+    , m_rNoteToLightMap(rNoteToLightMap)
     , m_rMidiInput(rMidiInput)
     , m_channel(0)
     , m_scheduler()
@@ -35,7 +36,7 @@ void NoteRgbSource::execute(Processing::TRgbStrip& output)
 {
     m_scheduler.executeAll();
 
-    for(auto pair : m_noteToLightMap)
+    for(auto pair : m_rNoteToLightMap)
     {
         // first: note number, second: light number
         if(m_pRgbFunction != nullptr && pair.second < output.size())
@@ -123,8 +124,32 @@ void NoteRgbSource::setRgbFunction(IRgbFunction* pRgbFunction)
     m_pRgbFunction = pRgbFunction;
 }
 
-void NoteRgbSource::setNoteToLightMap(
-        const Processing::TNoteToLightMap& noteToLightMap)
+json NoteRgbSource::convertToJson() const
 {
-    m_noteToLightMap = noteToLightMap;
+    json json;
+    json[IJsonConvertible::c_objectTypeKey] = std::string(IRgbSource::c_typeNameNoteRgbSource);
+    json[c_usingPedalJsonKey] = m_usingPedal;
+    json[c_channelJsonKey] = m_channel;
+    if(m_pRgbFunction != nullptr)
+    {
+        json[c_rgbFunctionJsonKey] = m_pRgbFunction->convertToJson();
+    }
+
+    return json;
+}
+
+void NoteRgbSource::convertFromJson(json json)
+{
+    if(json.count(c_usingPedalJsonKey) > 0)
+    {
+        m_usingPedal = json[c_usingPedalJsonKey];
+    }
+    if(json.count(c_channelJsonKey) > 0)
+    {
+        m_channel = json[c_channelJsonKey];
+    }
+    if(json.count(c_rgbFunctionJsonKey) > 0)
+    {
+        m_pRgbFunction = RgbFunctionFactory::create(json[c_rgbFunctionJsonKey]);
+    }
 }

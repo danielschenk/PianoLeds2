@@ -34,6 +34,8 @@ public:
 
     // IRgbSource implementation.
     virtual void execute(Processing::TRgbStrip& output);
+    virtual json convertToJson() const;
+    virtual void convertFromJson(json json);
 
     /**
      * Get color.
@@ -46,6 +48,10 @@ public:
     void setColor(Processing::TRgb color);
 
 private:
+    static constexpr const char* c_rJsonKey = "r";
+    static constexpr const char* c_gJsonKey = "g";
+    static constexpr const char* c_bJsonKey = "b";
+
     /** Output color. */
     Processing::TRgb m_color;
 };

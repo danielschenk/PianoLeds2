@@ -12,13 +12,18 @@
 #include <vector>
 
 #include "ProcessingTypes.h"
+#include "IJsonConvertible.h"
 
 /**
  * Interface for RGB sources.
  */
 class IRgbSource
+    : public IJsonConvertible
 {
 public:
+    static constexpr const char* c_typeNameEqualRangeRgbSource  = "EqualRangeRgbSource";
+    static constexpr const char* c_typeNameNoteRgbSource        = "NoteRgbSource";
+
     /**
      * Destructor.
      */

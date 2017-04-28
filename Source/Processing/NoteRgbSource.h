@@ -28,8 +28,9 @@ public:
      * Constructor.
      *
      * @param   [in]    rMidiInput      Reference to the MIDI input.
+     * @param   [in]    rNoteToLightMap Reference to the note to light map.
      */
-    NoteRgbSource(IMidiInput& rMidiDriver);
+    NoteRgbSource(IMidiInput& rMidiDriver, const Processing::TNoteToLightMap& rNoteToLightMap);
 
     /**
      * Destructor.
@@ -42,6 +43,8 @@ public:
 
     // IRgbSource implementation.
     virtual void execute(Processing::TRgbStrip& output);
+    virtual json convertToJson() const;
+    virtual void convertFromJson(json json);
 
     uint8_t getChannel() const;
     void setChannel(uint8_t channel);
@@ -49,9 +52,12 @@ public:
     void setUsingPedal(bool usingPedal);
 
     void setRgbFunction(IRgbFunction* pRgbFunction);
-    void setNoteToLightMap(const Processing::TNoteToLightMap& noteToLightMap);
 
 private:
+    static constexpr const char* c_usingPedalJsonKey    = "usingPedal";
+    static constexpr const char* c_channelJsonKey       = "channel";
+    static constexpr const char* c_rgbFunctionJsonKey   = "rgbFunction";
+
     /**
      * Handler for note on/off events.
      */
@@ -71,14 +77,11 @@ private:
      */
     Processing::TRgb calculateOutputValue(uint8_t noteNumber);
 
-    /** Output color. */
-    Processing::TRgb m_color;
-
     /** Indicates whether pedal should be used. */
     bool m_usingPedal;
 
-    /** Note to light map. */
-    Processing::TNoteToLightMap m_noteToLightMap;
+    /** Reference to the note to light map. */
+    const Processing::TNoteToLightMap& m_rNoteToLightMap;
 
     /** Reference to the MIDI input. */
     IMidiInput& m_rMidiInput;

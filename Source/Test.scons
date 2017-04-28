@@ -32,6 +32,7 @@ env.Append(CPPPATH=[
     '#',
     '#/ExternalComponents/googletest/googletest/include',
     '#/ExternalComponents/googletest/googlemock/include',
+    '/usr/local/Cellar/nlohmann_json/2.1.1/include',
 ])
 
 googletest = SConscript('ExternalComponents/GoogleTest.scons',

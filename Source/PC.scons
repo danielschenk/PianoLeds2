@@ -42,6 +42,7 @@ env.Append(CPPPATH=[
     '#/ExternalComponents',
     '#/ExternalComponents/googletest/googletest/include',
     '#/ExternalComponents/googletest/googlemock/include',
+    '/usr/local/Cellar/nlohmann_json/2.1.1/include',
 ])
 
 rtmidi = SConscript('ExternalComponents/RtMidi.scons',

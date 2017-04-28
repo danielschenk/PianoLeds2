@@ -31,14 +31,13 @@ public:
             .WillOnce(DoAll(SaveArg<0>(&m_noteOnOffCallback), Return(42)));
         EXPECT_CALL(m_mockMidiInput, subscribeControlChange(_))
             .WillOnce(DoAll(SaveArg<0>(&m_controlChangeCallback), Return(69)));
-        m_pNoteRgbSource = new NoteRgbSource(m_mockMidiInput);
 
         for(int i = 0; i < c_StripSize; ++i)
         {
             // Default: simple 1-to-1 mapping
             m_noteToLightMap[i] = i;
         }
-        m_pNoteRgbSource->setNoteToLightMap(m_noteToLightMap);
+        m_pNoteRgbSource = new NoteRgbSource(m_mockMidiInput, m_noteToLightMap);
     }
 
     void SetUp()
@@ -193,10 +192,9 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
 
 TEST_F(NoteRgbSourceTest, otherNoteToLightMap)
 {
-    Processing::TNoteToLightMap newMap;
-    newMap[0] = 9;
-    newMap[5] = 8;
-    m_pNoteRgbSource->setNoteToLightMap(newMap);
+    m_noteToLightMap.clear();
+    m_noteToLightMap[0] = 9;
+    m_noteToLightMap[5] = 8;
 
     // (channel, number, velocity, on/off)
     m_noteOnOffCallback(0, 0, 1, true);

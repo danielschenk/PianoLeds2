@@ -34,3 +34,30 @@ void EqualRangeRgbSource::setColor(Processing::TRgb color)
 {
     m_color = color;
 }
+
+json EqualRangeRgbSource::convertToJson() const
+{
+    json json;
+    json[IJsonConvertible::c_objectTypeKey] = std::string(IRgbSource::c_typeNameEqualRangeRgbSource);
+    json[c_rJsonKey] = m_color.r;
+    json[c_gJsonKey] = m_color.g;
+    json[c_bJsonKey] = m_color.b;
+
+    return json;
+}
+
+void EqualRangeRgbSource::convertFromJson(json json)
+{
+    if(json.count(c_rJsonKey) > 0)
+    {
+        m_color.r = json[c_rJsonKey];
+    }
+    if(json.count(c_gJsonKey) > 0)
+    {
+        m_color.g = json[c_gJsonKey];
+    }
+    if(json.count(c_bJsonKey) > 0)
+    {
+        m_color.b = json[c_bJsonKey];
+    }
+}

@@ -9,14 +9,18 @@
 #ifndef PROCESSING_IRGBFUNCTION_H_
 #define PROCESSING_IRGBFUNCTION_H_
 
+#include "IJsonConvertible.h"
 #include "ProcessingTypes.h"
 
 /**
  * Interface for RGB functions.
  */
 class IRgbFunction
+    : public IJsonConvertible
 {
 public:
+    static constexpr const char* c_jsonTypeNameLinearRgbFunction = "LinearRgbFunction";
+
     /**
      * Destructor.
      */

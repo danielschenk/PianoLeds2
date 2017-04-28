@@ -27,6 +27,11 @@ public:
     /**
      * Constructor.
      */
+    LinearRgbFunction() = default;
+
+    /**
+     * Constructor.
+     */
     LinearRgbFunction(TLinearConstants redConstants, TLinearConstants greenConstants, TLinearConstants blueConstants);
 
     /**
@@ -36,11 +41,20 @@ public:
 
     // IRgbFunction implementation
     virtual Processing::TRgb calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const;
+    virtual json convertToJson() const;
+    virtual void convertFromJson(json json);
 
 private:
     TLinearConstants m_redConstants;
     TLinearConstants m_greenConstants;
     TLinearConstants m_blueConstants;
+
+    static constexpr const char* c_rFactorJsonKey = "rFactor";
+    static constexpr const char* c_gFactorJsonKey = "gFactor";
+    static constexpr const char* c_bFactorJsonKey = "bFactor";
+    static constexpr const char* c_rOffsetJsonKey = "rOffset";
+    static constexpr const char* c_gOffsetJsonKey = "gOffset";
+    static constexpr const char* c_bOffsetJsonKey = "bOffset";
 };
 
 #endif /* PROCESSING_LINEARRGBFUNCTION_H_ */
