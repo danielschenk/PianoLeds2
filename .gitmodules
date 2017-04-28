@@ -4,3 +4,6 @@
 [submodule "Source/ExternalComponents/googletest"]
 	path = Source/ExternalComponents/googletest
 	url = https://github.com/google/googletest.git
+[submodule "Source/ExternalComponents/tools"]
+	path = Source/ExternalComponents/tools
+	url = https://github.com/danielschenk/tools.git
