@@ -28,6 +28,7 @@ NoteRgbSource::~NoteRgbSource()
 {
     m_rMidiInput.unsubscribeNoteOnOff(m_noteOnOffSubscription);
     m_rMidiInput.unsubscribeControlChange(m_controlChangeSubscription);
+    delete m_pRgbFunction;
 }
 
 void NoteRgbSource::execute(Processing::TRgbStrip& output)
