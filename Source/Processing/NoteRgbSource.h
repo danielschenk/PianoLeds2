@@ -11,9 +11,9 @@
 
 #include <array>
 
-#include <Processing/Interfaces/IRgbSource.h>
 #include <Drivers/Interfaces/IMidiInput.h>
 #include <Common/Scheduler.h>
+#include "Interfaces/IProcessingBlock.h"
 
 class IRgbFunction;
 
@@ -21,7 +21,7 @@ class IRgbFunction;
  * RGB source which generates RGB data based on note on/off events.
  */
 class NoteRgbSource
-    : public IRgbSource
+    : public IProcessingBlock
 {
 public:
     /**
@@ -41,7 +41,7 @@ public:
     NoteRgbSource(NoteRgbSource&) = delete;
     NoteRgbSource& operator=(NoteRgbSource&) = delete;
 
-    // IRgbSource implementation.
+    // IProcessingBlock implementation.
     virtual void execute(Processing::TRgbStrip& output);
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);

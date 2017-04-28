@@ -9,13 +9,13 @@
 #ifndef PROCESSING_EQUALRANGERGBSOURCE_H_
 #define PROCESSING_EQUALRANGERGBSOURCE_H_
 
-#include <Processing/Interfaces/IRgbSource.h>
+#include "Interfaces/IProcessingBlock.h"
 
 /**
  * RGB source which generates an equal range of colors.
  */
 class EqualRangeRgbSource
-    : public IRgbSource
+    : public IProcessingBlock
 {
 public:
     /**
@@ -32,7 +32,7 @@ public:
     EqualRangeRgbSource(EqualRangeRgbSource&) = delete;
     EqualRangeRgbSource& operator=(EqualRangeRgbSource&) = delete;
 
-    // IRgbSource implementation.
+    // IProcessingBlock implementation.
     virtual void execute(Processing::TRgbStrip& output);
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);

@@ -32,16 +32,16 @@ NoteRgbSource::~NoteRgbSource()
     delete m_pRgbFunction;
 }
 
-void NoteRgbSource::execute(Processing::TRgbStrip& output)
+void NoteRgbSource::execute(Processing::TRgbStrip& strip)
 {
     m_scheduler.executeAll();
 
     for(auto pair : m_rNoteToLightMap)
     {
         // first: note number, second: light number
-        if(m_pRgbFunction != nullptr && pair.second < output.size())
+        if(m_pRgbFunction != nullptr && pair.second < strip.size())
         {
-            output[pair.second] = m_pRgbFunction->calculate(m_noteState[pair.first], 0 /* TODO pass actual time */);
+            strip[pair.second] = m_pRgbFunction->calculate(m_noteState[pair.first], 0 /* TODO pass actual time */);
         }
     }
 }
@@ -127,7 +127,7 @@ void NoteRgbSource::setRgbFunction(IRgbFunction* pRgbFunction)
 json NoteRgbSource::convertToJson() const
 {
     json json;
-    json[IJsonConvertible::c_objectTypeKey] = std::string(IRgbSource::c_typeNameNoteRgbSource);
+    json[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameNoteRgbSource);
     json[c_usingPedalJsonKey] = m_usingPedal;
     json[c_channelJsonKey] = m_channel;
     if(m_pRgbFunction != nullptr)

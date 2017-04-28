@@ -3,11 +3,11 @@
  * @copyright (c) Daniel Schenk, 2017
  * This file is part of MLC2.
  * 
- * @brief Interface for RGB sources.
+ * @brief Interface for processing blocks.
  */
 
-#ifndef PROCESSING_IRGBSOURCE_H_
-#define PROCESSING_IRGBSOURCE_H_
+#ifndef PROCESSING_IPROCESSINGBLOCK_H_
+#define PROCESSING_IPROCESSINGBLOCK_H_
 
 #include <vector>
 
@@ -15,9 +15,9 @@
 #include "IJsonConvertible.h"
 
 /**
- * Interface for RGB sources.
+ * Interface for processing blocks.
  */
-class IRgbSource
+class IProcessingBlock
     : public IJsonConvertible
 {
 public:
@@ -27,16 +27,16 @@ public:
     /**
      * Destructor.
      */
-    virtual ~IRgbSource()
+    virtual ~IProcessingBlock()
     {
     };
 
     /**
-     * Execute this source and write output to the specified buffer.
+     * Execute this block on the given strip.
      *
-     * @param   [out]   output  The output buffer to write to.
+     * @param   [in/out]    strip   The strip to operate on.
      */
-    virtual void execute(Processing::TRgbStrip& output) = 0;
+    virtual void execute(Processing::TRgbStrip& strip) = 0;
 };
 
-#endif /* PROCESSING_IRGBSOURCE_H_ */
+#endif /* PROCESSING_IPROCESSINGBLOCK_H_ */
