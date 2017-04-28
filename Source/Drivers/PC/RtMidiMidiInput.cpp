@@ -62,6 +62,10 @@ void RtMidiMidiInput::RtMidiCallback(double deltatime, std::vector<unsigned char
             // Channel, controller number, value
             notifyControlChange(channel, (IMidiInterface::TControllerNumber)pMessage->at(1), pMessage->at(2));
             break;
+        case PROGRAM_CHANGE:
+            // Channel, number
+            notifyProgramChange(channel, pMessage->at(1));
+            break;
         default:
             break;
     }

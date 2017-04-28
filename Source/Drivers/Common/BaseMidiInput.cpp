@@ -41,7 +41,22 @@ void BaseMidiInput::notifyNoteOnOff(uint8_t channel, uint8_t pitch, uint8_t velo
     m_noteOnOffSubscribers.notifySubscribers(channel, pitch, velocity, on);
 }
 
+IMidiInput::TSubscriptionToken BaseMidiInput::subscribeProgramChange(TProgramChangeFunction callback)
+{
+    return m_programChangeSubscribers.subscribe(callback);
+}
+
+void BaseMidiInput::unsubscribeProgramChange(TSubscriptionToken token)
+{
+    m_programChangeSubscribers.unsubscribe(token);
+}
+
 void BaseMidiInput::notifyControlChange(uint8_t channel, IMidiInterface::TControllerNumber controller, uint8_t value) const
 {
     m_controlChangeSubscribers.notifySubscribers(channel, controller, value);
+}
+
+void BaseMidiInput::notifyProgramChange(uint8_t channel, uint8_t number) const
+{
+    m_programChangeSubscribers.notifySubscribers(channel, number);
 }

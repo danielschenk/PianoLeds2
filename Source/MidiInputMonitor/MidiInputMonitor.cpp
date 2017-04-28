@@ -23,6 +23,11 @@ static void OnControlChangeReceived(uint8_t channel, IMidiInput::TControllerNumb
     std::printf("CON chan %2u controller %3u val %3u\n", channel, controller, value);
 }
 
+static void OnProgramChangeReceived(uint8_t channel, uint8_t number)
+{
+    std::printf("PRG chan %2u num %2u\n", channel, number);
+}
+
 int main()
 {
     gs_pMidiInput = new RtMidiMidiInput();
@@ -35,6 +40,7 @@ int main()
     {
         gs_pMidiInput->subscribeNoteOnOff(&OnNoteReceived);
         gs_pMidiInput->subscribeControlChange(&OnControlChangeReceived);
+        gs_pMidiInput->subscribeProgramChange(&OnProgramChangeReceived);
         gs_pMidiInput->openPort(0);
         std::cout << "Opened port 0, incoming notes and control changes will be printed to stdout. Type <q> <ENTER> to quit.\n";
 

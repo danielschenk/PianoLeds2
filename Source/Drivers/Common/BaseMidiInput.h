@@ -35,6 +35,8 @@ public:
     virtual void unsubscribeNoteOnOff(TSubscriptionToken token);
     virtual TSubscriptionToken subscribeControlChange(TControlChangeFunction callback);
     virtual void unsubscribeControlChange(TSubscriptionToken token);
+    virtual TSubscriptionToken subscribeProgramChange(TProgramChangeFunction callback);
+    virtual void unsubscribeProgramChange(TSubscriptionToken token);
 
 protected:
     /**
@@ -60,12 +62,23 @@ protected:
      */
     virtual void notifyControlChange(uint8_t channel, IMidiInput::TControllerNumber control, uint8_t value) const;
 
+    /**
+     * Notify all program change subscribers.
+     *
+     * @param[in]   channel     The channel the message was received on.
+     * @param[in]   number      The program number.
+     */
+    virtual void notifyProgramChange(uint8_t channel, uint8_t number) const;
+
 private:
     /** Collection of note on/off subscribers. */
     ObserverList<uint8_t, uint8_t, uint8_t, bool> m_noteOnOffSubscribers;
 
     /** Collection of control change subscribers. */
     ObserverList<uint8_t, IMidiInput::TControllerNumber, uint8_t> m_controlChangeSubscribers;
+
+    /** Collection of control change subscribers. */
+    ObserverList<uint8_t, uint8_t> m_programChangeSubscribers;
 };
 
 #endif /* DRIVERS_COMMON_BASEMIDIINPUT_H_ */

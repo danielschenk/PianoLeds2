@@ -24,6 +24,9 @@ public:
     /** Function type for control change events. Arguments: channel, controller number, value. */
     typedef std::function<void(uint8_t, TControllerNumber, uint8_t)> TControlChangeFunction;
 
+    /** Function type for program change events. Arguments: channel, number. */
+    typedef std::function<void(uint8_t, uint8_t)> TProgramChangeFunction;
+
     /** Type of subscription token which can be used to unsubscribe. */
     typedef unsigned int TSubscriptionToken;
 
@@ -61,6 +64,20 @@ public:
      * @param[in]   token       The subscription to be removed.
      */
     virtual void unsubscribeControlChange(TSubscriptionToken token) = 0;
+
+    /**
+     * Subscribe to program change events.
+     *
+     * @param[in]   callback    The function to be called.
+     */
+    virtual TSubscriptionToken subscribeProgramChange(TProgramChangeFunction callback) = 0;
+
+    /**
+     * Unsubscribe from program change events.
+     *
+     * @param[in]   token       The subscription to be removed.
+     */
+    virtual void unsubscribeProgramChange(TSubscriptionToken token) = 0;
 };
 
 

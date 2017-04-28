@@ -26,6 +26,8 @@ public:
     MOCK_METHOD1(unsubscribeNoteOnOff, void(TSubscriptionToken token));
     MOCK_METHOD1(subscribeControlChange, TSubscriptionToken(TControlChangeFunction callback));
     MOCK_METHOD1(unsubscribeControlChange, void(TSubscriptionToken token));
+    MOCK_METHOD1(subscribeProgramChange, TSubscriptionToken(TProgramChangeFunction callback));
+    MOCK_METHOD1(unsubscribeProgramChange, void(TSubscriptionToken token));
 };
 
 #endif /* DRIVERS_MOCK_MOCKMIDIINPUT_H_ */
