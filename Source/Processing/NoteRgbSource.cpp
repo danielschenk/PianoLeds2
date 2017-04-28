@@ -150,6 +150,6 @@ void NoteRgbSource::convertFromJson(json json)
     }
     if(json.count(c_rgbFunctionJsonKey) > 0)
     {
-        m_pRgbFunction = RgbFunctionFactory::create(json[c_rgbFunctionJsonKey]);
+        m_pRgbFunction = RgbFunctionFactory::createRgbFunction(json[c_rgbFunctionJsonKey]);
     }
 }

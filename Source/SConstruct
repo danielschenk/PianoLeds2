@@ -10,6 +10,10 @@ if ARGUMENTS.get('VERBOSE') != '1':
     env['CXXCOMSTR'] = 'Compiling $TARGET'
     env['LINKCOMSTR'] = 'Linking $TARGET'
 
+env.Append(CPPPATH=[
+    '/usr/local/Cellar/nlohmann_json/2.1.1/include',
+])
+
 SConscript('PC.scons', variant_dir=Dir('Build/PC'), exports={'base_env': env}, duplicate=False)
 SConscript('Test.scons', variant_dir=Dir('Build/Test'), exports={'base_env': env}, duplicate=False)
 

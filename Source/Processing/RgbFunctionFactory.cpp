@@ -9,7 +9,7 @@
 #include "Interfaces/IJsonConvertible.h"
 #include "Interfaces/IRgbFunction.h"
 
-IRgbFunction* RgbFunctionFactory::create(json json)
+IRgbFunction* RgbFunctionFactory::createRgbFunction(json json)
 {
     IRgbFunction* rgbFunction = nullptr;
     if(json.count(IJsonConvertible::c_objectTypeKey) > 0)

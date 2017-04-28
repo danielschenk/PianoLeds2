@@ -32,7 +32,7 @@ public:
      *
      * @return  The newly created RGB function or nullptr if type could not be determined.
      */
-    static IRgbFunction* create(json json);
+    static IRgbFunction* createRgbFunction(json json);
 };
 
 #endif /* PROCESSING_RGBFUNCTIONFACTORY_H_ */
