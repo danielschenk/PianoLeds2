@@ -1,5 +1,7 @@
 #!python
 
+import os
+
 # Create base environment
 Import('base_env')
 env = base_env.Clone()
@@ -39,6 +41,8 @@ env.Append(CPPPATH=[
 SConscript('ExternalComponents/GoogleTest.scons', duplicate=False)
 
 test_env = env.Clone()
+# Propagate the 'TERM' environment variable from the OS, so Google Test can decide if it should colorize output
+test_env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
 for path in component_paths_with_test:
     test_name = path + 'Test'
     sources = Glob(path + '/Test/*.cpp')
