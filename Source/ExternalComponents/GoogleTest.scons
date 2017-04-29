@@ -26,4 +26,4 @@ gmock_all = gtest_env.Object('gmock-all.o', os.path.join(gmock_path, 'src', 'gmo
 gtest_main = gtest_env.Object('gtest_main.o', os.path.join(gtest_path, 'src', 'gtest_main.cc'))
 lib = gtest_env.StaticLibrary('GoogleTest', [gtest_all, gmock_all, gtest_main])
 
-Return('lib')
+base_env.Component('GoogleTest', lib)

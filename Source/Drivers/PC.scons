@@ -8,4 +8,4 @@ env.Append(CPPPATH=['Interfaces', 'PC'])
 sources = Glob('PC/*.cpp') + Glob('Common/*.cpp')
 
 lib = env.Library('Drivers', sources)
-Return('lib')
+base_env.Component('Drivers', lib)

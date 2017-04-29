@@ -4,11 +4,8 @@ import os
 join = os.path.join
 
 Import('base_env')
-Import('libs')
 env = base_env.Clone()
 
 env.Append(CPPPATH=[join('Drivers', 'PC')])
-env.Append(LIBS=[libs])
 
-app = env.Program('MidiInputMonitor', Glob('*.cpp'))
-Return('app')
+env.Program('MidiInputMonitor', Glob('*.cpp') + env.GetComponents('Drivers', 'RtMidi', 'Common'))

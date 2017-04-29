@@ -5,6 +5,10 @@ import platform
 # Create base environment
 Import('base_env')
 env = base_env.Clone()
+
+# Make environment available to SConscripts
+Export(base_env=env)
+
 symbols = [
 ]
 flags = [
@@ -44,18 +48,10 @@ env.Append(CPPPATH=[
     '#/ExternalComponents/googletest/googlemock/include',
 ])
 
-rtmidi = SConscript('ExternalComponents/RtMidi.scons',
-                    exports={'base_env': env},
-                    duplicate=False)
-drivers = SConscript('Drivers/PC.scons',
-                     exports={'base_env': env},
-                     duplicate=False)
+SConscript('Common/Common.Scons', duplicate=False)
+SConscript('ExternalComponents/RtMidi.scons', duplicate=False)
+SConscript('Drivers/PC.scons', duplicate=False)
+SConscript('Processing/Processing.scons', duplicate=False)
 
-common = SConscript('Common/Common.Scons',
-                    exports={'base_env': env},
-                    duplicate=False)
-
-# Build MidiInputMonitor test app against the libraries
-monitor = SConscript('MidiInputMonitor/MidiInputMonitor.scons',
-                     exports={'base_env': env, 'libs': [rtmidi, drivers]},
-                     duplicate=False)
+# Build MidiInputMonitor test app
+SConscript('MidiInputMonitor/MidiInputMonitor.scons', duplicate=False)

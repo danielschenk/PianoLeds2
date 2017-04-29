@@ -4,6 +4,8 @@
 Import('base_env')
 env = base_env.Clone()
 
+Export(base_env=env)
+
 symbols = [
 ]
 flags = [
@@ -34,19 +36,12 @@ env.Append(CPPPATH=[
     '#/ExternalComponents/googletest/googlemock/include',
 ])
 
-googletest = SConscript('ExternalComponents/GoogleTest.scons',
-                        exports={'base_env': env},
-                        duplicate=False)
-
-common = SConscript('Common/Common.Scons',
-                    exports={'base_env': env},
-                    duplicate=False)
+SConscript('ExternalComponents/GoogleTest.scons', duplicate=False)
 
 test_env = env.Clone()
-test_env.Append(LIBS=[googletest, common])
 for path in component_paths_with_test:
     test_name = path + 'Test'
-    sources = Glob(path + '/*.cpp') + Glob(path + '/Test/*.cpp')
-    test_program = test_env.Program(test_name, sources)
+    sources = Glob(path + '/Test/*.cpp')
+    test_program = test_env.Program(test_name, sources + env.GetComponents(path, 'GoogleTest', 'Common'))
     test_result = test_env.Command(test_name + '_result.xml', test_program, './$SOURCE --gtest_output=xml:$TARGET')
     test_env.AlwaysBuild(test_result)

@@ -1,0 +1,9 @@
+#!python
+
+Import('base_env')
+env = base_env.Clone()
+
+sources = Glob('*.cpp')
+
+lib = env.Library('Processing', sources)
+base_env.Component('Processing', lib)
