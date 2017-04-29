@@ -77,7 +77,7 @@ private:
     /** Collection of control change subscribers. */
     ObserverList<uint8_t, IMidiInput::TControllerNumber, uint8_t> m_controlChangeSubscribers;
 
-    /** Collection of control change subscribers. */
+    /** Collection of program change subscribers. */
     ObserverList<uint8_t, uint8_t> m_programChangeSubscribers;
 };
 
