@@ -18,10 +18,11 @@ IRgbFunction* RgbFunctionFactory::createRgbFunction(json json)
         if(objectType == IRgbFunction::c_jsonTypeNameLinearRgbFunction)
         {
             rgbFunction = new LinearRgbFunction();
-            if(rgbFunction != nullptr)
-            {
-                rgbFunction->convertFromJson(json);
-            }
+        }
+
+        if(rgbFunction != nullptr)
+        {
+            rgbFunction->convertFromJson(json);
         }
     }
 
