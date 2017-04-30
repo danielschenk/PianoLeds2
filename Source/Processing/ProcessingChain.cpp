@@ -17,10 +17,7 @@ ProcessingChain::ProcessingChain(const ProcessingBlockFactory& rProcessingBlockF
 
 ProcessingChain::~ProcessingChain()
 {
-    for(auto pProcessingBlock : m_processingChain)
-    {
-        delete pProcessingBlock;
-    }
+    deleteProcessingBlocks();
 }
 
 void ProcessingChain::insertBlock(IProcessingBlock* pBlock, unsigned int index)
@@ -53,7 +50,7 @@ json ProcessingChain::convertToJson() const
 
 void ProcessingChain::convertFromJson(json converted)
 {
-    m_processingChain.clear();
+    deleteProcessingBlocks();
 
     if(converted.count(c_processingChainJsonKey) > 0)
     {
@@ -71,4 +68,13 @@ void ProcessingChain::execute(Processing::TRgbStrip& strip)
     {
         pProcessingBlock->execute(strip);
     }
+}
+
+void ProcessingChain::deleteProcessingBlocks()
+{
+    for(auto pProcessingBlock : m_processingChain)
+    {
+        delete pProcessingBlock;
+    }
+    m_processingChain.clear();
 }

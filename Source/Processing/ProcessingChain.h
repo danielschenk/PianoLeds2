@@ -65,6 +65,8 @@ private:
 
     /** Reference to the processing block factory. */
     const ProcessingBlockFactory& m_rProcessingBlockFactory;
+
+    void deleteProcessingBlocks();
 };
 
 #endif /* PROCESSING_PROCESSINGCHAIN_H_ */
