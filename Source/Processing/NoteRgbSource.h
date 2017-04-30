@@ -68,15 +68,6 @@ private:
      */
     void handleControlChange(uint8_t channel, IMidiInput::TControllerNumber number, uint8_t value);
 
-    /**
-     * Calculate output value for a single color.
-     *
-     * @param[in]   noteNumber  Note number.
-     *
-     * @return Output color for the given note.
-     */
-    Processing::TRgb calculateOutputValue(uint8_t noteNumber);
-
     /** Indicates whether pedal should be used. */
     bool m_usingPedal;
 
