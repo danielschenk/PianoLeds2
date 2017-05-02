@@ -17,6 +17,7 @@
 
 using ::testing::_;
 using ::testing::Invoke;
+using ::testing::NiceMock;
 
 static void addRed(Processing::TRgbStrip& strip)
 {
@@ -50,25 +51,41 @@ class ProcessingChainTest
 public:
     static constexpr unsigned int c_stripSize = 3;
 
+    // Make processing block mocks nice, to prevent warnings about unexpected calls to execute().
+    typedef NiceMock<MockProcessingBlock> TMockBlock;
+
     ProcessingChainTest()
-        : m_redSource()
-        , m_greenSource()
-        , m_valueDoubler()
+        : m_pRedSource(new TMockBlock())
+        , m_pGreenSource(new TMockBlock())
+        , m_pValueDoubler(new TMockBlock())
         , m_strip(c_stripSize)
+        , m_mockMidiInput()
+        , m_noteToLightMap()
         , m_processingBlockFactory(m_mockMidiInput, m_noteToLightMap)
         , m_processingChain(m_processingBlockFactory)
     {
-        ON_CALL(m_redSource, execute(_))
+        ON_CALL(*m_pRedSource, execute(_))
             .WillByDefault(Invoke(addRed));
-        ON_CALL(m_greenSource, execute(_))
+        ON_CALL(*m_pGreenSource, execute(_))
             .WillByDefault(Invoke(addGreen));
-        ON_CALL(m_valueDoubler, execute(_))
+        ON_CALL(*m_pValueDoubler, execute(_))
             .WillByDefault(Invoke(doubleValue));
     }
 
-    MockProcessingBlock m_redSource;
-    MockProcessingBlock m_greenSource;
-    MockProcessingBlock m_valueDoubler;
+    virtual ~ProcessingChainTest()
+    {
+        delete m_pRedSource;
+        m_pRedSource = nullptr;
+        delete m_pGreenSource;
+        m_pGreenSource = nullptr;
+        delete m_pValueDoubler;
+        m_pValueDoubler = nullptr;
+    }
+
+    // These have to be pointers, as the processing chain takes ownership and will try to delete it's children.
+    TMockBlock* m_pRedSource;
+    TMockBlock* m_pGreenSource;
+    TMockBlock* m_pValueDoubler;
 
     Processing::TRgbStrip m_strip;
 
@@ -90,3 +107,32 @@ TEST_F(ProcessingChainTest, empty)
     EXPECT_EQ(reference, m_strip);
 }
 
+TEST_F(ProcessingChainTest, insertOne)
+{
+    m_processingChain.insertBlock(m_pRedSource);
+    m_pRedSource = nullptr;
+
+    auto reference = Processing::TRgbStrip(c_stripSize);
+    reference[0] = { 10, 0, 0 };
+    reference[1] = { 10, 0, 0 };
+    reference[2] = { 10, 0, 0 };
+
+    m_processingChain.execute(m_strip);
+    EXPECT_EQ(reference, m_strip);
+}
+
+TEST_F(ProcessingChainTest, insertTwo)
+{
+    m_processingChain.insertBlock(m_pRedSource);
+    m_pRedSource = nullptr;
+    m_processingChain.insertBlock(m_pValueDoubler);
+    m_pValueDoubler = nullptr;
+
+    auto reference = Processing::TRgbStrip(c_stripSize);
+    reference[0] = { 20, 0, 0 };
+    reference[1] = { 20, 0, 0 };
+    reference[2] = { 20, 0, 0 };
+
+    m_processingChain.execute(m_strip);
+    EXPECT_EQ(reference, m_strip);
+}
