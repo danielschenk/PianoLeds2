@@ -23,6 +23,7 @@ class IProcessingBlock
 public:
     static constexpr const char* c_typeNameEqualRangeRgbSource  = "EqualRangeRgbSource";
     static constexpr const char* c_typeNameNoteRgbSource        = "NoteRgbSource";
+    static constexpr const char* c_typeNameProcessingChain      = "ProcessingChain";
 
     /**
      * Destructor.

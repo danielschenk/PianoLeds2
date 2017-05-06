@@ -7,6 +7,7 @@
 #include "ProcessingBlockFactory.h"
 #include "NoteRgbSource.h"
 #include "EqualRangeRgbSource.h"
+#include "ProcessingChain.h"
 
 ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& rMidiInput,
                                                const Processing::TNoteToLightMap& rNoteToLightMap)
@@ -32,6 +33,11 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json json) const
         else if(objectType == IProcessingBlock::c_typeNameNoteRgbSource)
         {
             processingBlock = new NoteRgbSource(m_rMidiInput, m_rNoteToLightMap);
+        }
+        else if(objectType == IProcessingBlock::c_typeNameProcessingChain)
+        {
+            // A processing chain needs the factory to construct its children
+            processingBlock = new ProcessingChain(*this);
         }
 
         if(processingBlock != nullptr)

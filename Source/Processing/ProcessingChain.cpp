@@ -38,6 +38,8 @@ void ProcessingChain::insertBlock(IProcessingBlock* pBlock)
 json ProcessingChain::convertToJson() const
 {
     json converted;
+    converted[IProcessingBlock::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameProcessingChain);
+
     std::vector<json> convertedChain;
     for(auto pProcessingBlock : m_processingChain)
     {
