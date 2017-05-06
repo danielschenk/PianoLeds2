@@ -6,8 +6,12 @@
  * @brief <brief description of the file>
  */
 
-#include <gtest/gtest.h>
 #include <vector>
+#include <string>
+#include <gtest/gtest.h>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 #include "../EqualRangeRgbSource.h"
 
@@ -18,7 +22,7 @@ public:
     EqualRangeRgbSource m_source;
 };
 
-TEST_F(EqualRangeRgbSourceTest, ExecuteDifferentColors)
+TEST_F(EqualRangeRgbSourceTest, executeDifferentColors)
 {
     Processing::TRgbStrip strip(20);
     std::vector<Processing::TRgb> colors({{0, 0, 0}, {255, 255, 255}, {1, 2, 3}});
@@ -29,7 +33,63 @@ TEST_F(EqualRangeRgbSourceTest, ExecuteDifferentColors)
         m_source.execute(strip);
         for(const auto& outputIt : strip)
         {
-            ASSERT_EQ(outputIt, colorIt);
+            EXPECT_EQ(outputIt, colorIt);
         }
     }
+}
+
+TEST_F(EqualRangeRgbSourceTest, convertFromJson)
+{
+    json j = R"(
+        {
+            "objectType": "EqualRangeRgbSource",
+            "r": 10,
+            "g": 20,
+            "b": 30
+        }
+    )"_json;
+
+    m_source.convertFromJson(j);
+    EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 20, 30}));
+}
+
+TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithWrongType)
+{
+    json j = R"(
+        {
+            "objectType": "wrong",
+            "r": 10,
+            "g": 20,
+            "b": 30
+        }
+    )"_json;
+
+    m_source.convertFromJson(j);
+    EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 20, 30}));
+}
+
+TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithMissingColor)
+{
+    json j = R"(
+        {
+            "objectType": "EqualRangeRgbSource",
+            "r": 10,
+            "b": 30
+        }
+    )"_json;
+
+    m_source.convertFromJson(j);
+    EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 0, 30}));
+}
+
+TEST_F(EqualRangeRgbSourceTest, convertToJson)
+{
+    m_source.setColor(Processing::TRgb({40, 50, 60}));
+
+    json j = m_source.convertToJson();
+    EXPECT_EQ(4, j.size());
+    EXPECT_EQ("EqualRangeRgbSource", j.at("objectType").get<std::string>());
+    EXPECT_EQ(40, j.at("r").get<int>());
+    EXPECT_EQ(50, j.at("g").get<int>());
+    EXPECT_EQ(60, j.at("b").get<int>());
 }
