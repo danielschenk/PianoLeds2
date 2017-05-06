@@ -11,6 +11,7 @@
 
 #include "../NoteRgbSource.h"
 #include "../LinearRgbFunction.h"
+#include "../Mock/MockRgbFunction.h"
 
 using ::testing::_;
 using ::testing::SaveArg;
@@ -224,4 +225,19 @@ TEST_F(NoteRgbSourceTest, doNotWriteOutsideStrip)
     reference[0] = {0xff, 0xff, 0xff};
 
     EXPECT_EQ(reference, shorterStrip);
+}
+
+TEST_F(NoteRgbSourceTest, deleteRgbFunction)
+{
+    MockRgbFunction* pMock1 = new MockRgbFunction();
+    MockRgbFunction* pMock2 = new MockRgbFunction();
+
+    // Need to set an action, to make Google Test throw an error in case of a leaked mock.
+    ON_CALL(*pMock1, calculate(_, _))
+        .WillByDefault(Return(Processing::TRgb()));
+    ON_CALL(*pMock2, calculate(_, _))
+        .WillByDefault(Return(Processing::TRgb()));
+
+    m_pNoteRgbSource->setRgbFunction(pMock1);
+    m_pNoteRgbSource->setRgbFunction(pMock2);
 }
