@@ -1,12 +1,16 @@
 #!python
 
 import os
+import components
 
 # Create base environment
 Import('base_env')
 env = base_env.Clone()
 
 Export(base_env=env)
+
+# Install the components module
+components.install(env)
 
 symbols = [
 ]
@@ -22,11 +26,6 @@ link_flags = [
     '-Wl,-dead_strip',
 ]
 
-component_paths_with_test = [
-    'Processing',
-    'Common',
-]
-
 env.Append(CDEFINES=symbols)
 env.Append(CPPDEFINES=symbols)
 env.Append(CFLAGS=flags)
@@ -40,12 +39,15 @@ env.Append(CPPPATH=[
 
 SConscript('ExternalComponents/GoogleTest.scons', duplicate=False)
 
+SConscript('Common/Common.scons', duplicate=False)
+SConscript('Processing/Processing.scons', duplicate=False)
+
 test_env = env.Clone()
 # Propagate the 'TERM' environment variable from the OS, so Google Test can decide if it should colorize output
 test_env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
-for path in component_paths_with_test:
+for path in ['Processing', 'Common']:
     test_name = path + 'Test'
     sources = Glob(path + '/Test/*.cpp')
-    test_program = test_env.Program(test_name, sources + env.GetComponents(path, 'GoogleTest', 'Common'))
+    test_program = test_env.Program(test_name, sources + env.GetComponents(path, 'GoogleTest'))
     test_result = test_env.Command(test_name + '_result.xml', test_program, './$SOURCE --gtest_output=xml:$TARGET')
     test_env.AlwaysBuild(test_result)

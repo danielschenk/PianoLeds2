@@ -1,6 +1,7 @@
 #!python
 
 import platform
+import components
 
 # Create base environment
 Import('base_env')
@@ -8,6 +9,9 @@ env = base_env.Clone()
 
 # Make environment available to SConscripts
 Export(base_env=env)
+
+# Install the components module
+components.install(env)
 
 symbols = [
 ]

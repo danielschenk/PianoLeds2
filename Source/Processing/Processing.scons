@@ -5,5 +5,4 @@ env = base_env.Clone()
 
 sources = Glob('*.cpp')
 
-lib = env.Library('Processing', sources)
-base_env.Component('Processing', lib)
+base_env.Component('Processing', sources + env.GetComponents('Common'))

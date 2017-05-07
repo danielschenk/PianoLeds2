@@ -1,14 +1,10 @@
 #!python
 
 import os
-import components
 
 join = os.path.join
 
 env = Environment()
-
-# Install the components module
-components.install(env)
 
 Export(base_env=env)
 
