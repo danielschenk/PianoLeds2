@@ -16,6 +16,8 @@ if ARGUMENTS.get('VERBOSE') != '1':
 env.Append(CPPPATH=[
     '/usr/local/Cellar/nlohmann_json/2.1.1/include',
 ])
+# Propagate the 'TERM' environment variable from the OS, so tools can decide if they should colorize output
+env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
 
 SConscript('PC.scons', variant_dir=Dir('Build/PC'), duplicate=False)
 SConscript('Test.scons', variant_dir=Dir('Build/Test'), duplicate=False)
