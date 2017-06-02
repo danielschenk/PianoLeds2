@@ -7,6 +7,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <json.hpp>
 #include <Drivers/Mock/MockMidiInput.h>
 
 #include "../NoteRgbSource.h"
@@ -240,4 +241,28 @@ TEST_F(NoteRgbSourceTest, deleteRgbFunction)
 
     m_pNoteRgbSource->setRgbFunction(pMock1);
     m_pNoteRgbSource->setRgbFunction(pMock2);
+}
+
+TEST_F(NoteRgbSourceTest, convertToJson)
+{
+    MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
+    ASSERT_NE(nullptr, pMockRgbFunction);
+
+    json mockRgbFunctionJson;
+    mockRgbFunctionJson["objectType"] = "MockRgbFunction";
+    mockRgbFunctionJson["someParameter"] = 42;
+    EXPECT_CALL(*pMockRgbFunction, convertToJson())
+        .WillOnce(Return(mockRgbFunctionJson));
+
+    // Set some non-default values
+    m_pNoteRgbSource->setRgbFunction(pMockRgbFunction);
+    m_pNoteRgbSource->setChannel(6);
+    m_pNoteRgbSource->setUsingPedal(true);
+
+    json j = m_pNoteRgbSource->convertToJson();
+    EXPECT_EQ("NoteRgbSource", j.at("objectType").get<std::string>());
+    EXPECT_EQ(6, j.at("channel").get<int>());
+    EXPECT_EQ(true, j.at("usingPedal").get<bool>());
+    EXPECT_EQ("MockRgbFunction", j.at("rgbFunction").at("objectType").get<std::string>());
+    EXPECT_EQ(42, j.at("rgbFunction").at("someParameter").get<int>());
 }
