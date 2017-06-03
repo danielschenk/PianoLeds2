@@ -129,6 +129,8 @@ TEST_F(NoteRgbSourceTest, ignoreOtherChannel)
 
 TEST_F(NoteRgbSourceTest, ignorePedal)
 {
+    m_pNoteRgbSource->setUsingPedal(false);
+
     auto darkStrip = m_strip;
 
     m_noteOnOffCallback(0, 0, 1, true);
@@ -141,8 +143,6 @@ TEST_F(NoteRgbSourceTest, ignorePedal)
 
 TEST_F(NoteRgbSourceTest, usePedal)
 {
-    m_pNoteRgbSource->setUsingPedal(true);
-
     // Press a key
     // (channel, number, velocity, on/off)
     m_noteOnOffCallback(0, 0, 1, true);
@@ -260,12 +260,12 @@ TEST_F(NoteRgbSourceTest, convertToJson)
     // Set some non-default values
     m_pNoteRgbSource->setRgbFunction(pMockRgbFunction);
     m_pNoteRgbSource->setChannel(6);
-    m_pNoteRgbSource->setUsingPedal(true);
+    m_pNoteRgbSource->setUsingPedal(false);
 
     json j = m_pNoteRgbSource->convertToJson();
     EXPECT_EQ("NoteRgbSource", j.at("objectType").get<std::string>());
     EXPECT_EQ(6, j.at("channel").get<int>());
-    EXPECT_EQ(true, j.at("usingPedal").get<bool>());
+    EXPECT_EQ(false, j.at("usingPedal").get<bool>());
     EXPECT_EQ("MockRgbFunction", j.at("rgbFunction").at("objectType").get<std::string>());
     EXPECT_EQ(42, j.at("rgbFunction").at("someParameter").get<int>());
 }
@@ -276,7 +276,7 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
         {
             "objectType": "NoteRgbSource",
             "channel": 6,
-            "usingPedal": true,
+            "usingPedal": false,
             "rgbFunction": {
                 "objectType": "MockRgbFunction",
                 "someParameter": 42
@@ -298,7 +298,7 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
 
     m_pNoteRgbSource->convertFromJson(j);
     EXPECT_EQ(6, m_pNoteRgbSource->getChannel());
-    EXPECT_EQ(true, m_pNoteRgbSource->isUsingPedal());
+    EXPECT_EQ(false, m_pNoteRgbSource->isUsingPedal());
 
     Processing::TRgbStrip reference(3);
     reference[0] = {1, 2, 3};

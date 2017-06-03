@@ -11,7 +11,7 @@
 #include "LinearRgbFunction.h"
 
 NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory)
-    : m_usingPedal(false)
+    : m_usingPedal(true)
     , m_rNoteToLightMap(rNoteToLightMap)
     , m_rRgbFunctionFactory(rRgbFunctionFactory)
     , m_rMidiInput(rMidiInput)
