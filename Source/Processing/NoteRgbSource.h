@@ -16,6 +16,7 @@
 #include "Interfaces/IProcessingBlock.h"
 
 class IRgbFunction;
+class IRgbFunctionFactory;
 
 /**
  * RGB source which generates RGB data based on note on/off events.
@@ -27,10 +28,11 @@ public:
     /**
      * Constructor.
      *
-     * @param   [in]    rMidiInput      Reference to the MIDI input.
-     * @param   [in]    rNoteToLightMap Reference to the note to light map.
+     * @param   [in]    rMidiInput          Reference to the MIDI input.
+     * @param   [in]    rNoteToLightMap     Reference to the note to light map.
+     * @param   [in]    rRgbFunctionFactory Reference to the RGB function factory.
      */
-    NoteRgbSource(IMidiInput& rMidiDriver, const Processing::TNoteToLightMap& rNoteToLightMap);
+    NoteRgbSource(IMidiInput& rMidiDriver, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory);
 
     /**
      * Destructor.
@@ -73,6 +75,9 @@ private:
 
     /** Reference to the note to light map. */
     const Processing::TNoteToLightMap& m_rNoteToLightMap;
+
+    /** Reference to the RGB function factory. */
+    const IRgbFunctionFactory& m_rRgbFunctionFactory;
 
     /** Reference to the MIDI input. */
     IMidiInput& m_rMidiInput;

@@ -5,11 +5,11 @@
  */
 
 #include "ProcessingChain.h"
-#include "ProcessingBlockFactory.h"
 
 #include "Interfaces/IProcessingBlock.h"
+#include "Interfaces/IProcessingBlockFactory.h"
 
-ProcessingChain::ProcessingChain(const ProcessingBlockFactory& rProcessingBlockFactory)
+ProcessingChain::ProcessingChain(const IProcessingBlockFactory& rProcessingBlockFactory)
     : m_processingChain()
     , m_rProcessingBlockFactory(rProcessingBlockFactory)
 {

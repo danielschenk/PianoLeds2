@@ -13,7 +13,7 @@
 
 #include "Interfaces/IProcessingBlock.h"
 
-class ProcessingBlockFactory;
+class IProcessingBlockFactory;
 
 /**
  * A processing chain which can hold multiple processing blocks connected in series.
@@ -25,7 +25,7 @@ public:
     /**
      * Constructor.
      */
-    ProcessingChain(const ProcessingBlockFactory& rProcessingBlockFactory);
+    ProcessingChain(const IProcessingBlockFactory& rProcessingBlockFactory);
 
     /**
      * Destructor.
@@ -64,7 +64,7 @@ private:
     std::vector<IProcessingBlock*> m_processingChain;
 
     /** Reference to the processing block factory. */
-    const ProcessingBlockFactory& m_rProcessingBlockFactory;
+    const IProcessingBlockFactory& m_rProcessingBlockFactory;
 
     void deleteProcessingBlocks();
 };

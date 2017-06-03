@@ -8,11 +8,10 @@
 
 #include <algorithm>
 #include <gtest/gtest.h>
-#include <Drivers/Mock/MockMidiInput.h>
 
 #include "../Mock/MockProcessingBlock.h"
+#include "../Mock/MockProcessingBlockFactory.h"
 #include "../ProcessingChain.h"
-#include "../ProcessingBlockFactory.h"
 #include "../Interfaces/ProcessingTypes.h"
 
 using ::testing::_;
@@ -59,9 +58,7 @@ public:
         , m_pGreenSource(new TMockBlock())
         , m_pValueDoubler(new TMockBlock())
         , m_strip(c_stripSize)
-        , m_mockMidiInput()
-        , m_noteToLightMap()
-        , m_processingBlockFactory(m_mockMidiInput, m_noteToLightMap)
+        , m_processingBlockFactory()
         , m_processingChain(m_processingBlockFactory)
     {
         ON_CALL(*m_pRedSource, execute(_))
@@ -89,9 +86,7 @@ public:
 
     Processing::TRgbStrip m_strip;
 
-    MockMidiInput m_mockMidiInput;
-    Processing::TNoteToLightMap m_noteToLightMap;
-    ProcessingBlockFactory m_processingBlockFactory;
+    MockProcessingBlockFactory m_processingBlockFactory;
     ProcessingChain m_processingChain;
 };
 

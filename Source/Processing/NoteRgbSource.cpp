@@ -6,13 +6,14 @@
 
 #include <functional>
 
+#include "Interfaces/IRgbFunctionFactory.h"
 #include "NoteRgbSource.h"
 #include "LinearRgbFunction.h"
-#include "RgbFunctionFactory.h"
 
-NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap)
+NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory)
     : m_usingPedal(false)
     , m_rNoteToLightMap(rNoteToLightMap)
+    , m_rRgbFunctionFactory(rRgbFunctionFactory)
     , m_rMidiInput(rMidiInput)
     , m_channel(0)
     , m_scheduler()
@@ -150,6 +151,6 @@ void NoteRgbSource::convertFromJson(json json)
     }
     if(json.count(c_rgbFunctionJsonKey) > 0)
     {
-        m_pRgbFunction = RgbFunctionFactory::createRgbFunction(json[c_rgbFunctionJsonKey]);
+        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(json[c_rgbFunctionJsonKey]);
     }
 }

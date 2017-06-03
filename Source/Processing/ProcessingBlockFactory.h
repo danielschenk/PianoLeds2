@@ -9,35 +9,31 @@
 #ifndef PROCESSING_PROCESSINGBLOCKFACTORY_H_
 #define PROCESSING_PROCESSINGBLOCKFACTORY_H_
 
-#include <json.hpp>
 #include "Interfaces/ProcessingTypes.h"
-using json = nlohmann::json;
+#include "Interfaces/IProcessingBlockFactory.h"
 
 class IMidiInput;
-class IProcessingBlock;
+class IRgbFunctionFactory;
 
 /**
  * Factory for processing blocks.
  */
 class ProcessingBlockFactory
+    : public IProcessingBlockFactory
 {
 public:
     /**
      * Constructor.
      */
-    ProcessingBlockFactory(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap);
+    ProcessingBlockFactory(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory);
 
     /**
      * Destructor.
      */
     virtual ~ProcessingBlockFactory();
 
-    /**
-     * Create a processing block from the given JSON.
-     *
-     * @param[in]   converted   JSON object containing the persistent properties.
-     */
-    IProcessingBlock* createProcessingBlock(json converted) const;
+    // IProcessingBlockFactory implementation
+    virtual IProcessingBlock* createProcessingBlock(json converted) const;
 
 private:
     /** Reference to the MIDI input to pass to new blocks. */
@@ -45,6 +41,9 @@ private:
 
     /** Reference to the note to light map to pass to new blocks. */
     const Processing::TNoteToLightMap& m_rNoteToLightMap;
+
+    /** Reference to the RGB function factory to pass to new blocks. */
+    const IRgbFunctionFactory& m_rRgbFunctionFactory;
 };
 
 #endif /* PROCESSING_PROCESSINGBLOCKFACTORY_H_ */

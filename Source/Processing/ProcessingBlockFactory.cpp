@@ -10,9 +10,11 @@
 #include "ProcessingChain.h"
 
 ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& rMidiInput,
-                                               const Processing::TNoteToLightMap& rNoteToLightMap)
+                                               const Processing::TNoteToLightMap& rNoteToLightMap,
+                                               const IRgbFunctionFactory& rRgbFunctionFactory)
     : m_rMidiInput(rMidiInput)
     , m_rNoteToLightMap(rNoteToLightMap)
+    , m_rRgbFunctionFactory(rRgbFunctionFactory)
 {
 }
 
@@ -32,7 +34,7 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json json) const
         }
         else if(objectType == IProcessingBlock::c_typeNameNoteRgbSource)
         {
-            processingBlock = new NoteRgbSource(m_rMidiInput, m_rNoteToLightMap);
+            processingBlock = new NoteRgbSource(m_rMidiInput, m_rNoteToLightMap, m_rRgbFunctionFactory);
         }
         else if(objectType == IProcessingBlock::c_typeNameProcessingChain)
         {

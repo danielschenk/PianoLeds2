@@ -13,6 +13,7 @@
 #include "../NoteRgbSource.h"
 #include "../LinearRgbFunction.h"
 #include "../Mock/MockRgbFunction.h"
+#include "../Mock/MockRgbFunctionFactory.h"
 
 using ::testing::_;
 using ::testing::SaveArg;
@@ -26,6 +27,7 @@ public:
 
     NoteRgbSourceTest()
         : m_mockMidiInput()
+        , m_mockRgbFunctionFactory()
         , m_strip(c_StripSize)
     {
         // Store callbacks so we can simulate events
@@ -39,7 +41,7 @@ public:
             // Default: simple 1-to-1 mapping
             m_noteToLightMap[i] = i;
         }
-        m_pNoteRgbSource = new NoteRgbSource(m_mockMidiInput, m_noteToLightMap);
+        m_pNoteRgbSource = new NoteRgbSource(m_mockMidiInput, m_noteToLightMap, m_mockRgbFunctionFactory);
     }
 
     void SetUp()
@@ -58,6 +60,7 @@ public:
     }
 
     MockMidiInput m_mockMidiInput;
+    MockRgbFunctionFactory m_mockRgbFunctionFactory;
     NoteRgbSource* m_pNoteRgbSource;
     Processing::TRgbStrip m_strip;
 
@@ -265,4 +268,43 @@ TEST_F(NoteRgbSourceTest, convertToJson)
     EXPECT_EQ(true, j.at("usingPedal").get<bool>());
     EXPECT_EQ("MockRgbFunction", j.at("rgbFunction").at("objectType").get<std::string>());
     EXPECT_EQ(42, j.at("rgbFunction").at("someParameter").get<int>());
+}
+
+TEST_F(NoteRgbSourceTest, convertFromJson)
+{
+    json j = R"(
+        {
+            "objectType": "NoteRgbSource",
+            "channel": 6,
+            "usingPedal": true,
+            "rgbFunction": {
+                "objectType": "MockRgbFunction",
+                "someParameter": 42
+            }
+        }
+    )"_json;
+
+    json mockRgbFunctionJson;
+    mockRgbFunctionJson["objectType"] = "MockRgbFunction";
+    mockRgbFunctionJson["someParameter"] = 42;
+
+    MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
+    ASSERT_NE(nullptr, pMockRgbFunction);
+    EXPECT_CALL(*pMockRgbFunction, calculate(_, _))
+        .WillRepeatedly(Return(Processing::TRgb(1, 2, 3)));
+
+    EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(mockRgbFunctionJson))
+        .WillOnce(Return(pMockRgbFunction));
+
+    m_pNoteRgbSource->convertFromJson(j);
+    EXPECT_EQ(6, m_pNoteRgbSource->getChannel());
+    EXPECT_EQ(true, m_pNoteRgbSource->isUsingPedal());
+
+    Processing::TRgbStrip reference(3);
+    reference[0] = {1, 2, 3};
+    reference[1] = {1, 2, 3};
+    reference[2] = {1, 2, 3};
+    Processing::TRgbStrip testStrip(3);
+    m_pNoteRgbSource->execute(testStrip);
+    EXPECT_EQ(reference, testStrip);
 }
