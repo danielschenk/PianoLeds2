@@ -6,7 +6,8 @@
  * @brief Unit tests for ProcessingBlock.
  */
 
-#include <algorithm>
+#include <string>
+#include <vector>
 #include <gtest/gtest.h>
 
 #include "../Mock/MockProcessingBlock.h"
@@ -17,6 +18,7 @@
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::NiceMock;
+using ::testing::Return;
 
 static void addRed(Processing::TRgbStrip& strip)
 {
@@ -79,6 +81,14 @@ public:
         m_pValueDoubler = nullptr;
     }
 
+    json createMockBlockJson(unsigned int id)
+    {
+        json j;
+        j["id"] = id;
+
+        return j;
+    }
+
     // These have to be pointers, as the processing chain takes ownership and will try to delete it's children.
     TMockBlock* m_pRedSource;
     TMockBlock* m_pGreenSource;
@@ -130,4 +140,25 @@ TEST_F(ProcessingChainTest, insertTwo)
 
     m_processingChain.execute(m_strip);
     EXPECT_EQ(reference, m_strip);
+}
+
+TEST_F(ProcessingChainTest, convertToJson)
+{
+    std::vector<json> mockBlocksJson;
+    for(unsigned int i = 0; i < 3; ++i)
+    {
+        TMockBlock* pMockBlock = new TMockBlock;
+        ASSERT_NE(nullptr, pMockBlock);
+
+        json mockJson = createMockBlockJson(i);
+        EXPECT_CALL(*pMockBlock, convertToJson())
+            .WillOnce(Return(mockJson));
+        mockBlocksJson.push_back(mockJson);
+
+        m_processingChain.insertBlock(pMockBlock);
+    }
+
+    json converted = m_processingChain.convertToJson();
+    EXPECT_EQ(mockBlocksJson, converted["processingChain"]);
+    EXPECT_EQ("ProcessingChain", converted.at("objectType").get<std::string>());
 }
