@@ -11,7 +11,6 @@
 #include <Drivers/Mock/MockMidiInput.h>
 
 #include "../NoteRgbSource.h"
-#include "../LinearRgbFunction.h"
 #include "../Mock/MockRgbFunction.h"
 #include "../Mock/MockRgbFunctionFactory.h"
 
@@ -177,10 +176,28 @@ TEST_F(NoteRgbSourceTest, usePedal)
     EXPECT_EQ(reference, m_strip);
 }
 
+/** Action definition for mock RGB function. */
+ACTION(ReturnBlueWhenNoteSoundingOtherwiseRed)
+{
+    Processing::TRgb output;
+    if(arg0.sounding)
+    {
+        output.b = 1;
+    }
+    else
+    {
+        output.r = 1;
+    }
+
+    return output;
+}
+
 TEST_F(NoteRgbSourceTest, otherRgbFunction)
 {
-    // LinearRgbFunction takes a factor&offset pair for each color
-    m_pNoteRgbSource->setRgbFunction(new LinearRgbFunction({0, 0}, {10, 0}, {1, 10}));
+    MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
+    EXPECT_CALL(*pMockRgbFunction, calculate(_, _))
+        .WillRepeatedly(ReturnBlueWhenNoteSoundingOtherwiseRed());
+    m_pNoteRgbSource->setRgbFunction(pMockRgbFunction);
 
     // (channel, number, velocity, on/off)
     m_noteOnOffCallback(0, 0, 1, true);
@@ -189,8 +206,16 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
     m_pNoteRgbSource->execute(m_strip);
 
     auto reference = Processing::TRgbStrip(c_StripSize);
-    reference[0] = {0, 10, 11};
-    reference[5] = {0, 60, 16};
+    reference[0] = {0, 0, 1};
+    reference[1] = {1, 0, 0};
+    reference[2] = {1, 0, 0};
+    reference[3] = {1, 0, 0};
+    reference[4] = {1, 0, 0};
+    reference[5] = {0, 0, 1};
+    reference[6] = {1, 0, 0};
+    reference[7] = {1, 0, 0};
+    reference[8] = {1, 0, 0};
+    reference[9] = {1, 0, 0};
 
     EXPECT_EQ(reference, m_strip);
 }
