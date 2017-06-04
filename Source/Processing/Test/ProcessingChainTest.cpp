@@ -162,3 +162,33 @@ TEST_F(ProcessingChainTest, convertToJson)
     EXPECT_EQ(mockBlocksJson, converted["processingChain"]);
     EXPECT_EQ("ProcessingChain", converted.at("objectType").get<std::string>());
 }
+
+TEST_F(ProcessingChainTest, convertFromJson)
+{
+    std::vector<IProcessingBlock*> mockBlocks({m_pGreenSource, m_pValueDoubler});
+
+    // Processing chain takes over ownership of the mock block when our mock factory returns it.
+    // Prevent that the fixture teardown deletes already deleted object
+    m_pGreenSource = nullptr;
+    m_pValueDoubler = nullptr;
+
+    std::vector<json> mockBlocksJson;
+    for(unsigned int i = 0; i < mockBlocks.size(); ++i)
+    {
+        json mockJson = createMockBlockJson(i);
+        mockBlocksJson.push_back(mockJson);
+        EXPECT_CALL(m_processingBlockFactory, createProcessingBlock(mockJson))
+            .WillOnce(Return(mockBlocks[i]));
+    }
+    json j;
+    j["processingChain"] = mockBlocksJson;
+    m_processingChain.convertFromJson(j);
+
+    Processing::TRgbStrip reference(3);
+    reference[0] = {0, 20, 0};
+    reference[1] = {0, 20, 0};
+    reference[2] = {0, 20, 0};
+    Processing::TRgbStrip testStrip(3);
+    m_processingChain.execute(testStrip);
+    EXPECT_EQ(reference, testStrip);
+}
