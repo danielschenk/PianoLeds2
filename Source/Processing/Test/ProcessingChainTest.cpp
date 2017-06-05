@@ -26,6 +26,7 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::AnyOf;
 using ::testing::AnyNumber;
+using ::testing::HasSubstr;
 
 static void addRed(Processing::TRgbStrip& strip)
 {
@@ -232,7 +233,9 @@ TEST_F(ProcessingChainTest, convertFromJsonUnrecognizedField)
     json j;
     j["processingChain"] = mockBlocksJson;
     j["futureField"] = 42;
+    j["futureField2"] = 43;
 
-    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Warning, LOGGING_COMPONENT, _));
+    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Warning, LOGGING_COMPONENT, HasSubstr("futureField")));
+    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Warning, LOGGING_COMPONENT, HasSubstr("futureField2")));
     m_processingChain.convertFromJson(j);
 }
