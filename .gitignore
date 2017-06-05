@@ -4,3 +4,4 @@
 .settings
 Source/Build
 Documentation
+.sconsign.dblite
