@@ -11,6 +11,7 @@
 
 #include <cstdint>
 #include <map>
+#include <vector>
 
 namespace Processing
 {
