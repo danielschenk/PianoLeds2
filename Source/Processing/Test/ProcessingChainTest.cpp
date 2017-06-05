@@ -10,15 +10,22 @@
 #include <vector>
 #include <gtest/gtest.h>
 
+#include <Common/Mock/MockLoggingTarget.h>
+#include <Common/LoggingEntryPoint.h>
+
 #include "../Mock/MockProcessingBlock.h"
 #include "../Mock/MockProcessingBlockFactory.h"
 #include "../ProcessingChain.h"
 #include "../Interfaces/ProcessingTypes.h"
 
+#define LOGGING_COMPONENT "ProcessingChain"
+
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::AnyOf;
+using ::testing::AnyNumber;
 
 static void addRed(Processing::TRgbStrip& strip)
 {
@@ -61,6 +68,7 @@ public:
         , m_pValueDoubler(new TMockBlock())
         , m_strip(c_stripSize)
         , m_processingBlockFactory()
+        , m_mockLoggingTarget()
         , m_processingChain(m_processingBlockFactory)
     {
         ON_CALL(*m_pRedSource, execute(_))
@@ -69,6 +77,12 @@ public:
             .WillByDefault(Invoke(addGreen));
         ON_CALL(*m_pValueDoubler, execute(_))
             .WillByDefault(Invoke(doubleValue));
+
+        // Info and debug logs are OK
+        EXPECT_CALL(m_mockLoggingTarget, logMessage(_, AnyOf(Logging::LogLevel_Info, Logging::LogLevel_Debug), LOGGING_COMPONENT, _))
+            .Times(AnyNumber());
+
+        LoggingEntryPoint::subscribe(m_mockLoggingTarget);
     }
 
     virtual ~ProcessingChainTest()
@@ -79,6 +93,8 @@ public:
         m_pGreenSource = nullptr;
         delete m_pValueDoubler;
         m_pValueDoubler = nullptr;
+
+        LoggingEntryPoint::unsubscribe(m_mockLoggingTarget);
     }
 
     json createMockBlockJson(unsigned int id)
@@ -97,6 +113,8 @@ public:
     Processing::TRgbStrip m_strip;
 
     MockProcessingBlockFactory m_processingBlockFactory;
+    MockLoggingTarget m_mockLoggingTarget;
+
     ProcessingChain m_processingChain;
 };
 
@@ -191,4 +209,30 @@ TEST_F(ProcessingChainTest, convertFromJson)
     Processing::TRgbStrip testStrip(3);
     m_processingChain.execute(testStrip);
     EXPECT_EQ(reference, testStrip);
+}
+
+TEST_F(ProcessingChainTest, convertFromJsonMissingChain)
+{
+    json j;
+    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Error, LOGGING_COMPONENT, _));
+    m_processingChain.convertFromJson(j);
+}
+
+TEST_F(ProcessingChainTest, convertFromJsonUnrecognizedField)
+{
+    json mockJson = createMockBlockJson(0);
+    EXPECT_CALL(m_processingBlockFactory, createProcessingBlock(mockJson))
+        .WillOnce(Return(m_pGreenSource));
+    // Processing chain takes over ownership of the mock block when our mock factory returns it.
+    // Prevent that the fixture teardown deletes already deleted object
+    m_pGreenSource = nullptr;
+
+    std::vector<json> mockBlocksJson;
+    mockBlocksJson.push_back(mockJson);
+    json j;
+    j["processingChain"] = mockBlocksJson;
+    j["futureField"] = 42;
+
+    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Warning, LOGGING_COMPONENT, _));
+    m_processingChain.convertFromJson(j);
 }

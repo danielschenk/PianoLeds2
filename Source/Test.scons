@@ -13,6 +13,10 @@ Export(base_env=env)
 components.install(env)
 
 symbols = [
+    ('ENABLE_LOG_ERROR', 1),
+    ('ENABLE_LOG_WARNING', 1),
+    ('ENABLE_LOG_INFO', 1),
+    ('ENABLE_LOG_DEBUG', 1),
 ]
 flags = [
     '-Wall',

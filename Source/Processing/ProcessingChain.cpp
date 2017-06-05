@@ -4,10 +4,14 @@
  * This file is part of MLC2.
  */
 
+#include <Common/Logging.h>
+
 #include "ProcessingChain.h"
 
 #include "Interfaces/IProcessingBlock.h"
 #include "Interfaces/IProcessingBlockFactory.h"
+
+#define LOGGING_COMPONENT "ProcessingChain"
 
 ProcessingChain::ProcessingChain(const IProcessingBlockFactory& rProcessingBlockFactory)
     : m_processingChain()
@@ -60,6 +64,18 @@ void ProcessingChain::convertFromJson(json converted)
         for(auto convertedBlock : convertedChain)
         {
             m_processingChain.push_back(m_rProcessingBlockFactory.createProcessingBlock(convertedBlock));
+        }
+    }
+    else
+    {
+        LOG_ERROR("convertFromJson: JSON does not contain list of processing blocks. Chain will stay empty.");
+    }
+
+    for(auto it = converted.begin(); it != converted.end(); ++it)
+    {
+        if(it.key() != c_processingChainJsonKey)
+        {
+            LOG_WARNING_PARAMS("convertFromJson: unknown key '%s'", it.key().c_str());
         }
     }
 }
