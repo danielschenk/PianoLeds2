@@ -10,8 +10,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 
-#include <Common/Mock/MockLoggingTarget.h>
-#include <Common/LoggingEntryPoint.h>
+#include <Common/Mock/LoggingTest.h>
 
 #include "../Mock/MockProcessingBlock.h"
 #include "../Mock/MockProcessingBlockFactory.h"
@@ -24,8 +23,6 @@ using ::testing::_;
 using ::testing::Invoke;
 using ::testing::NiceMock;
 using ::testing::Return;
-using ::testing::AnyOf;
-using ::testing::AnyNumber;
 using ::testing::HasSubstr;
 
 static void addRed(Processing::TRgbStrip& strip)
@@ -55,7 +52,7 @@ static void doubleValue(Processing::TRgbStrip& strip)
 }
 
 class ProcessingChainTest
-    : public ::testing::Test
+    : public LoggingTest
 {
 public:
     static constexpr unsigned int c_stripSize = 3;
@@ -64,12 +61,12 @@ public:
     typedef NiceMock<MockProcessingBlock> TMockBlock;
 
     ProcessingChainTest()
-        : m_pRedSource(new TMockBlock())
+        : LoggingTest()
+        , m_pRedSource(new TMockBlock())
         , m_pGreenSource(new TMockBlock())
         , m_pValueDoubler(new TMockBlock())
         , m_strip(c_stripSize)
         , m_processingBlockFactory()
-        , m_mockLoggingTarget()
         , m_processingChain(m_processingBlockFactory)
     {
         ON_CALL(*m_pRedSource, execute(_))
@@ -78,12 +75,6 @@ public:
             .WillByDefault(Invoke(addGreen));
         ON_CALL(*m_pValueDoubler, execute(_))
             .WillByDefault(Invoke(doubleValue));
-
-        // Info and debug logs are OK
-        EXPECT_CALL(m_mockLoggingTarget, logMessage(_, AnyOf(Logging::LogLevel_Info, Logging::LogLevel_Debug), LOGGING_COMPONENT, _))
-            .Times(AnyNumber());
-
-        LoggingEntryPoint::subscribe(m_mockLoggingTarget);
     }
 
     virtual ~ProcessingChainTest()
@@ -94,8 +85,6 @@ public:
         m_pGreenSource = nullptr;
         delete m_pValueDoubler;
         m_pValueDoubler = nullptr;
-
-        LoggingEntryPoint::unsubscribe(m_mockLoggingTarget);
     }
 
     json createMockBlockJson(unsigned int id)
@@ -114,7 +103,6 @@ public:
     Processing::TRgbStrip m_strip;
 
     MockProcessingBlockFactory m_processingBlockFactory;
-    MockLoggingTarget m_mockLoggingTarget;
 
     ProcessingChain m_processingChain;
 };

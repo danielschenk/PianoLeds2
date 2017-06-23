@@ -6,9 +6,13 @@
 
 #include <functional>
 
+#include <Common/Logging.h>
+
 #include "Interfaces/IRgbFunctionFactory.h"
 #include "NoteRgbSource.h"
 #include "LinearRgbFunction.h"
+
+#define LOGGING_COMPONENT "NoteRgbSource"
 
 NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory)
     : m_usingPedal(true)
@@ -139,18 +143,42 @@ json NoteRgbSource::convertToJson() const
     return json;
 }
 
-void NoteRgbSource::convertFromJson(json json)
+void NoteRgbSource::convertFromJson(json converted)
 {
-    if(json.count(c_usingPedalJsonKey) > 0)
+    if(converted.count(c_usingPedalJsonKey) > 0)
     {
-        m_usingPedal = json[c_usingPedalJsonKey];
+        m_usingPedal = converted[c_usingPedalJsonKey];
     }
-    if(json.count(c_channelJsonKey) > 0)
+    else
     {
-        m_channel = json[c_channelJsonKey];
+        LOG_ERROR("convertFromJson: Missing usingPedal property");
     }
-    if(json.count(c_rgbFunctionJsonKey) > 0)
+    if(converted.count(c_channelJsonKey) > 0)
     {
-        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(json[c_rgbFunctionJsonKey]);
+        m_channel = converted[c_channelJsonKey];
+    }
+    else
+    {
+        LOG_ERROR("convertFromJson: Missing channel property");
+    }
+    if(converted.count(c_rgbFunctionJsonKey) > 0)
+    {
+        delete m_pRgbFunction;
+        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(converted[c_rgbFunctionJsonKey]);
+    }
+    else
+    {
+        LOG_ERROR("convertFromJson: Missing rgbFunction property");
+    }
+
+    for(auto it = converted.begin(); it != converted.end(); ++it)
+    {
+        if((it.key() != IJsonConvertible::c_objectTypeKey) &&
+           (it.key() != c_channelJsonKey) &&
+           (it.key() != c_usingPedalJsonKey) &&
+           (it.key() != c_rgbFunctionJsonKey))
+        {
+            LOG_WARNING_PARAMS("convertFromJson: unknown property '%s'", it.key().c_str());
+        }
     }
 }

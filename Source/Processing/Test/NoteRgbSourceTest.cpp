@@ -1,5 +1,5 @@
 /**
- * @file
+   * @file
  * @copyright (c) Daniel Schenk, 2017
  * This file is part of MLC2.
  * 
@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include <json.hpp>
 #include <Drivers/Mock/MockMidiInput.h>
+#include <Common/Mock/LoggingTest.h>
 
 #include "../NoteRgbSource.h"
 #include "../Mock/MockRgbFunction.h"
@@ -17,17 +18,33 @@
 using ::testing::_;
 using ::testing::SaveArg;
 using ::testing::Return;
+using ::testing::HasSubstr;
+
+#define LOGGING_COMPONENT "NoteRgbSource"
+
+#include <cstdint>
 
 class NoteRgbSourceTest
-    : public ::testing::Test
+    : public LoggingTest
 {
 public:
     static constexpr unsigned int c_StripSize = 10;
 
     NoteRgbSourceTest()
-        : m_mockMidiInput()
+        : LoggingTest()
+        , m_mockMidiInput()
         , m_mockRgbFunctionFactory()
         , m_strip(c_StripSize)
+        , m_exampleJson(R"(
+             {
+                 "objectType": "NoteRgbSource",
+                 "channel": 6,
+                 "usingPedal": false,
+                 "rgbFunction": {
+                     "objectType": "MockRgbFunction",
+                     "someParameter": 42
+                 }
+             })"_json)
     {
         // Store callbacks so we can simulate events
         EXPECT_CALL(m_mockMidiInput, subscribeNoteOnOff(_))
@@ -67,7 +84,19 @@ public:
     IMidiInput::TControlChangeFunction m_controlChangeCallback;
 
     Processing::TNoteToLightMap m_noteToLightMap;
+
+    json m_exampleJson;
 };
+
+class JsonPropertyNoteRgbSourceTest
+    : public NoteRgbSourceTest
+    , public ::testing::WithParamInterface<std::string>
+{
+};
+
+INSTANTIATE_TEST_CASE_P(KnownJsonProperties,
+                        JsonPropertyNoteRgbSourceTest,
+                        ::testing::Values("usingPedal", "channel", "rgbFunction"));
 
 TEST_F(NoteRgbSourceTest, noNotesSounding)
 {
@@ -297,18 +326,7 @@ TEST_F(NoteRgbSourceTest, convertToJson)
 
 TEST_F(NoteRgbSourceTest, convertFromJson)
 {
-    json j = R"(
-        {
-            "objectType": "NoteRgbSource",
-            "channel": 6,
-            "usingPedal": false,
-            "rgbFunction": {
-                "objectType": "MockRgbFunction",
-                "someParameter": 42
-            }
-        }
-    )"_json;
-
+    json j(m_exampleJson);
     json mockRgbFunctionJson;
     mockRgbFunctionJson["objectType"] = "MockRgbFunction";
     mockRgbFunctionJson["someParameter"] = 42;
@@ -332,4 +350,24 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
     Processing::TRgbStrip testStrip(3);
     m_pNoteRgbSource->execute(testStrip);
     EXPECT_EQ(reference, testStrip);
+}
+
+TEST_P(JsonPropertyNoteRgbSourceTest, convertFromJsonMissingProperty)
+{
+    json j(m_exampleJson);
+
+    ASSERT_EQ(1, j.erase(GetParam()));
+
+    if(GetParam() != "rgbFunction")
+    {
+        // RGB function is not deleted from JSON, so expect call to factory
+        MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
+        ASSERT_NE(nullptr, pMockRgbFunction);
+
+        EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(_))
+            .WillOnce(Return(pMockRgbFunction));
+    }
+
+    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Error, LOGGING_COMPONENT, HasSubstr(GetParam())));
+    m_pNoteRgbSource->convertFromJson(j);
 }
