@@ -40,6 +40,14 @@ public:
     Patch m_patch;
 };
 
+TEST_F(PatchTest, defaults)
+{
+    EXPECT_EQ(0, m_patch.getBank());
+    EXPECT_EQ(0, m_patch.getProgram());
+    EXPECT_EQ(false, m_patch.hasBankAndProgram());
+    EXPECT_EQ("Untitled Patch", m_patch.getName());
+}
+
 TEST_F(PatchTest, convertToJson)
 {
     // Set some non-defaults
