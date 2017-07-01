@@ -3,8 +3,9 @@ This is the code of the second generation controller for my MIDI based keyboard 
 shine based on the notes I play. It is currently work in progress.
 
 ## History
-I started the redesign because I found that the first version was not extensible enough anymore, both in terms of
-hardware and software. The first version has some light effect "patches" (presets with different colors) hard-coded into
+I started the redesign because I found that the [first version](https://github.com/danielschenk/mlc) was not extensible
+enough anymore, both in terms of hardware and software.
+The first version has some light effect "patches" (presets with different colors) hard-coded into
 the firmware, together with the MIDI program numbers they respond to. This means that adding or changing a patch means
 C coding, recompiling and flashing the chip.
 The plan is a fully configurable version, so I can make and edit light effect patches from my smartphone or notebook,
