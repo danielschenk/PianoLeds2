@@ -69,8 +69,8 @@ public:
     void setHasBankAndProgram(bool hasBankAndProgram);
     uint8_t getProgram() const;
     void setProgram(uint8_t program);
-    const std::string& getName() const;
-    void setName(const std::string& name);
+    std::string getName() const;
+    void setName(const std::string name);
 
 private:
     static constexpr const char* c_hasBankAndProgramJsonKey = "hasBankAndProgram";

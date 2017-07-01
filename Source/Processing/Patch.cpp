@@ -138,12 +138,12 @@ void Patch::setProgram(uint8_t program)
     m_program = program;
 }
 
-const std::string& Patch::getName() const
+std::string Patch::getName() const
 {
     return m_name;
 }
 
-void Patch::setName(const std::string& name)
+void Patch::setName(const std::string name)
 {
     m_name = name;
 }
