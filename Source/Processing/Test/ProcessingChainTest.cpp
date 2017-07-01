@@ -24,97 +24,27 @@
 
 #include <Common/Mock/LoggingTest.h>
 
-#include "../Mock/MockProcessingBlock.h"
-#include "../Mock/MockProcessingBlockFactory.h"
+#include "ProcessingBlockContainerTest.h"
 #include "../ProcessingChain.h"
 #include "../Interfaces/ProcessingTypes.h"
 
 #define LOGGING_COMPONENT "ProcessingChain"
 
-using ::testing::_;
-using ::testing::Invoke;
-using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::HasSubstr;
 
-static void addRed(Processing::TRgbStrip& strip)
-{
-    for(auto& rLed : strip)
-    {
-        rLed.r = 10;
-    }
-}
-
-static void addGreen(Processing::TRgbStrip& strip)
-{
-    for(auto& rLed : strip)
-    {
-        rLed.g = 10;
-    }
-}
-
-static void doubleValue(Processing::TRgbStrip& strip)
-{
-    for(auto& rLed : strip)
-    {
-        rLed.r = std::min(0xff, rLed.r*2);
-        rLed.g = std::min(0xff, rLed.g*2);
-        rLed.b = std::min(0xff, rLed.b*2);
-    }
-}
-
 class ProcessingChainTest
-    : public LoggingTest
+    : public ProcessingBlockContainerTest
 {
 public:
-    static constexpr unsigned int c_stripSize = 3;
-
-    // Make processing block mocks nice, to prevent warnings about unexpected calls to execute().
-    typedef NiceMock<MockProcessingBlock> TMockBlock;
-
     ProcessingChainTest()
-        : LoggingTest()
-        , m_pRedSource(new TMockBlock())
-        , m_pGreenSource(new TMockBlock())
-        , m_pValueDoubler(new TMockBlock())
-        , m_strip(c_stripSize)
-        , m_processingBlockFactory()
-        , m_processingChain(m_processingBlockFactory)
+        : m_processingChain(m_processingBlockFactory)
     {
-        ON_CALL(*m_pRedSource, execute(_))
-            .WillByDefault(Invoke(addRed));
-        ON_CALL(*m_pGreenSource, execute(_))
-            .WillByDefault(Invoke(addGreen));
-        ON_CALL(*m_pValueDoubler, execute(_))
-            .WillByDefault(Invoke(doubleValue));
     }
 
     virtual ~ProcessingChainTest()
     {
-        delete m_pRedSource;
-        m_pRedSource = nullptr;
-        delete m_pGreenSource;
-        m_pGreenSource = nullptr;
-        delete m_pValueDoubler;
-        m_pValueDoubler = nullptr;
     }
-
-    json createMockBlockJson(unsigned int id)
-    {
-        json j;
-        j["id"] = id;
-
-        return j;
-    }
-
-    // These have to be pointers, as the processing chain takes ownership and will try to delete it's children.
-    TMockBlock* m_pRedSource;
-    TMockBlock* m_pGreenSource;
-    TMockBlock* m_pValueDoubler;
-
-    Processing::TRgbStrip m_strip;
-
-    MockProcessingBlockFactory m_processingBlockFactory;
 
     ProcessingChain m_processingChain;
 };
