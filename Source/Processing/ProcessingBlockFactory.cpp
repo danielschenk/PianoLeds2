@@ -21,6 +21,7 @@
 #include "NoteRgbSource.h"
 #include "EqualRangeRgbSource.h"
 #include "ProcessingChain.h"
+#include "Patch.h"
 
 ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& rMidiInput,
                                                const Processing::TNoteToLightMap& rNoteToLightMap,
@@ -53,6 +54,11 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json json) const
         {
             // A processing chain needs the factory to construct its children
             processingBlock = new ProcessingChain(*this);
+        }
+        else if(objectType == IProcessingBlock::c_typeNamePatch)
+        {
+            // A patch needs the factory to construct its children
+            processingBlock = new Patch(*this);
         }
 
         if(processingBlock != nullptr)

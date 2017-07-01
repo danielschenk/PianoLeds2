@@ -69,14 +69,15 @@ public:
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);
 
+protected:
+    /** Reference to the processing block factory. */
+    const IProcessingBlockFactory& m_rProcessingBlockFactory;
+
 private:
     static constexpr const char* c_processingChainJsonKey = "processingChain";
 
     /** The processing chain. Using a vector for optimal traversal. */
     std::vector<IProcessingBlock*> m_processingChain;
-
-    /** Reference to the processing block factory. */
-    const IProcessingBlockFactory& m_rProcessingBlockFactory;
 
     void deleteProcessingBlocks();
 };

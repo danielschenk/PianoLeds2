@@ -27,8 +27,8 @@
 #define LOGGING_COMPONENT "ProcessingChain"
 
 ProcessingChain::ProcessingChain(const IProcessingBlockFactory& rProcessingBlockFactory)
-    : m_processingChain()
-    , m_rProcessingBlockFactory(rProcessingBlockFactory)
+    : m_rProcessingBlockFactory(rProcessingBlockFactory)
+    , m_processingChain()
 {
 }
 
