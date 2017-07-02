@@ -46,6 +46,21 @@ public:
     };
 
     /**
+     * Activate this block.
+     *
+     * @post The block responds to events.
+     */
+    virtual void activate() = 0;
+
+    /**
+     * Deactivate this block.
+     *
+     * @post The block ignores events.
+     * @post The block is in a clean state (as if no events have ever been received).
+     */
+    virtual void deactivate() = 0;
+
+    /**
      * Execute this block on the given strip.
      *
      * @param   [in/out]    strip   The strip to operate on.

@@ -28,7 +28,9 @@
 #define LOGGING_COMPONENT "NoteRgbSource"
 
 NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory)
-    : m_usingPedal(true)
+    : m_mutex()
+    , m_active()
+    , m_usingPedal(true)
     , m_rNoteToLightMap(rNoteToLightMap)
     , m_rRgbFunctionFactory(rRgbFunctionFactory)
     , m_rMidiInput(rMidiInput)
@@ -50,6 +52,28 @@ NoteRgbSource::~NoteRgbSource()
     delete m_pRgbFunction;
 }
 
+void NoteRgbSource::activate()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    m_active = true;
+}
+
+void NoteRgbSource::deactivate()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    // Make sure no notes stay active. Handle remaining events first.
+    m_scheduler.executeAll();
+    for(auto& noteState : m_noteState)
+    {
+        noteState.pressed = false;
+        noteState.sounding = false;
+    }
+
+    m_active = false;
+}
+
 void NoteRgbSource::execute(Processing::TRgbStrip& strip)
 {
     m_scheduler.executeAll();
@@ -66,6 +90,13 @@ void NoteRgbSource::execute(Processing::TRgbStrip& strip)
 
 void NoteRgbSource::handleNoteOnOff(uint8_t channel, uint8_t number, uint8_t velocity, bool on)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if(!m_active)
+    {
+        return;
+    }
+
     auto fn = [=]() {
         if(channel == m_channel)
         {
@@ -90,6 +121,13 @@ void NoteRgbSource::handleNoteOnOff(uint8_t channel, uint8_t number, uint8_t vel
 
 void NoteRgbSource::handleControlChange(uint8_t channel, IMidiInput::TControllerNumber number, uint8_t value)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if(!m_active)
+    {
+        return;
+    }
+
     // Don't cause scheduling overhead when it's an unimportant controller number.
     // Channel check must be scheduled as it uses a member
     if(number == IMidiInterface::DAMPER_PEDAL)
@@ -117,26 +155,36 @@ void NoteRgbSource::handleControlChange(uint8_t channel, IMidiInput::TController
 
 uint8_t NoteRgbSource::getChannel() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     return m_channel;
 }
 
 void NoteRgbSource::setChannel(uint8_t channel)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     m_channel = channel;
 }
 
 bool NoteRgbSource::isUsingPedal() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     return m_usingPedal;
 }
 
 void NoteRgbSource::setUsingPedal(bool usingPedal)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     m_usingPedal = usingPedal;
 }
 
 void NoteRgbSource::setRgbFunction(IRgbFunction* pRgbFunction)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     // We have ownership
     delete m_pRgbFunction;
     m_pRgbFunction = pRgbFunction;
@@ -144,6 +192,8 @@ void NoteRgbSource::setRgbFunction(IRgbFunction* pRgbFunction)
 
 json NoteRgbSource::convertToJson() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     json json;
     json[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameNoteRgbSource);
     json[c_usingPedalJsonKey] = m_usingPedal;
@@ -158,6 +208,8 @@ json NoteRgbSource::convertToJson() const
 
 void NoteRgbSource::convertFromJson(json converted)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     if(converted.count(c_usingPedalJsonKey) > 0)
     {
         m_usingPedal = converted[c_usingPedalJsonKey];

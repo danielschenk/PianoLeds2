@@ -21,6 +21,7 @@
 #ifndef PROCESSING_PROCESSINGCHAIN_H_
 #define PROCESSING_PROCESSINGCHAIN_H_
 
+#include <mutex>
 #include <list>
 
 #include "Interfaces/IProcessingBlock.h"
@@ -65,21 +66,32 @@ public:
     void insertBlock(IProcessingBlock* pBlock);
 
     // IProcessingBlock implementation
+    virtual void activate();
+    virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& strip);
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);
 
 protected:
+    /** Mutex to protect the members. */
+    mutable std::recursive_mutex m_mutex;
+
     /** Reference to the processing block factory. */
     const IProcessingBlockFactory& m_rProcessingBlockFactory;
 
 private:
     static constexpr const char* c_processingChainJsonKey = "processingChain";
 
+    /** Whether all blocks in the chain are active or not. */
+    bool m_active;
+
     /** The processing chain. Using a vector for optimal traversal. */
     std::vector<IProcessingBlock*> m_processingChain;
 
     void deleteProcessingBlocks();
+
+    /** Activates/deactivates every block in the chain, based on whether we're active or not. */
+    void updateAllBlockStates();
 };
 
 #endif /* PROCESSING_PROCESSINGCHAIN_H_ */

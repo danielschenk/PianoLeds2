@@ -21,6 +21,7 @@
 #ifndef PROCESSING_NOTERGBSOURCE_H_
 #define PROCESSING_NOTERGBSOURCE_H_
 
+#include <mutex>
 #include <array>
 
 #include <Drivers/Interfaces/IMidiInput.h>
@@ -56,6 +57,8 @@ public:
     NoteRgbSource& operator=(NoteRgbSource&) = delete;
 
     // IProcessingBlock implementation.
+    virtual void activate();
+    virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& output);
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);
@@ -81,6 +84,12 @@ private:
      * Handler for control change events.
      */
     void handleControlChange(uint8_t channel, IMidiInput::TControllerNumber number, uint8_t value);
+
+    /** Mutex to protect the members. */
+    mutable std::mutex m_mutex;
+
+    /** Whether this block is active. */
+    bool m_active;
 
     /** Indicates whether pedal should be used. */
     bool m_usingPedal;

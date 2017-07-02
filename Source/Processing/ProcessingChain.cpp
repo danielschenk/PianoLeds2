@@ -27,7 +27,9 @@
 #define LOGGING_COMPONENT "ProcessingChain"
 
 ProcessingChain::ProcessingChain(const IProcessingBlockFactory& rProcessingBlockFactory)
-    : m_rProcessingBlockFactory(rProcessingBlockFactory)
+    : m_mutex()
+    , m_rProcessingBlockFactory(rProcessingBlockFactory)
+    , m_active()
     , m_processingChain()
 {
 }
@@ -39,21 +41,29 @@ ProcessingChain::~ProcessingChain()
 
 void ProcessingChain::insertBlock(IProcessingBlock* pBlock, unsigned int index)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     if(index > m_processingChain.size())
     {
         index = m_processingChain.size();
     }
 
     m_processingChain.insert(m_processingChain.begin() + index, pBlock);
+    m_active ? pBlock->activate() : pBlock->deactivate();
 }
 
 void ProcessingChain::insertBlock(IProcessingBlock* pBlock)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     m_processingChain.insert(m_processingChain.end(), pBlock);
+    m_active ? pBlock->activate() : pBlock->deactivate();
 }
 
 json ProcessingChain::convertToJson() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     json converted;
     converted[IProcessingBlock::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameProcessingChain);
 
@@ -69,6 +79,8 @@ json ProcessingChain::convertToJson() const
 
 void ProcessingChain::convertFromJson(json converted)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     deleteProcessingBlocks();
 
     if(converted.count(c_processingChainJsonKey) > 0)
@@ -91,10 +103,38 @@ void ProcessingChain::convertFromJson(json converted)
             LOG_WARNING_PARAMS("convertFromJson: unknown key '%s'", it.key().c_str());
         }
     }
+
+    updateAllBlockStates();
+}
+
+void ProcessingChain::activate()
+{
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+    for(auto pProcessingBlock : m_processingChain)
+    {
+        pProcessingBlock->activate();
+    }
+
+    m_active = true;
+}
+
+void ProcessingChain::deactivate()
+{
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+    for(auto pProcessingBlock : m_processingChain)
+    {
+        pProcessingBlock->deactivate();
+    }
+
+    m_active = false;
 }
 
 void ProcessingChain::execute(Processing::TRgbStrip& strip)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     for(auto pProcessingBlock : m_processingChain)
     {
         pProcessingBlock->execute(strip);
@@ -108,4 +148,22 @@ void ProcessingChain::deleteProcessingBlocks()
         delete pProcessingBlock;
     }
     m_processingChain.clear();
+}
+
+void ProcessingChain::updateAllBlockStates()
+{
+    if(m_active)
+    {
+        for(auto pProcessingBlock : m_processingChain)
+        {
+            pProcessingBlock->activate();
+        }
+    }
+    else
+    {
+        for(auto pProcessingBlock : m_processingChain)
+        {
+            pProcessingBlock->deactivate();
+        }
+    }
 }

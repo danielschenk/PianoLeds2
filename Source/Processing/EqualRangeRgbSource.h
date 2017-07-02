@@ -45,6 +45,8 @@ public:
     EqualRangeRgbSource& operator=(EqualRangeRgbSource&) = delete;
 
     // IProcessingBlock implementation.
+    virtual void activate();
+    virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& output);
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);
@@ -63,6 +65,9 @@ private:
     static constexpr const char* c_rJsonKey = "r";
     static constexpr const char* c_gJsonKey = "g";
     static constexpr const char* c_bJsonKey = "b";
+
+    /** Mutex to protect the members. */
+    mutable std::mutex m_mutex;
 
     /** Output color. */
     Processing::TRgb m_color;

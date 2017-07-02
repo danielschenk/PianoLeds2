@@ -45,6 +45,8 @@ Patch::~Patch()
 
 json Patch::convertToJson() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     // Start with contents of base
     json converted = ProcessingChain::convertToJson();
     // Overwrite object type
@@ -61,6 +63,8 @@ json Patch::convertToJson() const
 
 void Patch::convertFromJson(json converted)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     // Get items specific for Patch
     if(converted.count(c_hasBankAndProgramJsonKey) > 0)
     {
@@ -110,40 +114,56 @@ void Patch::convertFromJson(json converted)
 
 uint8_t Patch::getBank() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     return m_bank;
 }
 
 void Patch::setBank(uint8_t bank)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     m_bank = bank;
 }
 
 bool Patch::hasBankAndProgram() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     return m_hasBankAndProgram;
 }
 
 void Patch::setHasBankAndProgram(bool hasBankAndProgram)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     m_hasBankAndProgram = hasBankAndProgram;
 }
 
 uint8_t Patch::getProgram() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     return m_program;
 }
 
 void Patch::setProgram(uint8_t program)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     m_program = program;
 }
 
 std::string Patch::getName() const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     return m_name;
 }
 
 void Patch::setName(const std::string name)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
     m_name = name;
 }

@@ -31,6 +31,7 @@ using ::testing::_;
 using ::testing::SaveArg;
 using ::testing::Return;
 using ::testing::HasSubstr;
+using ::testing::Each;
 
 #define LOGGING_COMPONENT "NoteRgbSource"
 
@@ -70,6 +71,7 @@ public:
             m_noteToLightMap[i] = i;
         }
         m_pNoteRgbSource = new NoteRgbSource(m_mockMidiInput, m_noteToLightMap, m_mockRgbFunctionFactory);
+        m_pNoteRgbSource->activate();
     }
 
     void SetUp()
@@ -141,6 +143,19 @@ TEST_F(NoteRgbSourceTest, noteOn)
     EXPECT_EQ(reference, m_strip);
 }
 
+TEST_F(NoteRgbSourceTest, deactivateDisablesAllNotes)
+{
+    // (channel, number, velocity, on/off)
+    m_noteOnOffCallback(0, 0, 1, true);
+    m_noteOnOffCallback(0, 5, 6, true);
+
+    m_pNoteRgbSource->execute(m_strip);
+    m_pNoteRgbSource->deactivate();
+    m_pNoteRgbSource->execute(m_strip);
+
+    EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
+}
+
 TEST_F(NoteRgbSourceTest, noteOff)
 {
     // (channel, number, velocity, on/off)
@@ -162,23 +177,20 @@ TEST_F(NoteRgbSourceTest, ignoreOtherChannel)
 {
     m_noteOnOffCallback(1, 0, 1, true);
 
-    auto darkStrip = m_strip;
     m_pNoteRgbSource->execute(m_strip);
-    EXPECT_EQ(darkStrip, m_strip);
+    EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
 TEST_F(NoteRgbSourceTest, ignorePedal)
 {
     m_pNoteRgbSource->setUsingPedal(false);
 
-    auto darkStrip = m_strip;
-
     m_noteOnOffCallback(0, 0, 1, true);
     m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0xff);
     m_noteOnOffCallback(0, 0, 1, false);
 
     m_pNoteRgbSource->execute(m_strip);
-    EXPECT_EQ(darkStrip, m_strip);
+    EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
 TEST_F(NoteRgbSourceTest, usePedal)

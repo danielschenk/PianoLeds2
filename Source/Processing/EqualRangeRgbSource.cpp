@@ -20,7 +20,8 @@
 #include <Processing/EqualRangeRgbSource.h>
 
 EqualRangeRgbSource::EqualRangeRgbSource()
-    : m_color()
+    : m_mutex()
+    , m_color()
 {
 }
 
@@ -28,8 +29,18 @@ EqualRangeRgbSource::~EqualRangeRgbSource()
 {
 }
 
+void EqualRangeRgbSource::activate()
+{
+}
+
+void EqualRangeRgbSource::deactivate()
+{
+}
+
 void EqualRangeRgbSource::execute(Processing::TRgbStrip& strip)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     for(auto& it : strip)
     {
         it.r = m_color.r;
@@ -40,16 +51,22 @@ void EqualRangeRgbSource::execute(Processing::TRgbStrip& strip)
 
 Processing::TRgb EqualRangeRgbSource::getColor() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     return m_color;
 }
 
 void EqualRangeRgbSource::setColor(Processing::TRgb color)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     m_color = color;
 }
 
 json EqualRangeRgbSource::convertToJson() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     json json;
     json[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameEqualRangeRgbSource);
     json[c_rJsonKey] = m_color.r;
@@ -61,6 +78,8 @@ json EqualRangeRgbSource::convertToJson() const
 
 void EqualRangeRgbSource::convertFromJson(json json)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     if(json.count(c_rJsonKey) > 0)
     {
         m_color.r = json[c_rJsonKey];
