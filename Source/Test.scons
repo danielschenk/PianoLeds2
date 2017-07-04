@@ -60,10 +60,17 @@ SConscript('ExternalComponents/GoogleTest.scons', duplicate=False)
 SConscript('Common/Common.scons', duplicate=False)
 SConscript('Processing/Processing.scons', duplicate=False)
 
+AddOption('--memcheck', action='store_true')
+
 test_env = env.Clone()
 for path in ['Processing', 'Common']:
     test_name = path + 'Test'
     sources = Glob(path + '/Test/*.cpp')
     test_program = test_env.Program(test_name, sources + env.GetComponents(path, 'GoogleTest'))
-    test_result = test_env.Command(test_name + '_result.xml', test_program, './$SOURCE --gtest_output=xml:$TARGET')
+
+    if GetOption('memcheck'):
+        prefix = 'valgrind --leak-check=yes '
+    else:
+        prefix = ''
+    test_result = test_env.Command(test_name + '_result.xml', test_program, '{}./$SOURCE --gtest_output=xml:$TARGET'.format(prefix))
     test_env.AlwaysBuild(test_result)
