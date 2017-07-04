@@ -169,3 +169,53 @@ TEST_F(ProcessingChainTest, convertFromJsonUnrecognizedField)
     EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Warning, LOGGING_COMPONENT, HasSubstr("futureField2")));
     m_processingChain.convertFromJson(j);
 }
+
+TEST_F(ProcessingChainTest, activate)
+{
+    for(int i = 0; i < 3; i++)
+    {
+        TMockBlock* pBlock = new TMockBlock;
+        m_processingChain.insertBlock(pBlock);
+        EXPECT_CALL(*pBlock, activate());
+        pBlock = nullptr;
+    }
+
+    m_processingChain.activate();
+}
+
+TEST_F(ProcessingChainTest, deactivate)
+{
+    for(int i = 0; i < 3; i++)
+    {
+        TMockBlock* pBlock = new TMockBlock;
+        m_processingChain.insertBlock(pBlock);
+        EXPECT_CALL(*pBlock, deactivate());
+        pBlock = nullptr;
+    }
+
+    m_processingChain.deactivate();
+}
+
+TEST_F(ProcessingChainTest, activateOnInsert)
+{
+    m_processingChain.activate();
+
+    for(int i = 0; i < 3; i++)
+    {
+        TMockBlock* pBlock = new TMockBlock;
+        EXPECT_CALL(*pBlock, activate());
+        m_processingChain.insertBlock(pBlock);
+        pBlock = nullptr;
+    }
+}
+
+TEST_F(ProcessingChainTest, deactivateOnInsert)
+{
+    for(int i = 0; i < 3; i++)
+    {
+        TMockBlock* pBlock = new TMockBlock;
+        EXPECT_CALL(*pBlock, deactivate());
+        m_processingChain.insertBlock(pBlock);
+        pBlock = nullptr;
+    }
+}
