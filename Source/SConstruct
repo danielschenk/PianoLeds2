@@ -28,8 +28,11 @@ if ARGUMENTS.get('VERBOSE') != '1':
     env['LINKCOMSTR'] = 'Linking $TARGET'
 
 env.Append(CPPPATH=[
-    '/usr/local/Cellar/nlohmann_json/2.1.1/include',
+    # For dependencies expected to be installed on the system:
+    # - nlohmann/json (https://github.com/nlohmann/json)
+    '/usr/local/include',
 ])
+
 # Propagate the 'TERM' environment variable from the OS, so tools can decide if they should colorize output
 env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
 
