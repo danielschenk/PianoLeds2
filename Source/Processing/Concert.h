@@ -27,6 +27,9 @@
 #include "Interfaces/IJsonConvertible.h"
 #include "Interfaces/ProcessingTypes.h"
 #include "Patch.h"
+#include "Common/Scheduler.h"
+#include "Drivers/Interfaces/IMidiInterface.h"
+#include "Drivers/Interfaces/IMidiInput.h"
 
 class IMidiInput;
 class IProcessingBlockFactory;
@@ -69,13 +72,26 @@ public:
     void setNoteToLightMap(Processing::TNoteToLightMap noteToLightMap);
     uint8_t getProgramChangeChannel() const;
     void setProgramChangeChannel(uint8_t programChangeChannel);
+    uint16_t getCurrentBank() const;
+    void setCurrentBank(uint16_t bank);
+
+    void execute();
 
 private:
+    /** Callback to handle program changes. */
+    void onProgramChange(uint8_t channel, uint8_t program);
+
+    /** Callback to handle control changes. */
+    void onControlChange(uint8_t channel, IMidiInterface::TControllerNumber controllerNumber, uint8_t value);
+
     /** The note-to-light mapping. */
     Processing::TNoteToLightMap m_noteToLightMap;
 
     /** The collection of patches. */
     std::list<Patch> m_patches;
+
+    /** The active patch. */
+    std::list<Patch>::iterator m_activePatch;
 
     /** Whether program changes should be able to change the patch. */
     bool m_listeningToProgramChange;
@@ -83,13 +99,26 @@ private:
     /** The channel to listen to for program changes. */
     uint8_t m_programChangeChannel;
 
+    /** The last selected bank. */
+    uint16_t m_currentBank;
+    
     /** Reference to the MIDI input. */
     IMidiInput& m_rMidiInput;
+
+    /** The control change subscription. */
+    IMidiInput::TSubscriptionToken m_controlChangeSubscription;
+    
+    /** The program change subscription. */
+    IMidiInput::TSubscriptionToken m_programChangeSubscription;
 
     /** Reference to the processing block factory. */
     IProcessingBlockFactory& m_rProcessingBlockFactory;
 
-    // TODO add scheduler
+    /** Scheduler to decouple callbacks */
+    Scheduler m_scheduler;
+
+    /** Mutex to protect the members. */
+    mutable std::mutex m_mutex;
 };
 
 #endif /* PROCESSING_CONCERT_H_ */

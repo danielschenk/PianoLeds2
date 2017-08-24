@@ -39,6 +39,8 @@ public:
     /** Controller number type. */
     enum TControllerNumber
     {
+        BANK_SELECT_MSB = 0x00,
+        BANK_SELECT_LSB = 0x20,
         DAMPER_PEDAL = 0x40,
     };
 
