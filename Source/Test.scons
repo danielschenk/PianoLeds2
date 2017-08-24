@@ -61,6 +61,7 @@ SConscript('Common/Common.scons', duplicate=False)
 SConscript('Processing/Processing.scons', duplicate=False)
 
 AddOption('--memcheck', action='store_true')
+AddOption('--gtest_filter')
 
 test_env = env.Clone()
 sources = []
@@ -71,9 +72,15 @@ for component in components_with_test:
 components_to_get = components_with_test + ['GoogleTest']
 test_program = test_env.Program('Test', sources + env.GetComponents(*components_to_get))
 
+prefix = ''
+suffix = ''
+
 if GetOption('memcheck'):
-    prefix = 'valgrind --leak-check=yes '
-else:
-    prefix = ''
-test_result = test_env.Command('TestResult.xml', test_program, '{}./$SOURCE --gtest_output=xml:$TARGET'.format(prefix))
+    prefix += 'valgrind --leak-check=yes '
+
+gtest_filter = GetOption('gtest_filter')
+if gtest_filter is not None:
+    suffix += ' --gtest_filter=' + gtest_filter
+
+test_result = test_env.Command('TestResult.xml', test_program, '{}./$SOURCE --gtest_output=xml:$TARGET{}'.format(prefix, suffix))
 test_env.AlwaysBuild(test_result)
