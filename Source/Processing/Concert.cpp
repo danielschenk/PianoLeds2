@@ -145,9 +145,9 @@ void Concert::onProgramChange(uint8_t channel, uint8_t program)
                         if(m_activePatch != m_patches.end())
                         {
                             m_activePatch->deactivate();
-                            patchIt->activate();
-                            m_activePatch = patchIt;
                         }
+                        patchIt->activate();
+                        m_activePatch = patchIt;
                     }
                 }
             }
