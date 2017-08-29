@@ -173,11 +173,11 @@ void Concert::onControlChange(uint8_t channel, IMidiInterface::TControllerNumber
 
         if(controllerNumber == IMidiInterface::BANK_SELECT_MSB)
         {
-            m_currentBank = ((value << 8) | (m_currentBank & 0xf));
+            m_currentBank = ((value << 8) | (m_currentBank & 0xff));
         }
         else if(controllerNumber == IMidiInterface::BANK_SELECT_LSB)
         {
-            m_currentBank = ((m_currentBank & 0xf0) | value);
+            m_currentBank = ((m_currentBank & 0xff00) | value);
         }
     };
     m_scheduler.schedule(taskFn);

@@ -60,6 +60,9 @@ public:
         delete m_pConcert;
     }
 
+    // Should not be default and go beyond the byte range, to test LSB and MSB
+    static const uint16_t c_testBankNumber;
+
     // Required mocks
     MockProcessingBlockFactory m_mockProcessingBlockFactory;
     MockMidiInput m_mockMidiInput;
@@ -72,22 +75,23 @@ public:
     Concert*  m_pConcert;
 };
 
+const uint16_t ConcertTest::c_testBankNumber = 300;
+
 TEST_F(ConcertTest, bankSelect)
 {
     const uint8_t channel(0);
-    const uint16_t bank(m_pConcert->getCurrentBank());
     
     m_pConcert->setListeningToProgramChange(true);
     m_pConcert->setProgramChangeChannel(channel);
 
-    // Simulate a control change sequence
-    m_controlChangeCallback(channel, IMidiInterface::BANK_SELECT_LSB, (bank + 1) & 0x0f);
-    m_controlChangeCallback(channel, IMidiInterface::BANK_SELECT_MSB, (bank + 1) & 0xf0);
+    // Simulate a bank select sequence
+    m_controlChangeCallback(channel, IMidiInterface::BANK_SELECT_LSB, c_testBankNumber & 0xff);
+    m_controlChangeCallback(channel, IMidiInterface::BANK_SELECT_MSB, c_testBankNumber >> 8);
 
     m_pConcert->execute();
 
     // Check stored bank
-    ASSERT_EQ(bank + 1, m_pConcert->getCurrentBank());
+    ASSERT_EQ(c_testBankNumber, m_pConcert->getCurrentBank());
 }
 
 TEST_F(ConcertTest, bankSelectFromOtherChannelIgnored)
@@ -98,9 +102,9 @@ TEST_F(ConcertTest, bankSelectFromOtherChannelIgnored)
     m_pConcert->setListeningToProgramChange(true);
     m_pConcert->setProgramChangeChannel(channel);
 
-    // Simulate a control change sequence
-    m_controlChangeCallback(channel + 1, IMidiInterface::BANK_SELECT_LSB, (bank + 1) & 0x0f);
-    m_controlChangeCallback(channel + 1, IMidiInterface::BANK_SELECT_MSB, (bank + 1) & 0xf0);
+    // Simulate a bank select sequence
+    m_controlChangeCallback(channel + 1, IMidiInterface::BANK_SELECT_LSB, (bank + 1) & 0xff);
+    m_controlChangeCallback(channel + 1, IMidiInterface::BANK_SELECT_MSB, (bank + 1) >> 8);
 
     m_pConcert->execute();
 
