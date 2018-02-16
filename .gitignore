@@ -6,3 +6,5 @@ Source/Build
 Documentation
 .sconsign.dblite
 .idea/
+.pioenvs
+.piolibdeps
