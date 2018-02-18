@@ -5,7 +5,7 @@
     "tasks": [
         {
             "taskName": "build",
-            "command": "scons -j12",
+            "command": "scons",
             "type": "shell",
             "options": {
                 "cwd": "${workspaceRoot}/Source"
@@ -28,7 +28,7 @@
         },
         {
             "taskName": "buildTests",
-            "command": "scons -j12 test",
+            "command": "scons test",
             "options": {
                 "cwd": "${workspaceRoot}/Source"
             },
@@ -52,6 +52,30 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "taskName": "buildTestsSingleThreaded",
+            "command": "scons -j1 test",
+            "options": {
+                "cwd": "${workspaceRoot}/Source"
+            },
+            "type": "shell",
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceRoot}/Source"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "group": "build"
         },
         {
             "taskName": "clean",

@@ -13,6 +13,7 @@
                 "${workspaceRoot}/Source/Common",
                 "${workspaceRoot}/Source/Common/Interfaces",
                 "${workspaceRoot}/Source/Common/Mock",
+                "${workspaceRoot}/Source/Common/Utilities",
                 "${workspaceRoot}/Source/Drivers",
                 "${workspaceRoot}/Source/Drivers/Interfaces",
                 "${workspaceRoot}/Source/Drivers/Mock",
@@ -23,7 +24,12 @@
                 "${workspaceRoot}/ExternalComponents/googletest/googlemock/include/",
                 "${workspaceRoot}/ExternalComponents/googletest/googletest/include/"
             ],
-            "defines": [],
+            "defines": [
+                "ENABLE_LOG_DEBUG",
+                "ENABLE_LOG_INFO",
+                "ENABLE_LOG_WARNING",
+                "ENABLE_LOG_ERROR"
+            ],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
