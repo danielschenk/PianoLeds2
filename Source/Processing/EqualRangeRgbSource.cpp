@@ -17,7 +17,9 @@
  *
  */
 
-#include <Processing/EqualRangeRgbSource.h>
+#include <Common/Utilities/JsonHelper.h>
+
+#include "EqualRangeRgbSource.h"
 
 EqualRangeRgbSource::EqualRangeRgbSource()
     : m_mutex()
@@ -80,16 +82,8 @@ void EqualRangeRgbSource::convertFromJson(json json)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    if(json.count(c_rJsonKey) > 0)
-    {
-        m_color.r = json[c_rJsonKey];
-    }
-    if(json.count(c_gJsonKey) > 0)
-    {
-        m_color.g = json[c_gJsonKey];
-    }
-    if(json.count(c_bJsonKey) > 0)
-    {
-        m_color.b = json[c_bJsonKey];
-    }
+    JsonHelper helper(__PRETTY_FUNCTION__, json);
+    helper.getItemIfPresent(c_rJsonKey, m_color.r);
+    helper.getItemIfPresent(c_gJsonKey, m_color.g);
+    helper.getItemIfPresent(c_bJsonKey, m_color.b);
 }
