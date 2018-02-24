@@ -27,13 +27,13 @@
 
 #include "Interfaces/IJsonConvertible.h"
 #include "Interfaces/ProcessingTypes.h"
-#include "Patch.h"
 #include "Common/Scheduler.h"
 #include "Drivers/Interfaces/IMidiInterface.h"
 #include "Drivers/Interfaces/IMidiInput.h"
 
 class IMidiInput;
 class IProcessingBlockFactory;
+class IPatch;
 
 /**
  * Class which represents a concert.
@@ -94,10 +94,10 @@ private:
     Processing::TNoteToLightMap m_noteToLightMap;
 
     /** The collection of patches. */
-    std::list<Patch> m_patches;
+    std::list<IPatch*> m_patches;
 
     /** The active patch. */
-    std::list<Patch>::iterator m_activePatch;
+    std::list<IPatch*>::iterator m_activePatch;
 
     /** Whether program changes should be able to change the patch. */
     bool m_listeningToProgramChange;

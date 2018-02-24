@@ -45,6 +45,11 @@ Concert::~Concert()
 {
     m_rMidiInput.unsubscribeProgramChange(m_programChangeSubscription);
     m_rMidiInput.unsubscribeControlChange(m_controlChangeSubscription);
+
+    for(auto pPatch : m_patches)
+    {
+        delete pPatch;
+    }
 }
 
 json Concert::convertToJson() const
@@ -155,18 +160,19 @@ void Concert::onProgramChange(uint8_t channel, uint8_t program)
 
         for(auto patchIt = m_patches.begin(); patchIt != m_patches.end(); ++patchIt)
         {
-            if(patchIt->hasBankAndProgram())
+            IPatch* pPatch = *patchIt;
+            if(pPatch->hasBankAndProgram())
             {
-                if(patchIt->getBank() == m_currentBank)
+                if(pPatch->getBank() == m_currentBank)
                 {
-                    if(patchIt->getProgram() == program)
+                    if(pPatch->getProgram() == program)
                     {
                         // Found a patch which matches the received program number and active bank.
                         if(m_activePatch != m_patches.end())
                         {
-                            m_activePatch->deactivate();
+                            (*m_activePatch)->deactivate();
                         }
-                        patchIt->activate();
+                        pPatch->activate();
                         m_activePatch = patchIt;
                     }
                 }

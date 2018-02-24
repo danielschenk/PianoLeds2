@@ -133,13 +133,6 @@ bool Patch::hasBankAndProgram() const
     return m_hasBankAndProgram;
 }
 
-void Patch::setHasBankAndProgram(bool hasBankAndProgram)
-{
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-    m_hasBankAndProgram = hasBankAndProgram;
-}
-
 uint8_t Patch::getProgram() const
 {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -147,11 +140,19 @@ uint8_t Patch::getProgram() const
     return m_program;
 }
 
+void Patch::clearBankAndProgram()
+{
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+    m_hasBankAndProgram = false;
+}
+
 void Patch::setProgram(uint8_t program)
 {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
     m_program = program;
+    m_hasBankAndProgram = true;
 }
 
 std::string Patch::getName() const
