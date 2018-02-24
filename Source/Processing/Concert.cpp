@@ -72,7 +72,7 @@ void Concert::convertFromJson(json converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
-    JsonHelper helper(__FUNCTION__, converted);
+    JsonHelper helper(__PRETTY_FUNCTION__, converted);
     helper.getItemIfPresent(c_isListeningToProgramChangeJsonKey, m_listeningToProgramChange);
     helper.getItemIfPresent(c_programChangeChannelJsonKey, m_programChangeChannel);
     helper.getItemIfPresent(c_currentBankJsonKey, m_currentBank);

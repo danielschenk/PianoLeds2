@@ -74,5 +74,6 @@ private:
     nlohmann::json& m_rJson;
 };
 
+#undef LOGGING_COMPONENT
 
 #endif // COMMON_UTILITIES_JSONHELPER_H_

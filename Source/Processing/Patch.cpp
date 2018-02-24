@@ -16,12 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Common/Logging.h>
+#include <Common/Utilities/JsonHelper.h>
 
 #include "Patch.h"
 #include "Interfaces/IProcessingBlockFactory.h"
-
-#define LOGGING_COMPONENT "Patch"
 
 Patch::Patch(const IProcessingBlockFactory& rProcessingBlockFactory)
     : ProcessingChain(rProcessingBlockFactory)
@@ -66,42 +64,12 @@ void Patch::convertFromJson(json converted)
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
     // Get items specific for Patch
-    if(converted.count(c_hasBankAndProgramJsonKey) > 0)
-    {
-        m_hasBankAndProgram = converted[c_hasBankAndProgramJsonKey];
-    }
-    else
-    {
-        LOG_ERROR("convertFromJson: missing key 'hasBankAndProgram'");
-    }
-
-    if(converted.count(c_programJsonKey) > 0)
-    {
-        m_program = converted[c_programJsonKey];
-    }
-    else
-    {
-        LOG_ERROR("convertFromJson: missing key 'program'");
-    }
-
-    if(converted.count(c_bankJsonKey) > 0)
-    {
-        m_bank = converted[c_bankJsonKey];
-    }
-    else
-    {
-        LOG_ERROR("convertFromJson: missing key 'bank'");
-    }
-
-    if(converted.count(c_nameJsonKey) > 0)
-    {
-        m_name = converted[c_nameJsonKey];
-    }
-    else
-    {
-        LOG_ERROR("convertFromJson: missing key 'name'");
-    }
-
+    JsonHelper helper(__PRETTY_FUNCTION__, converted);
+    helper.getItemIfPresent(c_hasBankAndProgramJsonKey, m_hasBankAndProgram);
+    helper.getItemIfPresent(c_programJsonKey, m_program);
+    helper.getItemIfPresent(c_bankJsonKey, m_bank);
+    helper.getItemIfPresent(c_nameJsonKey, m_name);
+    
     // Remove keys the base doesn't know about, to prevent warnings
     converted.erase(c_hasBankAndProgramJsonKey);
     converted.erase(c_programJsonKey);
