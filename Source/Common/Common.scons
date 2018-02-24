@@ -17,6 +17,6 @@
 Import('base_env')
 env = base_env.Clone()
 
-sources = Glob('*.cpp')
+sources = Glob('*.cpp') + Glob('Utilities/*.cpp')
 
 base_env.Component('Common', sources)

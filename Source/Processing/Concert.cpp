@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Common/Utilities/JsonHelper.h"
+
 #include "Concert.h"
 #include "Patch.h"
 
@@ -49,16 +51,34 @@ json Concert::convertToJson() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    // TODO
+    json converted;
+    converted[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameConcert);
+    converted[c_isListeningToProgramChangeJsonKey] = m_listeningToProgramChange;
+    converted[c_programChangeChannelJsonKey] = m_programChangeChannel;
+    converted[c_currentBankJsonKey] = m_currentBank;
+    converted[c_noteToLightMapJsonKey] = Processing::convert(m_noteToLightMap);
 
-    return json();
+    // TODO the patches
+
+    return converted;
 }
 
-void Concert::convertFromJson(json json)
+void Concert::convertFromJson(json converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
-    // TODO
+    JsonHelper helper(__FUNCTION__, converted);
+    helper.getItemIfPresent(c_isListeningToProgramChangeJsonKey, m_listeningToProgramChange);
+    helper.getItemIfPresent(c_programChangeChannelJsonKey, m_programChangeChannel);
+    helper.getItemIfPresent(c_currentBankJsonKey, m_currentBank);
+    
+    Processing::TStringNoteToLightMap temp;
+    if(helper.getItemIfPresent(c_noteToLightMapJsonKey, temp))
+    {
+        m_noteToLightMap = Processing::convert(temp);
+    }
+
+    // TODO the patches
 }
 
 bool Concert::isListeningToProgramChange() const

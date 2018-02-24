@@ -23,6 +23,7 @@
 
 #include <list>
 #include <cstdint>
+#include <json.hpp>
 
 #include "Interfaces/IJsonConvertible.h"
 #include "Interfaces/ProcessingTypes.h"
@@ -78,6 +79,11 @@ public:
     void execute();
 
 private:
+    static constexpr const char* c_isListeningToProgramChangeJsonKey    = "isListeningToProgramChange";
+    static constexpr const char* c_noteToLightMapJsonKey                = "noteToLightMap";
+    static constexpr const char* c_programChangeChannelJsonKey          = "programChangeChannel";
+    static constexpr const char* c_currentBankJsonKey                   = "currentBank";
+
     /** Callback to handle program changes. */
     void onProgramChange(uint8_t channel, uint8_t program);
 
