@@ -25,6 +25,7 @@
 using json = nlohmann::json;
 
 class IProcessingBlock;
+class IPatch;
 
 /**
  * Interface for processing block factories.
@@ -45,6 +46,18 @@ public:
      * @param[in]   converted   JSON object containing the persistent properties.
      */
     virtual IProcessingBlock* createProcessingBlock(json converted) const = 0;
+
+    /**
+     * Create a new patch.
+     */
+    virtual IPatch* createPatch() const = 0;
+
+    /**
+     * Create a patch from the given JSON.
+     *
+     * @param[in]   converted   JSON object containing the persistent properties.
+     */
+    virtual IPatch* createPatch(json converted) const = 0;
 };
 
 

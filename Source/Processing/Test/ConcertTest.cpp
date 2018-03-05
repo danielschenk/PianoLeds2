@@ -21,6 +21,7 @@
 
 #include "../Concert.h"
 #include "../Mock/MockProcessingBlockFactory.h"
+#include "../Mock/MockPatch.h"
 
 using testing::_;
 using testing::SaveArg;
@@ -110,4 +111,44 @@ TEST_F(ConcertTest, bankSelectFromOtherChannelIgnored)
 
     // Check stored bank
     ASSERT_EQ(bank, m_pConcert->getCurrentBank());
+}
+
+TEST_F(ConcertTest, convertToJson)
+{
+    // Set some non-default values
+    m_pConcert->setListeningToProgramChange(true);
+    m_pConcert->setCurrentBank(2);
+    m_pConcert->setProgramChangeChannel(3);
+
+    Processing::TNoteToLightMap map({{1, 10}, {2, 20}});
+    m_pConcert->setNoteToLightMap(map);
+    
+    json mockPatchJson, mockPatch2Json;
+    mockPatchJson["objectType"] = "MockPatch";
+    mockPatchJson["someParameter"] = 42;
+    mockPatch2Json["objectType"] = "MockPatch";
+    mockPatch2Json["someParameter"] = 43;
+
+    MockPatch* pMockPatch = new MockPatch();
+    ASSERT_NE(nullptr, pMockPatch);
+    MockPatch* pMockPatch2 = new MockPatch();
+    ASSERT_NE(nullptr, pMockPatch2);
+
+    EXPECT_CALL(m_mockProcessingBlockFactory, createPatch())
+        .WillOnce(Return(pMockPatch))
+        .WillOnce(Return(pMockPatch2));
+
+    EXPECT_CALL(*pMockPatch, convertToJson())
+        .WillOnce(Return(mockPatchJson));
+    EXPECT_CALL(*pMockPatch2, convertToJson())
+        .WillOnce(Return(mockPatch2Json));
+
+    m_pConcert->addPatch();
+    m_pConcert->addPatch();
+
+    json converted = m_pConcert->convertToJson();
+    EXPECT_EQ(true, converted.at("isListeningToProgramChange").get<bool>());
+    EXPECT_EQ(2, converted.at("currentBank").get<uint8_t>());
+    EXPECT_EQ(3, converted.at("programChangeChannel").get<uint8_t>());
+    EXPECT_EQ(Processing::convert(map), converted.at("noteToLightMap").get<Processing::TStringNoteToLightMap>());
 }

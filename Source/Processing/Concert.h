@@ -67,6 +67,7 @@ public:
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);
 
+    IPatch& addPatch();
     bool isListeningToProgramChange() const;
     void setListeningToProgramChange(bool listeningToProgramChange);
     Processing::TNoteToLightMap getNoteToLightMap() const;
@@ -83,6 +84,7 @@ private:
     static constexpr const char* c_noteToLightMapJsonKey                = "noteToLightMap";
     static constexpr const char* c_programChangeChannelJsonKey          = "programChangeChannel";
     static constexpr const char* c_currentBankJsonKey                   = "currentBank";
+    static constexpr const char* c_patchesJsonKey                       = "patches";
 
     /** Callback to handle program changes. */
     void onProgramChange(uint8_t channel, uint8_t program);

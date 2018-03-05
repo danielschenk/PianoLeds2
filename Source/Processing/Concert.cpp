@@ -17,6 +17,7 @@
  */
 
 #include "Common/Utilities/JsonHelper.h"
+#include "Interfaces/IProcessingBlockFactory.h"
 
 #include "Concert.h"
 #include "Patch.h"
@@ -52,6 +53,14 @@ Concert::~Concert()
     }
 }
 
+IPatch& Concert::addPatch()
+{
+    IPatch* pPatch = m_rProcessingBlockFactory.createPatch();
+    m_patches.push_back(pPatch);
+
+    return *pPatch;
+}
+
 json Concert::convertToJson() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -63,7 +72,12 @@ json Concert::convertToJson() const
     converted[c_currentBankJsonKey] = m_currentBank;
     converted[c_noteToLightMapJsonKey] = Processing::convert(m_noteToLightMap);
 
-    // TODO the patches
+    std::list<json> convertedPatches;
+    for(const IPatch* pPatch : m_patches)
+    {
+        convertedPatches.push_back(pPatch->convertToJson());
+    }
+    converted[c_patchesJsonKey] = convertedPatches;
 
     return converted;
 }
@@ -83,7 +97,15 @@ void Concert::convertFromJson(json converted)
         m_noteToLightMap = Processing::convert(temp);
     }
 
-    // TODO the patches
+    for(IPatch* pPatch : m_patches)
+    {
+        delete pPatch;
+    }
+    m_patches.clear();
+    for(json convertedPatch : converted[c_patchesJsonKey])
+    {
+        m_patches.push_back(m_rProcessingBlockFactory.createPatch(convertedPatch));
+    }
 }
 
 bool Concert::isListeningToProgramChange() const

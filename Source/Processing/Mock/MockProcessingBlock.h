@@ -26,7 +26,7 @@
 #include "../Interfaces/IProcessingBlock.h"
 
 class MockProcessingBlock
-    : public IProcessingBlock
+    : public virtual IProcessingBlock
 {
 public:
     // IProcessingBlock implementation
