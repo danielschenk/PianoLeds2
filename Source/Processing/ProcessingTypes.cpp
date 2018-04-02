@@ -95,7 +95,7 @@ TStringNoteToLightMap convert(const TNoteToLightMap& rSource)
 TNoteToLightMap convert(const TStringNoteToLightMap& rSource)
 {
     TNoteToLightMap converted;
-    for(uint8_t noteNumber = 0; noteNumber <= UINT8_MAX; ++noteNumber)
+    for(unsigned int noteNumber = 0; noteNumber <= UINT8_MAX; ++noteNumber)
     {
         std::string key = std::to_string(noteNumber);
         if(rSource.count(key) > 0)

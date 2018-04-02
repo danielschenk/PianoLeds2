@@ -26,6 +26,7 @@
 using testing::_;
 using testing::SaveArg;
 using testing::Return;
+using testing::Expectation;
 
 class ConcertTest
     : public testing::Test
@@ -151,4 +152,56 @@ TEST_F(ConcertTest, convertToJson)
     EXPECT_EQ(2, converted.at("currentBank").get<uint8_t>());
     EXPECT_EQ(3, converted.at("programChangeChannel").get<uint8_t>());
     EXPECT_EQ(Processing::convert(map), converted.at("noteToLightMap").get<Processing::TStringNoteToLightMap>());
+
+    // TODO get the patches
+}
+
+TEST_F(ConcertTest, convertFromJson)
+{
+    json j(R"({
+                "objectType": "Concert",
+                "isListeningToProgramChange": true,
+                "currentBank": 2,
+                "programChangeChannel": 3,
+                "noteToLightMap": {
+                    "1": 10,
+                    "2": 20
+                },
+                "patches": [
+                    {
+                        "objectType": "MockPatch",
+                        "someParameter": 42
+                    },
+                    {
+                        "objectType": "MockPatch",
+                        "someParameter": 43
+                    }
+                ]
+            })"_json);
+
+    json mockPatch1Json;
+    mockPatch1Json["objectType"] = "MockPatch";
+    mockPatch1Json["someParameter"] = 42;
+    json mockPatch2Json;
+    mockPatch2Json["objectType"] = "MockPatch";
+    mockPatch2Json["someParameter"] = 43;
+
+    MockPatch* pConvertedPatch1 = new MockPatch();
+    MockPatch* pConvertedPatch2 = new MockPatch();
+
+    ON_CALL(*pConvertedPatch1, getName())
+        .WillByDefault(Return("Purple Rain"));
+    ON_CALL(*pConvertedPatch2, getName())
+        .WillByDefault(Return("Simply Red"));
+
+    Expectation first = EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(mockPatch1Json))
+        .WillOnce(Return(pConvertedPatch1));
+    EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(mockPatch2Json))
+        .After(first)
+        .WillOnce(Return(pConvertedPatch2));
+
+    m_pConcert->convertFromJson(j);
+    EXPECT_EQ(true, m_pConcert->isListeningToProgramChange());
+    EXPECT_EQ(2, m_pConcert->getCurrentBank());
+    EXPECT_EQ(3, m_pConcert->getProgramChangeChannel());
 }
