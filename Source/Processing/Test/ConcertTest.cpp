@@ -27,6 +27,7 @@ using testing::_;
 using testing::SaveArg;
 using testing::Return;
 using testing::Expectation;
+using testing::NiceMock;
 
 class ConcertTest
     : public testing::Test
@@ -144,6 +145,7 @@ TEST_F(ConcertTest, convertToJson)
     EXPECT_CALL(*pMockPatch2, convertToJson())
         .WillOnce(Return(mockPatch2Json));
 
+    // This will use the mock factory to create the patch instances.
     m_pConcert->addPatch();
     m_pConcert->addPatch();
 
@@ -152,8 +154,11 @@ TEST_F(ConcertTest, convertToJson)
     EXPECT_EQ(2, converted.at("currentBank").get<uint8_t>());
     EXPECT_EQ(3, converted.at("programChangeChannel").get<uint8_t>());
     EXPECT_EQ(Processing::convert(map), converted.at("noteToLightMap").get<Processing::TStringNoteToLightMap>());
-
-    // TODO get the patches
+    
+    json patches = converted.at("patches");
+    EXPECT_EQ(2, patches.size());
+    EXPECT_EQ(42, patches.at(0).at("someParameter").get<int>());
+    EXPECT_EQ(43, patches.at(1).at("someParameter").get<int>());
 }
 
 TEST_F(ConcertTest, convertFromJson)
@@ -179,20 +184,24 @@ TEST_F(ConcertTest, convertFromJson)
                 ]
             })"_json);
 
+    NiceMock<MockPatch>* pConvertedPatch1 = new NiceMock<MockPatch>();
+    NiceMock<MockPatch>* pConvertedPatch2 = new NiceMock<MockPatch>();
+
+    std::string name1("Purple Rain");
+    std::string name2("Simply Red");
+    ON_CALL(*pConvertedPatch1, getName())
+        .WillByDefault(Return(name1));
+    ON_CALL(*pConvertedPatch2, getName())
+        .WillByDefault(Return(name2));
+
+    // Re-create the sub-objects of the above test input, 
+    // so we can verify that they are passed to the factory in order.
     json mockPatch1Json;
     mockPatch1Json["objectType"] = "MockPatch";
     mockPatch1Json["someParameter"] = 42;
     json mockPatch2Json;
     mockPatch2Json["objectType"] = "MockPatch";
     mockPatch2Json["someParameter"] = 43;
-
-    MockPatch* pConvertedPatch1 = new MockPatch();
-    MockPatch* pConvertedPatch2 = new MockPatch();
-
-    ON_CALL(*pConvertedPatch1, getName())
-        .WillByDefault(Return("Purple Rain"));
-    ON_CALL(*pConvertedPatch2, getName())
-        .WillByDefault(Return("Simply Red"));
 
     Expectation first = EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(mockPatch1Json))
         .WillOnce(Return(pConvertedPatch1));
@@ -204,4 +213,8 @@ TEST_F(ConcertTest, convertFromJson)
     EXPECT_EQ(true, m_pConcert->isListeningToProgramChange());
     EXPECT_EQ(2, m_pConcert->getCurrentBank());
     EXPECT_EQ(3, m_pConcert->getProgramChangeChannel());
+
+    ASSERT_EQ(2, m_pConcert->size());
+    EXPECT_EQ(name1, m_pConcert->getPatch(0)->getName());
+    EXPECT_EQ(name2, m_pConcert->getPatch(1)->getName());
 }

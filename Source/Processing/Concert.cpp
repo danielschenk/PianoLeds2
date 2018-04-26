@@ -16,11 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <list>
+
 #include "Common/Utilities/JsonHelper.h"
 #include "Interfaces/IProcessingBlockFactory.h"
 
 #include "Concert.h"
-#include "Patch.h"
+#include "Interfaces/IPatch.h"
 
 Concert::Concert(IMidiInput& rMidiInput, IProcessingBlockFactory& rProcessingBlockFactory)
     : m_noteToLightMap()
@@ -53,12 +55,50 @@ Concert::~Concert()
     }
 }
 
-IPatch& Concert::addPatch()
+size_t Concert::size() const
 {
-    IPatch* pPatch = m_rProcessingBlockFactory.createPatch();
-    m_patches.push_back(pPatch);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
-    return *pPatch;
+    return m_patches.size();
+}
+
+Concert::TPatchPosition Concert::addPatch()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    IPatch* pPatch = m_rProcessingBlockFactory.createPatch();
+    if(pPatch == nullptr)
+    {
+        return c_invalidPatchPosition;
+    }
+
+    m_patches.push_back(pPatch);
+    return m_patches.size() - 1;
+}
+
+IPatch* Concert::getPatch(TPatchPosition position) const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if(position >= m_patches.size())
+    {
+        return nullptr;
+    }
+
+    return m_patches.at(position);
+}
+
+bool Concert::removePatch(TPatchPosition position)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if(position >= m_patches.size())
+    {
+        return false;
+    }
+
+    m_patches.erase(m_patches.begin() + position);
+    return true;
 }
 
 json Concert::convertToJson() const
