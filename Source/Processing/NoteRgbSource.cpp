@@ -20,6 +20,7 @@
 #include <functional>
 
 #include <Common/Logging.h>
+#include <Common/Utilities/JsonHelper.h>
 
 #include "Interfaces/IRgbFunctionFactory.h"
 #include "NoteRgbSource.h"
@@ -210,22 +211,10 @@ void NoteRgbSource::convertFromJson(json converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    if(converted.count(c_usingPedalJsonKey) > 0)
-    {
-        m_usingPedal = converted[c_usingPedalJsonKey];
-    }
-    else
-    {
-        LOG_ERROR("convertFromJson: Missing usingPedal property");
-    }
-    if(converted.count(c_channelJsonKey) > 0)
-    {
-        m_channel = converted[c_channelJsonKey];
-    }
-    else
-    {
-        LOG_ERROR("convertFromJson: Missing channel property");
-    }
+    JsonHelper helper(__PRETTY_FUNCTION__, converted);
+    helper.getItemIfPresent(c_usingPedalJsonKey, m_usingPedal);
+    helper.getItemIfPresent(c_channelJsonKey, m_channel);
+
     if(converted.count(c_rgbFunctionJsonKey) > 0)
     {
         delete m_pRgbFunction;

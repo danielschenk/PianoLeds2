@@ -16,8 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <list>
+
+#include "Common/Utilities/JsonHelper.h"
+#include "Interfaces/IProcessingBlockFactory.h"
+
 #include "Concert.h"
-#include "Patch.h"
+#include "Interfaces/IPatch.h"
 
 Concert::Concert(IMidiInput& rMidiInput, IProcessingBlockFactory& rProcessingBlockFactory)
     : m_noteToLightMap()
@@ -43,22 +48,104 @@ Concert::~Concert()
 {
     m_rMidiInput.unsubscribeProgramChange(m_programChangeSubscription);
     m_rMidiInput.unsubscribeControlChange(m_controlChangeSubscription);
+
+    for(auto pPatch : m_patches)
+    {
+        delete pPatch;
+    }
+}
+
+size_t Concert::size() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    return m_patches.size();
+}
+
+Concert::TPatchPosition Concert::addPatch()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    IPatch* pPatch = m_rProcessingBlockFactory.createPatch();
+    if(pPatch == nullptr)
+    {
+        return c_invalidPatchPosition;
+    }
+
+    m_patches.push_back(pPatch);
+    return m_patches.size() - 1;
+}
+
+IPatch* Concert::getPatch(TPatchPosition position) const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if(position >= m_patches.size())
+    {
+        return nullptr;
+    }
+
+    return m_patches.at(position);
+}
+
+bool Concert::removePatch(TPatchPosition position)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if(position >= m_patches.size())
+    {
+        return false;
+    }
+
+    m_patches.erase(m_patches.begin() + position);
+    return true;
 }
 
 json Concert::convertToJson() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    // TODO
+    json converted;
+    converted[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameConcert);
+    converted[c_isListeningToProgramChangeJsonKey] = m_listeningToProgramChange;
+    converted[c_programChangeChannelJsonKey] = m_programChangeChannel;
+    converted[c_currentBankJsonKey] = m_currentBank;
+    converted[c_noteToLightMapJsonKey] = Processing::convert(m_noteToLightMap);
 
-    return json();
+    std::list<json> convertedPatches;
+    for(const IPatch* pPatch : m_patches)
+    {
+        convertedPatches.push_back(pPatch->convertToJson());
+    }
+    converted[c_patchesJsonKey] = convertedPatches;
+
+    return converted;
 }
 
-void Concert::convertFromJson(json json)
+void Concert::convertFromJson(json converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
-    // TODO
+    JsonHelper helper(__PRETTY_FUNCTION__, converted);
+    helper.getItemIfPresent(c_isListeningToProgramChangeJsonKey, m_listeningToProgramChange);
+    helper.getItemIfPresent(c_programChangeChannelJsonKey, m_programChangeChannel);
+    helper.getItemIfPresent(c_currentBankJsonKey, m_currentBank);
+    
+    Processing::TStringNoteToLightMap temp;
+    if(helper.getItemIfPresent(c_noteToLightMapJsonKey, temp))
+    {
+        m_noteToLightMap = Processing::convert(temp);
+    }
+
+    for(IPatch* pPatch : m_patches)
+    {
+        delete pPatch;
+    }
+    m_patches.clear();
+    for(json convertedPatch : converted[c_patchesJsonKey])
+    {
+        m_patches.push_back(m_rProcessingBlockFactory.createPatch(convertedPatch));
+    }
 }
 
 bool Concert::isListeningToProgramChange() const
@@ -135,18 +222,19 @@ void Concert::onProgramChange(uint8_t channel, uint8_t program)
 
         for(auto patchIt = m_patches.begin(); patchIt != m_patches.end(); ++patchIt)
         {
-            if(patchIt->hasBankAndProgram())
+            IPatch* pPatch = *patchIt;
+            if(pPatch->hasBankAndProgram())
             {
-                if(patchIt->getBank() == m_currentBank)
+                if(pPatch->getBank() == m_currentBank)
                 {
-                    if(patchIt->getProgram() == program)
+                    if(pPatch->getProgram() == program)
                     {
                         // Found a patch which matches the received program number and active bank.
                         if(m_activePatch != m_patches.end())
                         {
-                            m_activePatch->deactivate();
+                            (*m_activePatch)->deactivate();
                         }
-                        patchIt->activate();
+                        pPatch->activate();
                         m_activePatch = patchIt;
                     }
                 }

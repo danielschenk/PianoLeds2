@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include "Interfaces/IPatch.h"
 #include "ProcessingChain.h"
 
 class IProcessingBlockFactory;
@@ -35,7 +36,8 @@ class IProcessingBlockFactory;
  * so light is generated from MIDI data in a certain way.
  */
 class Patch
-    : public ProcessingChain
+    : public IPatch
+    , public ProcessingChain
 {
 public:
     /**
@@ -63,14 +65,15 @@ public:
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);
 
-    uint8_t getBank() const;
-    void setBank(uint8_t bank);
-    bool hasBankAndProgram() const;
-    void setHasBankAndProgram(bool hasBankAndProgram);
-    uint8_t getProgram() const;
-    void setProgram(uint8_t program);
-    std::string getName() const;
-    void setName(const std::string name);
+    // IPatch implementation
+    virtual bool hasBankAndProgram() const;
+    virtual uint8_t getBank() const;
+    virtual void setBank(uint8_t bank);
+    virtual uint8_t getProgram() const;
+    virtual void setProgram(uint8_t program);
+    virtual void clearBankAndProgram();
+    virtual std::string getName() const;
+    virtual void setName(const std::string name);
 
 private:
     static constexpr const char* c_hasBankAndProgramJsonKey = "hasBankAndProgram";

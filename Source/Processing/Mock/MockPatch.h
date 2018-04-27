@@ -15,24 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @brief Mock processing block factory.
+ * @brief Mock patch.
  */
 
-#ifndef PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_
-#define PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_
+#ifndef PROCESSING_MOCK_MOCKPATCH_H_
+#define PROCESSING_MOCK_MOCKPATCH_H_
 
 #include <gmock/gmock.h>
 
-#include "../Interfaces/IProcessingBlockFactory.h"
+#include "../Interfaces/IPatch.h"
+#include "MockProcessingBlock.h"
 
-class MockProcessingBlockFactory
-    : public IProcessingBlockFactory
+class MockPatch
+    : public IPatch
+    , public virtual MockProcessingBlock
 {
 public:
-    MOCK_CONST_METHOD1(createProcessingBlock, IProcessingBlock*(json converted));
-    MOCK_CONST_METHOD0(createPatch, IPatch*());
-    MOCK_CONST_METHOD1(createPatch, IPatch*(json converted));
+    MOCK_CONST_METHOD0(hasBankAndProgram, bool());
+    MOCK_CONST_METHOD0(getBank, uint8_t());
+    MOCK_METHOD1(setBank, void(uint8_t bank));
+    MOCK_CONST_METHOD0(getProgram, uint8_t());
+    MOCK_METHOD1(setProgram, void(uint8_t program));
+    MOCK_METHOD0(clearBankAndProgram, void());
+    MOCK_CONST_METHOD0(getName, std::string());
+    MOCK_METHOD1(setName, void(std::string name));
 };
 
 
-#endif /* PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_ */
+#endif /* PROCESSING_MOCK_MOCKPATCH_H_ */

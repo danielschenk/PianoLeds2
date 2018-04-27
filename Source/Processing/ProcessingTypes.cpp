@@ -22,6 +22,8 @@
 
 #include "Interfaces/ProcessingTypes.h"
 
+using json = nlohmann::json;
+
 namespace Processing
 {
 
@@ -77,6 +79,32 @@ TRgb rgbFromFloat(float initialR, float initialG, float initialB)
     if(initialB <         0) {initialB =         0;}
 
     return TRgb((uint8_t)initialR, (uint8_t)initialG, (uint8_t)initialB);
+}
+
+TStringNoteToLightMap convert(const TNoteToLightMap& rSource)
+{
+    TStringNoteToLightMap converted;
+    for(const auto& rPair : rSource)
+    {
+        converted[std::to_string(rPair.first)] = rPair.second;
+    }
+
+    return converted;
+}
+
+TNoteToLightMap convert(const TStringNoteToLightMap& rSource)
+{
+    TNoteToLightMap converted;
+    for(unsigned int noteNumber = 0; noteNumber <= UINT8_MAX; ++noteNumber)
+    {
+        std::string key = std::to_string(noteNumber);
+        if(rSource.count(key) > 0)
+        {
+            converted[noteNumber] = rSource.at(key);
+        }
+    }
+
+    return converted;
 }
 
 } /* namespace Processing */

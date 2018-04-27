@@ -37,6 +37,7 @@ public:
     static constexpr const char* c_typeNameNoteRgbSource        = "NoteRgbSource";
     static constexpr const char* c_typeNameProcessingChain      = "ProcessingChain";
     static constexpr const char* c_typeNamePatch                = "Patch";
+    static constexpr const char* c_typeNameConcert              = "Concert";
 
     /**
      * Destructor.

@@ -36,12 +36,12 @@ ProcessingBlockFactory::~ProcessingBlockFactory()
 {
 }
 
-IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json json) const
+IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json converted) const
 {
     IProcessingBlock* processingBlock = nullptr;
-    if(json.count(IJsonConvertible::c_objectTypeKey) > 0)
+    if(converted.count(IJsonConvertible::c_objectTypeKey) > 0)
     {
-        std::string objectType = json[IJsonConvertible::c_objectTypeKey];
+        std::string objectType = converted[IJsonConvertible::c_objectTypeKey];
         if(objectType == IProcessingBlock::c_typeNameEqualRangeRgbSource)
         {
             processingBlock = new EqualRangeRgbSource();
@@ -58,14 +58,32 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json json) const
         else if(objectType == IProcessingBlock::c_typeNamePatch)
         {
             // A patch needs the factory to construct its children
-            processingBlock = new Patch(*this);
+            processingBlock = createPatch();
         }
 
         if(processingBlock != nullptr)
         {
-            processingBlock->convertFromJson(json);
+            processingBlock->convertFromJson(converted);
         }
     }
 
     return processingBlock;
+}
+
+IPatch* ProcessingBlockFactory::createPatch() const
+{
+    // A patch needs the factory to construct its children
+    return new Patch(*this);
+}
+
+IPatch* ProcessingBlockFactory::createPatch(json converted) const
+{
+    IPatch* pPatch = createPatch();
+
+    if(pPatch != nullptr)
+    {
+        pPatch->convertFromJson(converted);
+    }
+
+    return pPatch;
 }

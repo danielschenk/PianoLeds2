@@ -32,7 +32,7 @@ class IProcessingBlockFactory;
  * A processing chain which can hold multiple processing blocks connected in series.
  */
 class ProcessingChain
-    : public IProcessingBlock
+    : public virtual IProcessingBlock
 {
 public:
     /**

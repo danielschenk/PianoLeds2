@@ -46,6 +46,8 @@ public:
 
     // IProcessingBlockFactory implementation
     virtual IProcessingBlock* createProcessingBlock(json converted) const;
+    virtual IPatch* createPatch() const;
+    virtual IPatch* createPatch(json converted) const;
 
 private:
     /** Reference to the MIDI input to pass to new blocks. */

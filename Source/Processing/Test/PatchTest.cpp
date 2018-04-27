@@ -53,7 +53,6 @@ TEST_F(PatchTest, convertToJson)
     // Set some non-defaults
     m_patch.setBank(42);
     m_patch.setProgram(43);
-    m_patch.setHasBankAndProgram(true);
     m_patch.setName("Awesome patch");
 
     std::vector<json> mockBlocksJson;

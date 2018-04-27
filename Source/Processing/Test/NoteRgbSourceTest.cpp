@@ -392,6 +392,6 @@ TEST_P(JsonPropertyNoteRgbSourceTest, convertFromJsonMissingProperty)
             .WillOnce(Return(pMockRgbFunction));
     }
 
-    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Error, LOGGING_COMPONENT, HasSubstr(GetParam())));
+    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Error, _, HasSubstr(GetParam())));
     m_pNoteRgbSource->convertFromJson(j);
 }

@@ -21,18 +21,19 @@
 #ifndef PROCESSING_CONCERT_H_
 #define PROCESSING_CONCERT_H_
 
-#include <list>
+#include <vector>
 #include <cstdint>
+#include <json.hpp>
 
 #include "Interfaces/IJsonConvertible.h"
 #include "Interfaces/ProcessingTypes.h"
-#include "Patch.h"
 #include "Common/Scheduler.h"
 #include "Drivers/Interfaces/IMidiInterface.h"
 #include "Drivers/Interfaces/IMidiInput.h"
 
 class IMidiInput;
 class IProcessingBlockFactory;
+class IPatch;
 
 /**
  * Class which represents a concert.
@@ -66,6 +67,60 @@ public:
     virtual json convertToJson() const;
     virtual void convertFromJson(json json);
 
+    typedef int TPatchPosition;
+    static constexpr TPatchPosition c_invalidPatchPosition = -1;
+
+    /**
+     * Get the number of patches.
+     */
+    size_t size() const;
+
+    /**
+     * Add a new patch.
+     * 
+     * @return The patch position, or @ref c_invalidPatchPosition on error.
+     */
+    TPatchPosition addPatch();
+
+    /**
+     * Get the patch at the specified position, for modifications.
+     * Concert stays owner of the patch.
+     * 
+     * @param[in] position  The patch position.
+     * 
+     * @return Pointer to the patch, or nullptr on error.
+     */
+    IPatch* getPatch(TPatchPosition position) const;
+    
+    /**
+     * Remove the patch at the specified position.
+     * 
+     * @param[in] position  The patch position.
+     * 
+     * @return True on success.
+     */
+    bool removePatch(TPatchPosition position);
+
+    /**
+     * @TODO
+     * Move a patch up in the list.
+     * 
+     * @param[in] position  The patch position.
+     * 
+     * @return The new patch position.
+     */
+    // TPatchPosition movePatchUp(TPatchPosition position);
+
+    /**
+     * @TODO
+     * Move a patch down in the list.
+     * 
+     * @param[in] position  The patch position.
+     * 
+     * @return The new patch position.
+     */    
+    // TPatchPosition movePatchDown(TPatchPosition position);
+
     bool isListeningToProgramChange() const;
     void setListeningToProgramChange(bool listeningToProgramChange);
     Processing::TNoteToLightMap getNoteToLightMap() const;
@@ -78,6 +133,14 @@ public:
     void execute();
 
 private:
+    static constexpr const char* c_isListeningToProgramChangeJsonKey    = "isListeningToProgramChange";
+    static constexpr const char* c_noteToLightMapJsonKey                = "noteToLightMap";
+    static constexpr const char* c_programChangeChannelJsonKey          = "programChangeChannel";
+    static constexpr const char* c_currentBankJsonKey                   = "currentBank";
+    static constexpr const char* c_patchesJsonKey                       = "patches";
+
+    typedef std::vector<IPatch*> TPatches;
+
     /** Callback to handle program changes. */
     void onProgramChange(uint8_t channel, uint8_t program);
 
@@ -88,10 +151,10 @@ private:
     Processing::TNoteToLightMap m_noteToLightMap;
 
     /** The collection of patches. */
-    std::list<Patch> m_patches;
+    TPatches m_patches;
 
     /** The active patch. */
-    std::list<Patch>::iterator m_activePatch;
+    TPatches::iterator m_activePatch;
 
     /** Whether program changes should be able to change the patch. */
     bool m_listeningToProgramChange;

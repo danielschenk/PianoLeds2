@@ -6,5 +6,7 @@ Source/Build
 Documentation
 .sconsign.dblite
 .idea/
+.vscode/.ropeproject
+.vscode/settings.json
 .pioenvs
 .piolibdeps
