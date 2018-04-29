@@ -22,8 +22,6 @@
 
 #include "Interfaces/ProcessingTypes.h"
 
-using json = nlohmann::json;
-
 namespace Processing
 {
 

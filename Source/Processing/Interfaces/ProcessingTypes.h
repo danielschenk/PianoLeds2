@@ -25,9 +25,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <json.hpp>
-
-using json = nlohmann::json;
 
 namespace Processing
 {

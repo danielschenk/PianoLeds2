@@ -21,7 +21,7 @@
 #ifndef PROCESSING_INTERFACES_IRGBFUNCTIONFACTORY_H_
 #define PROCESSING_INTERFACES_IRGBFUNCTIONFACTORY_H_
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 class IRgbFunction;

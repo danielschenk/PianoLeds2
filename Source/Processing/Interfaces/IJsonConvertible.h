@@ -22,7 +22,7 @@
 #define PROCESSING_INTERFACES_IJSONCONVERTIBLE_H_
 
 #include <string>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 // for convenience
 using json = nlohmann::json;
