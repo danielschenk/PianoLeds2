@@ -21,8 +21,6 @@ import components
 Import('base_env')
 env = base_env.Clone()
 
-Export(base_env=env)
-
 # Install the components module
 components.install(env)
 
@@ -55,10 +53,10 @@ env.Append(CPPPATH=[
     '#/ExternalComponents/googletest/googlemock/include',
 ])
 
-SConscript('ExternalComponents/GoogleTest.scons', duplicate=False)
+SConscript('ExternalComponents/GoogleTest.scons', exports={'base_env': env}, duplicate=False)
 
-SConscript('Common/Common.scons', duplicate=False)
-SConscript('Processing/Processing.scons', duplicate=False)
+SConscript('Common/Common.scons', exports={'base_env': env}, duplicate=False)
+SConscript('Processing/Processing.scons', exports={'base_env': env}, duplicate=False)
 
 AddOption('--memcheck', action='store_true')
 AddOption('--gtest_filter')
