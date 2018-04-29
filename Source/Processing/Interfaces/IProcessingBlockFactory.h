@@ -21,7 +21,7 @@
 #ifndef PROCESSING_INTERFACES_IPROCESSINGBLOCKFACTORY_H_
 #define PROCESSING_INTERFACES_IPROCESSINGBLOCKFACTORY_H_
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 class IProcessingBlock;

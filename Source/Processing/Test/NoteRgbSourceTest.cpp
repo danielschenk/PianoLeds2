@@ -19,7 +19,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <json.hpp>
 #include <Drivers/Mock/MockMidiInput.h>
 #include <Common/Mock/LoggingTest.h>
 

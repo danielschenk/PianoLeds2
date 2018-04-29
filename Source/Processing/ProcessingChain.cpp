@@ -83,9 +83,10 @@ void ProcessingChain::convertFromJson(json converted)
 
     deleteProcessingBlocks();
 
-    if(converted.count(c_processingChainJsonKey) > 0)
+    std::string processingChainJsonKey(c_processingChainJsonKey);
+    if(converted.count(processingChainJsonKey) > 0)
     {
-        std::vector<json> convertedChain = converted[c_processingChainJsonKey];
+        std::vector<json> convertedChain = converted[processingChainJsonKey];
         for(auto convertedBlock : convertedChain)
         {
             m_processingChain.push_back(m_rProcessingBlockFactory.createProcessingBlock(convertedBlock));
@@ -98,7 +99,7 @@ void ProcessingChain::convertFromJson(json converted)
 
     for(auto it = converted.begin(); it != converted.end(); ++it)
     {
-        if(it.key() != c_processingChainJsonKey)
+        if(it.key() != processingChainJsonKey)
         {
             LOG_WARNING_PARAMS("convertFromJson: unknown key '%s'", it.key().c_str());
         }

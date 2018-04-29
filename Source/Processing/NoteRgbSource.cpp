@@ -215,10 +215,11 @@ void NoteRgbSource::convertFromJson(json converted)
     helper.getItemIfPresent(c_usingPedalJsonKey, m_usingPedal);
     helper.getItemIfPresent(c_channelJsonKey, m_channel);
 
-    if(converted.count(c_rgbFunctionJsonKey) > 0)
+    std::string rgbFunctionJsonKey(c_rgbFunctionJsonKey);
+    if(converted.count(rgbFunctionJsonKey) > 0)
     {
         delete m_pRgbFunction;
-        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(converted[c_rgbFunctionJsonKey]);
+        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(converted[rgbFunctionJsonKey]);
     }
     else
     {
@@ -230,7 +231,7 @@ void NoteRgbSource::convertFromJson(json converted)
         if((it.key() != IJsonConvertible::c_objectTypeKey) &&
            (it.key() != c_channelJsonKey) &&
            (it.key() != c_usingPedalJsonKey) &&
-           (it.key() != c_rgbFunctionJsonKey))
+           (it.key() != rgbFunctionJsonKey))
         {
             LOG_WARNING_PARAMS("convertFromJson: unknown property '%s'", it.key().c_str());
         }

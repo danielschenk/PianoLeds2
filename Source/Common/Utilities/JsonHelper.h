@@ -22,7 +22,7 @@
 #define COMMON_UTILITIES_JSONHELPER_H_
 
 #include <string>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 #include <Common/Logging.h>
 

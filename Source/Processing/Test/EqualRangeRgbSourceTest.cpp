@@ -21,11 +21,9 @@
 #include <vector>
 #include <string>
 #include <gtest/gtest.h>
-#include <json.hpp>
-
-using json = nlohmann::json;
 
 #include "../EqualRangeRgbSource.h"
+using json = nlohmann::json;
 
 class EqualRangeRgbSourceTest
     : public ::testing::Test

@@ -23,7 +23,6 @@
 
 #include <vector>
 #include <cstdint>
-#include <json.hpp>
 
 #include "Interfaces/IJsonConvertible.h"
 #include "Interfaces/ProcessingTypes.h"
