@@ -21,7 +21,7 @@
                 "${workspaceRoot}/Source/Processing/Interfaces",
                 "${workspaceRoot}/Source/Processing/Mock",
                 "${workspaceRoot}/Source/ExternalComponents/googletest/googlemock/include",
-                "${workspaceRoot}/Source/ExternalComponents/googletest/googletest/include",
+                "${workspaceRoot}/Source/ExternalComponents/googletest/googletest/include"
             ],
             "defines": [
                 "ENABLE_LOG_DEBUG",
