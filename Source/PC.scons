@@ -21,9 +21,6 @@ import components
 Import('base_env')
 env = base_env.Clone()
 
-# Make environment available to SConscripts
-Export(base_env=env)
-
 # Install the components module
 components.install(env)
 
@@ -51,7 +48,7 @@ if platform.system() == 'Darwin':
     symbols += [
         '__MACOSX_CORE__',
     ]
-else:
+elif any('pc' in target.lower() for target in COMMAND_LINE_TARGETS):
     raise Exception('Platform for RtMidi not configured or not supported')
 
 env.Append(CDEFINES=symbols)
@@ -66,10 +63,10 @@ env.Append(CPPPATH=[
     '#/ExternalComponents/googletest/googlemock/include',
 ])
 
-SConscript('Common/Common.Scons', duplicate=False)
-SConscript('ExternalComponents/RtMidi.scons', duplicate=False)
-SConscript('Drivers/PC.scons', duplicate=False)
-SConscript('Processing/Processing.scons', duplicate=False)
+SConscript('Common/Common.Scons', exports={'base_env': env}, duplicate=False)
+SConscript('ExternalComponents/RtMidi.scons', exports={'base_env': env}, duplicate=False)
+SConscript('Drivers/PC.scons', exports={'base_env': env}, duplicate=False)
+SConscript('Processing/Processing.scons', exports={'base_env': env}, duplicate=False)
 
 # Build MidiInputMonitor test app
-SConscript('MidiInputMonitor/MidiInputMonitor.scons', duplicate=False)
+SConscript('MidiInputMonitor/MidiInputMonitor.scons', exports={'base_env': env}, duplicate=False)
