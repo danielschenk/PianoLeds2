@@ -23,14 +23,10 @@
 # SOFTWARE.
 
 import platform
-import components
 
 # Create base environment
 Import('base_env')
 env = base_env.Clone()
-
-# Install the components module
-components.install(env)
 
 symbols = [
 ]

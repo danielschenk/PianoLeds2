@@ -23,10 +23,14 @@
 # SOFTWARE.
 
 import os
+import components
 
 join = os.path.join
 
 env = Environment()
+
+# Install the components module
+components.install(env)
 
 if ARGUMENTS.get('VERBOSE') != '1':
     env['CCCOMSTR'] = 'Compiling $TARGET'
