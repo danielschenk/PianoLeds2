@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (C) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
+# Copyright (C) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 Import('base_env')
 env = base_env.Clone()
+env.Append(CPPPATH=['json11'])
 
-sources = Glob('*.cpp')
-
-base_env.Component('Processing', sources + env.GetComponents('Common', 'json11'))
+lib = env.Library('json11', ['json11/json11.cpp'])
+base_env.Component('json11', lib)

@@ -69,7 +69,10 @@ env.Append(CPPPATH=[
     '#/ExternalComponents',
     '#/ExternalComponents/googletest/googletest/include',
     '#/ExternalComponents/googletest/googlemock/include',
+    '#/ExternalComponents/json11',
 ])
+
+SConscript('ExternalComponents/json11.scons', exports={'base_env': env}, duplicate=False)
 
 SConscript('Common/Common.Scons', exports={'base_env': env}, duplicate=False)
 SConscript('ExternalComponents/RtMidi.scons', exports={'base_env': env}, duplicate=False)
