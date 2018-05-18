@@ -23,14 +23,10 @@
 # SOFTWARE.
 
 import os
-import components
 
 # Create base environment
 Import('base_env')
 env = base_env.Clone()
-
-# Install the components module
-components.install(env)
 
 symbols = [
     ('ENABLE_LOG_ERROR', 1),
@@ -72,13 +68,14 @@ AddOption('--memcheck', action='store_true')
 AddOption('--gtest_filter')
 
 test_env = env.Clone()
-sources = []
+test_programs = []
 components_with_test = ['Processing', 'Common']
 for component in components_with_test:
-    sources += Glob(component + '/Test/*.cpp')
-
-components_to_get = components_with_test + ['GoogleTest']
-test_program = test_env.Program('Test', sources + env.GetComponents(*components_to_get))
+    for test_source in Glob(component + '/Test/*.cpp'):
+        # Use the .cpp file name without extension as name for the built test program.
+        # Link with GoogleTest, and the component where the class to be tested is in
+        test_program = test_env.Program(os.path.splitext(os.path.basename(test_source.path))[0], [test_source] + env.GetComponents('GoogleTest', component))
+        test_programs.append(test_program)
 
 prefix = ''
 suffix = ''
@@ -90,5 +87,9 @@ gtest_filter = GetOption('gtest_filter')
 if gtest_filter is not None:
     suffix += ' --gtest_filter=' + gtest_filter
 
-test_result = test_env.Command('TestResult.xml', test_program, '{}./$SOURCE --gtest_output=xml:$TARGET{}'.format(prefix, suffix))
-test_env.AlwaysBuild(test_result)
+for test_program in test_programs:
+    test_name = os.path.basename(test_program[0].path)
+    # Use the test program name for the result file name
+    test_result = test_env.Command(test_name + 'Result.xml', test_program, '{}./$SOURCE --gtest_output=xml:$TARGET{}'.format(prefix, suffix))
+    test_env.AlwaysBuild(test_result)
+    Alias(test_name, test_result)
