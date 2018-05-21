@@ -26,7 +26,7 @@
 
 #include <list>
 
-#include "Common/Utilities/JsonHelper.h"
+#include "Common/Utilities/Json11Helper.h"
 #include "Interfaces/IProcessingBlockFactory.h"
 
 #include "Concert.h"
@@ -109,40 +109,40 @@ bool Concert::removePatch(TPatchPosition position)
     return true;
 }
 
-json Concert::convertToJson() const
+Json Concert::convertToJson() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    json converted;
-    converted[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameConcert);
+    Json::object converted;
+    converted[IJsonConvertible::c_objectTypeKey] = getObjectType();
     converted[c_isListeningToProgramChangeJsonKey] = m_listeningToProgramChange;
     converted[c_programChangeChannelJsonKey] = m_programChangeChannel;
     converted[c_currentBankJsonKey] = m_currentBank;
     converted[c_noteToLightMapJsonKey] = Processing::convert(m_noteToLightMap);
 
-    std::list<json> convertedPatches;
+    Json::array convertedPatches;
     for(const IPatch* pPatch : m_patches)
     {
         convertedPatches.push_back(pPatch->convertToJson());
     }
     converted[c_patchesJsonKey] = convertedPatches;
 
-    return converted;
+    return Json(converted);
 }
 
-void Concert::convertFromJson(json converted)
+void Concert::convertFromJson(const Json& rConverted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
-    JsonHelper helper(__PRETTY_FUNCTION__, converted);
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
     helper.getItemIfPresent(c_isListeningToProgramChangeJsonKey, m_listeningToProgramChange);
     helper.getItemIfPresent(c_programChangeChannelJsonKey, m_programChangeChannel);
     helper.getItemIfPresent(c_currentBankJsonKey, m_currentBank);
     
-    Processing::TStringNoteToLightMap temp;
-    if(helper.getItemIfPresent(c_noteToLightMapJsonKey, temp))
+    Json::object convertedNoteToLightMap;
+    if(helper.getItemIfPresent(c_noteToLightMapJsonKey, convertedNoteToLightMap))
     {
-        m_noteToLightMap = Processing::convert(temp);
+        m_noteToLightMap = Processing::convert(convertedNoteToLightMap);
     }
 
     for(IPatch* pPatch : m_patches)
@@ -150,9 +150,14 @@ void Concert::convertFromJson(json converted)
         delete pPatch;
     }
     m_patches.clear();
-    for(json convertedPatch : converted[c_patchesJsonKey])
+
+    Json::array convertedPatches;
+    if(helper.getItemIfPresent(c_patchesJsonKey, convertedPatches))
     {
-        m_patches.push_back(m_rProcessingBlockFactory.createPatch(convertedPatch));
+        for(const Json& rConvertedPatch : convertedPatches)
+        {
+            m_patches.push_back(m_rProcessingBlockFactory.createPatch(rConvertedPatch));
+        }
     }
 }
 
@@ -216,6 +221,11 @@ void Concert::execute()
 {
     m_scheduler.executeAll();
     // TODO execute active patch
+}
+
+std::string Concert::getObjectType() const
+{
+    return IProcessingBlock::c_typeNameConcert;
 }
 
 void Concert::onProgramChange(uint8_t channel, uint8_t program)

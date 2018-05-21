@@ -77,10 +77,13 @@ public:
     virtual void activate();
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& strip);
-    virtual json convertToJson() const;
-    virtual void convertFromJson(json json);
+    virtual Json convertToJson() const;
+    virtual void convertFromJson(const Json& rConverted);
 
 protected:
+    // IProcessingBlock implementation
+    virtual std::string getObjectType() const;
+
     /** Mutex to protect the members. */
     mutable std::recursive_mutex m_mutex;
 

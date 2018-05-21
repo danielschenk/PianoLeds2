@@ -68,8 +68,8 @@ public:
     virtual void activate();
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& output);
-    virtual json convertToJson() const;
-    virtual void convertFromJson(json json);
+    virtual Json convertToJson() const;
+    virtual void convertFromJson(const Json& rConverted);
 
     uint8_t getChannel() const;
     void setChannel(uint8_t channel);
@@ -77,6 +77,10 @@ public:
     void setUsingPedal(bool usingPedal);
 
     void setRgbFunction(IRgbFunction* pRgbFunction);
+
+protected:
+    // IProcessingBlock implementation
+    virtual std::string getObjectType() const;
 
 private:
     static constexpr const char* c_usingPedalJsonKey    = "usingPedal";

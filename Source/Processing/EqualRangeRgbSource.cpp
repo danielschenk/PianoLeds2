@@ -25,7 +25,7 @@
  *
  */
 
-#include <Common/Utilities/JsonHelper.h>
+#include <Common/Utilities/Json11Helper.h>
 
 #include "EqualRangeRgbSource.h"
 
@@ -73,25 +73,30 @@ void EqualRangeRgbSource::setColor(Processing::TRgb color)
     m_color = color;
 }
 
-json EqualRangeRgbSource::convertToJson() const
+Json EqualRangeRgbSource::convertToJson() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    json json;
-    json[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameEqualRangeRgbSource);
+    Json::object json;
+    json[IJsonConvertible::c_objectTypeKey] = getObjectType();
     json[c_rJsonKey] = m_color.r;
     json[c_gJsonKey] = m_color.g;
     json[c_bJsonKey] = m_color.b;
 
-    return json;
+    return Json(json);
 }
 
-void EqualRangeRgbSource::convertFromJson(json json)
+void EqualRangeRgbSource::convertFromJson(const Json& rConverted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    JsonHelper helper(__PRETTY_FUNCTION__, json);
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
     helper.getItemIfPresent(c_rJsonKey, m_color.r);
     helper.getItemIfPresent(c_gJsonKey, m_color.g);
     helper.getItemIfPresent(c_bJsonKey, m_color.b);
+}
+
+std::string EqualRangeRgbSource::getObjectType() const
+{
+     return IProcessingBlock::c_typeNameEqualRangeRgbSource;
 }

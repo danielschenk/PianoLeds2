@@ -29,8 +29,9 @@
 #ifndef PROCESSING_INTERFACES_IPROCESSINGBLOCKFACTORY_H_
 #define PROCESSING_INTERFACES_IPROCESSINGBLOCKFACTORY_H_
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include <json11.hpp>
+// for convenience
+using Json = json11::Json;
 
 class IProcessingBlock;
 class IPatch;
@@ -51,9 +52,9 @@ public:
     /**
      * Create a processing block from the given JSON.
      *
-     * @param[in]   converted   JSON object containing the persistent properties.
+     * @param[in]   rConverted  JSON object containing the persistent properties.
      */
-    virtual IProcessingBlock* createProcessingBlock(json converted) const = 0;
+    virtual IProcessingBlock* createProcessingBlock(const Json& rConverted) const = 0;
 
     /**
      * Create a new patch.
@@ -63,9 +64,9 @@ public:
     /**
      * Create a patch from the given JSON.
      *
-     * @param[in]   converted   JSON object containing the persistent properties.
+     * @param[in]   rConverted  JSON object containing the persistent properties.
      */
-    virtual IPatch* createPatch(json converted) const = 0;
+    virtual IPatch* createPatch(const Json& rConverted) const = 0;
 };
 
 

@@ -27,4 +27,4 @@ env = base_env.Clone()
 
 sources = Glob('*.cpp')
 
-base_env.Component('Processing', sources + env.GetComponents('Common'))
+base_env.Component('Processing', sources + env.GetComponents('Common', 'json11'))

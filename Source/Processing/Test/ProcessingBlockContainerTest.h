@@ -101,12 +101,12 @@ public:
         m_pValueDoubler = nullptr;
     }
 
-    json createMockBlockJson(unsigned int id)
+    Json createMockBlockJson(unsigned int id)
     {
-        json j;
-        j["id"] = id;
+        Json::object j;
+        j["id"] = static_cast<int>(id);
 
-        return j;
+        return Json(j);
     }
 
     // These have to be manually allocated, as the container under test takes ownership and will try to delete it's children.

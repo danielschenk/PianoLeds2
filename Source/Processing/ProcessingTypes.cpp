@@ -27,6 +27,9 @@
  */
 
 #include <cstdint>
+#include <cstdio>
+
+#include <Common/Utilities/Json11Helper.h>
 
 #include "Interfaces/ProcessingTypes.h"
 
@@ -87,26 +90,33 @@ TRgb rgbFromFloat(float initialR, float initialG, float initialB)
     return TRgb((uint8_t)initialR, (uint8_t)initialG, (uint8_t)initialB);
 }
 
-TStringNoteToLightMap convert(const TNoteToLightMap& rSource)
+Json convert(const TNoteToLightMap& rSource)
 {
-    TStringNoteToLightMap converted;
+    Json::object converted;
     for(const auto& rPair : rSource)
     {
-        converted[std::to_string(rPair.first)] = rPair.second;
+        char buf[4];
+        std::snprintf(buf, sizeof(buf), "%u", rPair.first);
+        converted[std::string(buf)] = Json(rPair.second);
     }
 
-    return converted;
+    return Json(converted);
 }
 
-TNoteToLightMap convert(const TStringNoteToLightMap& rSource)
+TNoteToLightMap convert(const Json& rSource)
 {
+    Json11Helper helper(__PRETTY_FUNCTION__, rSource, false /* logMissingKeys */);
+
     TNoteToLightMap converted;
     for(unsigned int noteNumber = 0; noteNumber <= UINT8_MAX; ++noteNumber)
     {
-        std::string key = std::to_string(noteNumber);
-        if(rSource.count(key) > 0)
+        char buf[4];
+        std::snprintf(buf, sizeof(buf), "%u", noteNumber);
+
+        uint8_t lightNumber;
+        if(helper.getItemIfPresent(std::string(buf), lightNumber))
         {
-            converted[noteNumber] = rSource.at(key);
+            converted[noteNumber] = lightNumber;
         }
     }
 

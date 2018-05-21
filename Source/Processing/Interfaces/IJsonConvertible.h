@@ -30,10 +30,9 @@
 #define PROCESSING_INTERFACES_IJSONCONVERTIBLE_H_
 
 #include <string>
-#include <nlohmann/json.hpp>
-
+#include <json11.hpp>
 // for convenience
-using json = nlohmann::json;
+using Json = json11::Json;
 
 /**
  * Interface for objects which can be converted to/from JSON.
@@ -55,14 +54,22 @@ public:
      *
      * @return The JSON object containing the persistent properties of the object.
      */
-    virtual json convertToJson() const = 0;
+    virtual Json convertToJson() const = 0;
 
     /**
      * Convert object from JSON.
      *
-     * @param[in]   json    The JSON object containing the persistent properties of the object.
+     * @param[in]   rConverted  The JSON object containing the persistent properties of the object.
      */
-    virtual void convertFromJson(json json) = 0;
+    virtual void convertFromJson(const Json& rConverted) = 0;
+
+protected:
+    /**
+     * Get the object type.
+     *
+     * @return The object type.
+     */
+    virtual std::string getObjectType() const = 0;
 };
 
 

@@ -25,7 +25,7 @@
  *
  */
 
-#include <Common/Utilities/JsonHelper.h>
+#include <Common/Utilities/Json11Helper.h>
 
 #include "LinearRgbFunction.h"
 
@@ -56,10 +56,10 @@ Processing::TRgb LinearRgbFunction::calculate(const Processing::TNoteState& note
     return output;
 }
 
-json LinearRgbFunction::convertToJson() const
+Json LinearRgbFunction::convertToJson() const
 {
-    json json;
-    json[IJsonConvertible::c_objectTypeKey] = std::string(IRgbFunction::c_jsonTypeNameLinearRgbFunction);
+    Json::object json;
+    json[IJsonConvertible::c_objectTypeKey] = getObjectType();
     json[c_rFactorJsonKey] = m_redConstants.factor;
     json[c_gFactorJsonKey] = m_greenConstants.factor;
     json[c_bFactorJsonKey] = m_blueConstants.factor;
@@ -67,16 +67,21 @@ json LinearRgbFunction::convertToJson() const
     json[c_gOffsetJsonKey] = m_greenConstants.offset;
     json[c_bOffsetJsonKey] = m_blueConstants.offset;
 
-    return json;
+    return Json(json);
 }
 
-void LinearRgbFunction::convertFromJson(json json)
+void LinearRgbFunction::convertFromJson(const Json& rConverted)
 {
-    JsonHelper helper(__PRETTY_FUNCTION__, json);
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
     helper.getItemIfPresent(c_rFactorJsonKey, m_redConstants.factor);
     helper.getItemIfPresent(c_rOffsetJsonKey, m_redConstants.offset);
     helper.getItemIfPresent(c_gFactorJsonKey, m_greenConstants.factor);
     helper.getItemIfPresent(c_gOffsetJsonKey, m_greenConstants.offset);
     helper.getItemIfPresent(c_bFactorJsonKey, m_blueConstants.factor);
     helper.getItemIfPresent(c_bOffsetJsonKey, m_blueConstants.offset);
+}
+
+std::string LinearRgbFunction::getObjectType() const
+{
+    return IRgbFunction::c_jsonTypeNameLinearRgbFunction;
 }

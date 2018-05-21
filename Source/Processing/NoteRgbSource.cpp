@@ -28,7 +28,7 @@
 #include <functional>
 
 #include <Common/Logging.h>
-#include <Common/Utilities/JsonHelper.h>
+#include <Common/Utilities/Json11Helper.h>
 
 #include "Interfaces/IRgbFunctionFactory.h"
 #include "NoteRgbSource.h"
@@ -46,6 +46,7 @@ NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLi
     , m_channel(0)
     , m_scheduler()
     , m_noteState()
+    , m_pedalPressed(false)
     , m_pRgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}))
 {
     m_noteOnOffSubscription = m_rMidiInput.subscribeNoteOnOff(
@@ -199,12 +200,12 @@ void NoteRgbSource::setRgbFunction(IRgbFunction* pRgbFunction)
     m_pRgbFunction = pRgbFunction;
 }
 
-json NoteRgbSource::convertToJson() const
+Json NoteRgbSource::convertToJson() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    json json;
-    json[IJsonConvertible::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameNoteRgbSource);
+    Json::object json;
+    json[IJsonConvertible::c_objectTypeKey] = getObjectType();
     json[c_usingPedalJsonKey] = m_usingPedal;
     json[c_channelJsonKey] = m_channel;
     if(m_pRgbFunction != nullptr)
@@ -215,33 +216,23 @@ json NoteRgbSource::convertToJson() const
     return json;
 }
 
-void NoteRgbSource::convertFromJson(json converted)
+void NoteRgbSource::convertFromJson(const Json& rConverted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    JsonHelper helper(__PRETTY_FUNCTION__, converted);
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
     helper.getItemIfPresent(c_usingPedalJsonKey, m_usingPedal);
     helper.getItemIfPresent(c_channelJsonKey, m_channel);
 
-    std::string rgbFunctionJsonKey(c_rgbFunctionJsonKey);
-    if(converted.count(rgbFunctionJsonKey) > 0)
+    Json::object convertedRgbFunction;
+    if(helper.getItemIfPresent(c_rgbFunctionJsonKey, convertedRgbFunction))
     {
         delete m_pRgbFunction;
-        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(converted[rgbFunctionJsonKey]);
+        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(convertedRgbFunction);
     }
-    else
-    {
-        LOG_ERROR("convertFromJson: Missing rgbFunction property");
-    }
+}
 
-    for(auto it = converted.begin(); it != converted.end(); ++it)
-    {
-        if((it.key() != IJsonConvertible::c_objectTypeKey) &&
-           (it.key() != c_channelJsonKey) &&
-           (it.key() != c_usingPedalJsonKey) &&
-           (it.key() != rgbFunctionJsonKey))
-        {
-            LOG_WARNING_PARAMS("convertFromJson: unknown property '%s'", it.key().c_str());
-        }
-    }
+std::string NoteRgbSource::getObjectType() const
+{
+    return IProcessingBlock::c_typeNameNoteRgbSource;
 }

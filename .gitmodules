@@ -7,3 +7,6 @@
 [submodule "Source/ExternalComponents/tools"]
 	path = Source/ExternalComponents/tools
 	url = https://github.com/danielschenk/tools.git
+[submodule "Source/ExternalComponents/json11"]
+	path = Source/ExternalComponents/json11
+	url = https://github.com/dropbox/json11.git

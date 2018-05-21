@@ -30,8 +30,8 @@
 #include <string>
 #include <gtest/gtest.h>
 
+#include "Common/Utilities/Json11Helper.h"
 #include "../EqualRangeRgbSource.h"
-using json = nlohmann::json;
 
 class EqualRangeRgbSourceTest
     : public ::testing::Test
@@ -54,18 +54,21 @@ TEST_F(EqualRangeRgbSourceTest, executeDifferentColors)
             EXPECT_EQ(outputIt, colorIt);
         }
     }
-}
 
+}
 TEST_F(EqualRangeRgbSourceTest, convertFromJson)
 {
-    json j = R"(
+    std::string err;
+    Json j = Json::parse(R"(
         {
             "objectType": "EqualRangeRgbSource",
             "r": 10,
             "g": 20,
             "b": 30
         }
-    )"_json;
+        )",
+        err,
+        json11::STANDARD);
 
     m_source.convertFromJson(j);
     EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 20, 30}));
@@ -73,14 +76,17 @@ TEST_F(EqualRangeRgbSourceTest, convertFromJson)
 
 TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithWrongType)
 {
-    json j = R"(
+    std::string err;
+    Json j = Json::parse(R"(
         {
             "objectType": "wrong",
             "r": 10,
             "g": 20,
             "b": 30
         }
-    )"_json;
+        )",
+        err,
+        json11::STANDARD);
 
     m_source.convertFromJson(j);
     EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 20, 30}));
@@ -88,13 +94,16 @@ TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithWrongType)
 
 TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithMissingColor)
 {
-    json j = R"(
+    std::string err;
+    Json j = Json::parse(R"(
         {
             "objectType": "EqualRangeRgbSource",
             "r": 10,
             "b": 30
         }
-    )"_json;
+        )",
+        err,
+        json11::STANDARD);
 
     m_source.convertFromJson(j);
     EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 0, 30}));
@@ -104,10 +113,10 @@ TEST_F(EqualRangeRgbSourceTest, convertToJson)
 {
     m_source.setColor(Processing::TRgb({40, 50, 60}));
 
-    json j = m_source.convertToJson();
+    Json::object j = m_source.convertToJson().object_items();
     EXPECT_EQ(4, j.size());
-    EXPECT_EQ("EqualRangeRgbSource", j.at("objectType").get<std::string>());
-    EXPECT_EQ(40, j.at("r").get<int>());
-    EXPECT_EQ(50, j.at("g").get<int>());
-    EXPECT_EQ(60, j.at("b").get<int>());
+    EXPECT_EQ("EqualRangeRgbSource", j.at("objectType").string_value());
+    EXPECT_EQ(40, j.at("r").number_value());
+    EXPECT_EQ(50, j.at("g").number_value());
+    EXPECT_EQ(60, j.at("b").number_value());
 }

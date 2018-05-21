@@ -37,7 +37,7 @@ class MockRgbFunctionFactory
     : public IRgbFunctionFactory
 {
 public:
-    MOCK_CONST_METHOD1(createRgbFunction, IRgbFunction*(json converted));
+    MOCK_CONST_METHOD1(createRgbFunction, IRgbFunction*(const Json& rConverted));
 };
 
 

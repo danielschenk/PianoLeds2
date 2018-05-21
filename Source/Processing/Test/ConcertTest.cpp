@@ -132,7 +132,7 @@ TEST_F(ConcertTest, convertToJson)
     Processing::TNoteToLightMap map({{1, 10}, {2, 20}});
     m_pConcert->setNoteToLightMap(map);
     
-    json mockPatchJson, mockPatch2Json;
+    Json::object mockPatchJson, mockPatch2Json;
     mockPatchJson["objectType"] = "MockPatch";
     mockPatchJson["someParameter"] = 42;
     mockPatch2Json["objectType"] = "MockPatch";
@@ -156,21 +156,22 @@ TEST_F(ConcertTest, convertToJson)
     m_pConcert->addPatch();
     m_pConcert->addPatch();
 
-    json converted = m_pConcert->convertToJson();
-    EXPECT_EQ(true, converted.at("isListeningToProgramChange").get<bool>());
-    EXPECT_EQ(2, converted.at("currentBank").get<uint8_t>());
-    EXPECT_EQ(3, converted.at("programChangeChannel").get<uint8_t>());
-    EXPECT_EQ(Processing::convert(map), converted.at("noteToLightMap").get<Processing::TStringNoteToLightMap>());
+    Json::object converted = m_pConcert->convertToJson().object_items();
+    EXPECT_EQ(true, converted.at("isListeningToProgramChange").bool_value());
+    EXPECT_EQ(2, converted.at("currentBank").number_value());
+    EXPECT_EQ(3, converted.at("programChangeChannel").number_value());
+    EXPECT_EQ(Processing::convert(map), converted.at("noteToLightMap").object_items());
     
-    json patches = converted.at("patches");
+    Json::array patches = converted.at("patches").array_items();
     EXPECT_EQ(2, patches.size());
-    EXPECT_EQ(42, patches.at(0).at("someParameter").get<int>());
-    EXPECT_EQ(43, patches.at(1).at("someParameter").get<int>());
+    EXPECT_EQ(42, patches.at(0).object_items().at("someParameter").number_value());
+    EXPECT_EQ(43, patches.at(1).object_items().at("someParameter").number_value());
 }
 
 TEST_F(ConcertTest, convertFromJson)
 {
-    json j(R"({
+    std::string err;
+    Json j(Json::parse(R"({
                 "objectType": "Concert",
                 "isListeningToProgramChange": true,
                 "currentBank": 2,
@@ -189,7 +190,9 @@ TEST_F(ConcertTest, convertFromJson)
                         "someParameter": 43
                     }
                 ]
-            })"_json);
+            })",
+            err,
+            json11::STANDARD));
 
     NiceMock<MockPatch>* pConvertedPatch1 = new NiceMock<MockPatch>();
     NiceMock<MockPatch>* pConvertedPatch2 = new NiceMock<MockPatch>();
@@ -203,16 +206,16 @@ TEST_F(ConcertTest, convertFromJson)
 
     // Re-create the sub-objects of the above test input, 
     // so we can verify that they are passed to the factory in order.
-    json mockPatch1Json;
+    Json::object mockPatch1Json;
     mockPatch1Json["objectType"] = "MockPatch";
     mockPatch1Json["someParameter"] = 42;
-    json mockPatch2Json;
+    Json::object mockPatch2Json;
     mockPatch2Json["objectType"] = "MockPatch";
     mockPatch2Json["someParameter"] = 43;
 
-    Expectation first = EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(mockPatch1Json))
+    Expectation first = EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(Json(mockPatch1Json)))
         .WillOnce(Return(pConvertedPatch1));
-    EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(mockPatch2Json))
+    EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(Json(mockPatch2Json)))
         .After(first)
         .WillOnce(Return(pConvertedPatch2));
 
