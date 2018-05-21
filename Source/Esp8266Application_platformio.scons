@@ -33,13 +33,16 @@ components.install(env)
 env.Append(CPPPATH=[
     '#/Source',
     '#/Source/StlFreertos',
-    # For dependencies expected to be installed on the system:
-    # - nlohmann/json (https://github.com/nlohmann/json)
-    '/usr/local/include',
+    '#/Source/ExternalComponents/json11'
+])
+
+env.Append(CPPFLAGS=[
+    '-std=c++11',
 ])
 
 # Define dependencies
-SConscript('Common/Common.Scons', exports={'base_env': env}, duplicate=False)
+SConscript('ExternalComponents/json11.scons', exports={'base_env': env}, duplicate=False)
+SConscript('Common/Common.scons', exports={'base_env': env}, duplicate=False)
 SConscript('Processing/Processing.scons', exports={'base_env': env}, duplicate=False)
 
 # Build library of dependencies to be able to link it with the application which is built by PlatformIO

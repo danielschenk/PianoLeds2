@@ -27,7 +27,7 @@
  */
 
 #include <cstdint>
-#include <cstdio>
+#include <stdio.h>
 
 #include <Common/Utilities/Json11Helper.h>
 
@@ -96,7 +96,7 @@ Json convert(const TNoteToLightMap& rSource)
     for(const auto& rPair : rSource)
     {
         char buf[4];
-        std::snprintf(buf, sizeof(buf), "%u", rPair.first);
+        snprintf(buf, sizeof(buf), "%u", rPair.first);
         converted[std::string(buf)] = Json(rPair.second);
     }
 
@@ -111,7 +111,7 @@ TNoteToLightMap convert(const Json& rSource)
     for(unsigned int noteNumber = 0; noteNumber <= UINT8_MAX; ++noteNumber)
     {
         char buf[4];
-        std::snprintf(buf, sizeof(buf), "%u", noteNumber);
+        snprintf(buf, sizeof(buf), "%u", noteNumber);
 
         uint8_t lightNumber;
         if(helper.getItemIfPresent(std::string(buf), lightNumber))

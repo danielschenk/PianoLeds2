@@ -28,7 +28,8 @@
 #include <string>
 #include <mutex>
 #include <cstdarg>
-#include <cstdio>
+#include <algorithm>
+#include <stdio.h>
 
 #include "LoggingEntryPoint.h"
 #include "Interfaces/ILoggingTarget.h"
@@ -68,7 +69,7 @@ void LoggingEntryPoint::logMessage(uint64_t time, Logging::TLogLevel level, cons
         std::vector<char> buffer(c_maxMessageSize);
         va_list args;
         va_start(args, fmt);
-        std::vsnprintf(buffer.data(), buffer.size(), fmt, args);
+        vsnprintf(buffer.data(), buffer.size(), fmt, args);
         va_end(args);
 
         std::string message(buffer.data());
