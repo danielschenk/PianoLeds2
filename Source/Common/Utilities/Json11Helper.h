@@ -31,40 +31,46 @@
 
 #include <string>
 #include <json11.hpp>
+// for convenience
+using Json = json11::Json;
 
 #include <Common/Logging.h>
 
 #define LOGGING_COMPONENT "Json11Helper"
 
+/**
+ * @brief Helper class to fetch JSON items with type checking.
+ */
 class Json11Helper
 {
 public:
     /**
      * Constructor.
      *
-     * @param[in]   user    Name of the user for logging errors.
-     * @param[in]   rJson   JSON object to work with.
+     * @param[in]   user            Name of the user for logging errors.
+     * @param[in]   rJson           JSON object to work with.
+     * @param[in]   logMissingKeys  If missing keys should be logged.
      */
-    Json11Helper(std::string user, json11::Json& rJson);
-    Json11Helper(const char* user, json11::Json& rJson);
+    Json11Helper(std::string user, const Json& rJson, bool logMissingKeys = true);
+    Json11Helper(const char* user, const Json& rJson, bool logMissingKeys = true);
 
     virtual ~Json11Helper();
 
     template<typename T>
     bool getItemIfPresent(std::string key, T& rTarget) const
     {
-        bool found(false);
         if(!m_rJson[key].is_null())
         {
-            found = true;
             return getItem(key, rTarget);
         }
         else
         {
-            LOG_ERROR_PARAMS("%s: Missing JSON key '%s'", m_user.c_str(), key.c_str());
+            if(m_logMissingKeys)
+            {
+                LOG_ERROR_PARAMS("%s: Missing JSON key '%s'", m_user.c_str(), key.c_str());
+            }
+            return false;
         }
-
-        return found;
     }
 
     Json11Helper() = delete;
@@ -72,13 +78,53 @@ public:
     Json11Helper& operator=(const Json11Helper&) = delete;
 
 private:
+    template <typename IntegerType>
+    bool getInt(std::string key, IntegerType& rTarget) const
+    {
+        const auto& rItem = m_rJson[key];
+
+        if(rItem.is_number())
+        {
+            rTarget = static_cast<IntegerType>(rItem.int_value());
+            return true;
+        }
+        else
+        {
+            LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a number", m_user.c_str(), key.c_str());
+            return false;
+        }
+    }
+
+    template <typename FloatType>
+    bool getFloat(std::string key, FloatType& rTarget) const
+    {
+        const auto& rItem = m_rJson[key];
+
+        if(rItem.is_number())
+        {
+            rTarget = static_cast<FloatType>(rItem.number_value());
+            return true;
+        }
+        else
+        {
+            LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a number", m_user.c_str(), key.c_str());
+            return false;
+        }
+    }
+
     bool getItem(std::string key, int& rTarget) const;
+    bool getItem(std::string key, uint8_t& rTarget) const;
+    bool getItem(std::string key, uint16_t& rTarget) const;
+    bool getItem(std::string key, float& rTarget) const;
     bool getItem(std::string key, double& rTarget) const;
     bool getItem(std::string key, bool& rTarget) const;
     bool getItem(std::string key, std::string& rTarget) const;
+    bool getItem(std::string key, Json::object& rTarget) const;
+    bool getItem(std::string key, Json::array& rTarget) const;
 
     std::string     m_user;
-    json11::Json&   m_rJson;
+    const Json&     m_rJson;
+    bool            m_logMissingKeys;
 };
 
 #undef LOGGING_COMPONENT

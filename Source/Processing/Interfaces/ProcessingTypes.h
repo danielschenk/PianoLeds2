@@ -33,6 +33,8 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <json11.hpp>
+using Json = json11::Json;
 
 namespace Processing
 {
@@ -85,11 +87,8 @@ typedef std::vector<TRgb> TRgbStrip;
 /** Type to map MIDI note numbers to lights. */
 typedef std::map<uint8_t, uint8_t> TNoteToLightMap;
 
-/** Same as @ref TNoteToLightMap but with string as key. */
-typedef std::map<std::string, uint8_t> TStringNoteToLightMap;
-
-TStringNoteToLightMap convert(const TNoteToLightMap& rSource);
-TNoteToLightMap convert(const TStringNoteToLightMap& rSource);
+Json convert(const TNoteToLightMap& rSource);
+TNoteToLightMap convert(const Json& rSource);
 
 /** Type for actual time in milliseconds. */
 typedef uint64_t TTime;

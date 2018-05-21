@@ -25,17 +25,22 @@
  *
  */
 
+#include <Common/Utilities/Json11Helper.h>
+
 #include "RgbFunctionFactory.h"
 #include "LinearRgbFunction.h"
 #include "Interfaces/IJsonConvertible.h"
 #include "Interfaces/IRgbFunction.h"
 
-IRgbFunction* RgbFunctionFactory::createRgbFunction(json json) const
+IRgbFunction* RgbFunctionFactory::createRgbFunction(const Json& rConverted) const
 {
     IRgbFunction* rgbFunction = nullptr;
-    if(json.count(IJsonConvertible::c_objectTypeKey) > 0)
+
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+
+    std::string objectType;
+    if(helper.getItemIfPresent(IJsonConvertible::c_objectTypeKey, objectType))
     {
-        std::string objectType = json[IJsonConvertible::c_objectTypeKey];
         if(objectType == IRgbFunction::c_jsonTypeNameLinearRgbFunction)
         {
             rgbFunction = new LinearRgbFunction();
@@ -43,7 +48,7 @@ IRgbFunction* RgbFunctionFactory::createRgbFunction(json json) const
 
         if(rgbFunction != nullptr)
         {
-            rgbFunction->convertFromJson(json);
+            rgbFunction->convertFromJson(rConverted);
         }
     }
 

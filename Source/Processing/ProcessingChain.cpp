@@ -26,6 +26,7 @@
  */
 
 #include <Common/Logging.h>
+#include <Common/Utilities/Json11Helper.h>
 
 #include "ProcessingChain.h"
 
@@ -68,33 +69,33 @@ void ProcessingChain::insertBlock(IProcessingBlock* pBlock)
     m_active ? pBlock->activate() : pBlock->deactivate();
 }
 
-json ProcessingChain::convertToJson() const
+Json ProcessingChain::convertToJson() const
 {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-    json converted;
+    Json::object converted;
     converted[IProcessingBlock::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameProcessingChain);
 
-    std::vector<json> convertedChain;
+    Json::array convertedChain;
     for(auto pProcessingBlock : m_processingChain)
     {
         convertedChain.push_back(pProcessingBlock->convertToJson());
     }
     converted[c_processingChainJsonKey] = convertedChain;
 
-    return converted;
+    return Json(converted);
 }
 
-void ProcessingChain::convertFromJson(json converted)
+void ProcessingChain::convertFromJson(const Json& rConverted)
 {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
     deleteProcessingBlocks();
 
-    std::string processingChainJsonKey(c_processingChainJsonKey);
-    if(converted.count(processingChainJsonKey) > 0)
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+    Json::array convertedChain;
+    if(helper.getItemIfPresent(c_processingChainJsonKey, convertedChain))
     {
-        std::vector<json> convertedChain = converted[processingChainJsonKey];
         for(auto convertedBlock : convertedChain)
         {
             m_processingChain.push_back(m_rProcessingBlockFactory.createProcessingBlock(convertedBlock));
@@ -105,15 +106,12 @@ void ProcessingChain::convertFromJson(json converted)
         LOG_ERROR("convertFromJson: JSON does not contain list of processing blocks. Chain will stay empty.");
     }
 
-    for(auto it = converted.begin(); it != converted.end(); ++it)
-    {
-        if(it.key() != processingChainJsonKey)
-        {
-            LOG_WARNING_PARAMS("convertFromJson: unknown key '%s'", it.key().c_str());
-        }
-    }
-
     updateAllBlockStates();
+}
+
+std::string ProcessingChain::getObjectType() const
+{
+    return IProcessingBlock::c_typeNameProcessingChain;
 }
 
 void ProcessingChain::activate()

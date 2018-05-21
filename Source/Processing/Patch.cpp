@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-#include <Common/Utilities/JsonHelper.h>
+#include <Common/Utilities/Json11Helper.h>
 
 #include "Patch.h"
 #include "Interfaces/IProcessingBlockFactory.h"
@@ -49,14 +49,12 @@ Patch::~Patch()
 {
 }
 
-json Patch::convertToJson() const
+Json Patch::convertToJson() const
 {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-    // Start with contents of base
-    json converted = ProcessingChain::convertToJson();
-    // Overwrite object type
-    converted[IProcessingBlock::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNamePatch);
+    // Start with contents of base (also sets object type using our override)
+    Json::object converted = ProcessingChain::convertToJson().object_items();
 
     // Add items specific for Patch
     converted[c_hasBankAndProgramJsonKey] = m_hasBankAndProgram;
@@ -67,25 +65,24 @@ json Patch::convertToJson() const
     return converted;
 }
 
-void Patch::convertFromJson(json converted)
+void Patch::convertFromJson(const Json& rConverted)
 {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
     // Get items specific for Patch
-    JsonHelper helper(__PRETTY_FUNCTION__, converted);
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
     helper.getItemIfPresent(c_hasBankAndProgramJsonKey, m_hasBankAndProgram);
     helper.getItemIfPresent(c_programJsonKey, m_program);
     helper.getItemIfPresent(c_bankJsonKey, m_bank);
     helper.getItemIfPresent(c_nameJsonKey, m_name);
     
-    // Remove keys the base doesn't know about, to prevent warnings
-    converted.erase(c_hasBankAndProgramJsonKey);
-    converted.erase(c_programJsonKey);
-    converted.erase(c_bankJsonKey);
-    converted.erase(c_nameJsonKey);
-
     // Get contents of base
-    ProcessingChain::convertFromJson(converted);
+    ProcessingChain::convertFromJson(rConverted);
+}
+
+std::string Patch::getObjectType() const
+{
+    return IProcessingBlock::c_typeNamePatch;
 }
 
 uint8_t Patch::getBank() const

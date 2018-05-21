@@ -29,8 +29,9 @@
 #ifndef PROCESSING_INTERFACES_IRGBFUNCTIONFACTORY_H_
 #define PROCESSING_INTERFACES_IRGBFUNCTIONFACTORY_H_
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include <json11.hpp>
+// for convenience
+using Json = json11::Json;
 
 class IRgbFunction;
 
@@ -50,11 +51,11 @@ public:
     /**
      * Create RGB function from JSON input.
      *
-     * @param   [in]    json    The JSON object containing the type name and persistent properties.
+     * @param   [in]    converted   The JSON object containing the type name and persistent properties.
      *
      * @return  The newly created RGB function or nullptr if type could not be determined.
      */
-    virtual IRgbFunction* createRgbFunction(json json) const = 0;
+    virtual IRgbFunction* createRgbFunction(const Json& rConverted) const = 0;
 };
 
 

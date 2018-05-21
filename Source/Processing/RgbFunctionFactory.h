@@ -44,7 +44,7 @@ public:
     RgbFunctionFactory& operator=(const RgbFunctionFactory&) = delete;
 
     // IRgbFunctionFactory implementation
-    virtual IRgbFunction* createRgbFunction(json json) const;
+    virtual IRgbFunction* createRgbFunction(const Json& rConverted) const;
 };
 
 #endif /* PROCESSING_RGBFUNCTIONFACTORY_H_ */

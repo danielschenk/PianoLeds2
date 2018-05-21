@@ -28,16 +28,22 @@
 
 #define LOGGING_COMPONENT "Json11Helper"
 
-Json11Helper::Json11Helper(std::string user, json11::Json& rJson)
+Json11Helper::Json11Helper(std::string user, const Json& rJson, bool logMissingKeys)
     : m_user(user)
     , m_rJson(rJson)
+    , m_logMissingKeys(logMissingKeys)
 {
 }
 
-Json11Helper::Json11Helper(const char* user, json11::Json& rJson)
+Json11Helper::Json11Helper(const char* user, const Json& rJson, bool logMissingKeys)
     : m_user(user)
     , m_rJson(rJson)
+    , m_logMissingKeys(logMissingKeys)
 {
+    if(!m_rJson.is_object())
+    {
+        LOG_ERROR_PARAMS("%s: Passed object not a JSON object", m_user.c_str());
+    }
 }
 
 Json11Helper::~Json11Helper()
@@ -46,34 +52,27 @@ Json11Helper::~Json11Helper()
 
 bool Json11Helper::getItem(std::string key, int& rTarget) const
 {
-    const auto& rItem = m_rJson[key];
+    return getInt(key, rTarget);
+}
 
-    if(rItem.is_number())
-    {
-        rTarget = rItem.int_value();
-        return true;
-    }
-    else
-    {
-        LOG_ERROR_PARAMS("%s: JSON key '%s' not a number", m_user.c_str(), key.c_str());
-        return false;
-    }
+bool Json11Helper::getItem(std::string key, uint8_t& rTarget) const
+{
+    return getInt(key, rTarget);
+}
+
+bool Json11Helper::getItem(std::string key, uint16_t& rTarget) const
+{
+    return getInt(key, rTarget);
+}
+
+bool Json11Helper::getItem(std::string key, float& rTarget) const
+{
+    return getFloat(key, rTarget);
 }
 
 bool Json11Helper::getItem(std::string key, double& rTarget) const
 {
-    const auto& rItem = m_rJson[key];
-
-    if(rItem.is_number())
-    {
-        rTarget = rItem.number_value();
-        return true;
-    }
-    else
-    {
-        LOG_ERROR_PARAMS("%s: JSON key '%s' not a number", m_user.c_str(), key.c_str());
-        return false;
-    }
+    return getFloat(key, rTarget);
 }
 
 bool Json11Helper::getItem(std::string key, bool& rTarget) const
@@ -87,7 +86,7 @@ bool Json11Helper::getItem(std::string key, bool& rTarget) const
     }
     else
     {
-        LOG_ERROR_PARAMS("%s: JSON key '%s' not a boolean", m_user.c_str(), key.c_str());
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a boolean", m_user.c_str(), key.c_str());
         return false;
     }
 }
@@ -103,7 +102,39 @@ bool Json11Helper::getItem(std::string key, std::string& rTarget) const
     }
     else
     {
-        LOG_ERROR_PARAMS("%s: JSON key '%s' not a string", m_user.c_str(), key.c_str());
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a string", m_user.c_str(), key.c_str());
+        return false;
+    }
+}
+
+bool Json11Helper::getItem(std::string key, Json::object& rTarget) const
+{
+    const auto& rItem = m_rJson[key];
+
+    if(rItem.is_object())
+    {
+        rTarget = rItem.object_items();
+        return true;
+    }
+    else
+    {
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not an object", m_user.c_str(), key.c_str());
+        return false;
+    }
+}
+
+bool Json11Helper::getItem(std::string key, Json::array& rTarget) const
+{
+    const auto& rItem = m_rJson[key];
+
+    if(rItem.is_array())
+    {
+        rTarget = rItem.array_items();
+        return true;
+    }
+    else
+    {
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not an array", m_user.c_str(), key.c_str());
         return false;
     }
 }

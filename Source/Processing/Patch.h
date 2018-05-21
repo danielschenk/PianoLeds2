@@ -70,8 +70,8 @@ public:
     Patch& operator=(const Patch&) = delete;
 
     // IJsonConvertible implementation
-    virtual json convertToJson() const;
-    virtual void convertFromJson(json json);
+    virtual Json convertToJson() const;
+    virtual void convertFromJson(const Json& rConverted);
 
     // IPatch implementation
     virtual bool hasBankAndProgram() const;
@@ -82,6 +82,10 @@ public:
     virtual void clearBankAndProgram();
     virtual std::string getName() const;
     virtual void setName(const std::string name);
+
+protected:
+    // IJsonConvertible implementation
+    std::string getObjectType() const;
 
 private:
     static constexpr const char* c_hasBankAndProgramJsonKey = "hasBankAndProgram";

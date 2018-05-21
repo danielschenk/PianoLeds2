@@ -56,8 +56,8 @@ public:
     virtual void activate();
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& output);
-    virtual json convertToJson() const;
-    virtual void convertFromJson(json json);
+    virtual Json convertToJson() const;
+    virtual void convertFromJson(const Json& rConverted);
 
     /**
      * Get color.
@@ -68,6 +68,10 @@ public:
      * Set color.
      */
     void setColor(Processing::TRgb color);
+
+protected:
+    // IProcessingBlock implementation
+    virtual std::string getObjectType() const;
 
 private:
     static constexpr const char* c_rJsonKey = "r";

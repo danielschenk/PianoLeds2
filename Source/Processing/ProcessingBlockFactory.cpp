@@ -25,6 +25,8 @@
  *
  */
 
+#include <Common/Utilities/Json11Helper.h>
+
 #include "ProcessingBlockFactory.h"
 #include "NoteRgbSource.h"
 #include "EqualRangeRgbSource.h"
@@ -44,12 +46,15 @@ ProcessingBlockFactory::~ProcessingBlockFactory()
 {
 }
 
-IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json converted) const
+IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& rConverted) const
 {
     IProcessingBlock* processingBlock = nullptr;
-    if(converted.count(IJsonConvertible::c_objectTypeKey) > 0)
+
+    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+
+    std::string objectType;
+    if(helper.getItemIfPresent(IJsonConvertible::c_objectTypeKey, objectType))
     {
-        std::string objectType = converted[IJsonConvertible::c_objectTypeKey];
         if(objectType == IProcessingBlock::c_typeNameEqualRangeRgbSource)
         {
             processingBlock = new EqualRangeRgbSource();
@@ -71,7 +76,7 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(json converted) 
 
         if(processingBlock != nullptr)
         {
-            processingBlock->convertFromJson(converted);
+            processingBlock->convertFromJson(rConverted);
         }
     }
 
@@ -84,13 +89,13 @@ IPatch* ProcessingBlockFactory::createPatch() const
     return new Patch(*this);
 }
 
-IPatch* ProcessingBlockFactory::createPatch(json converted) const
+IPatch* ProcessingBlockFactory::createPatch(const Json& rConverted) const
 {
     IPatch* pPatch = createPatch();
 
     if(pPatch != nullptr)
     {
-        pPatch->convertFromJson(converted);
+        pPatch->convertFromJson(rConverted);
     }
 
     return pPatch;

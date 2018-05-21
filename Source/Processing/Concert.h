@@ -71,8 +71,8 @@ public:
     Concert& operator =(const Concert&) = delete;
 
     // IJsonConvertible implementation
-    virtual json convertToJson() const;
-    virtual void convertFromJson(json json);
+    virtual Json convertToJson() const;
+    virtual void convertFromJson(const Json& rConverted);
 
     typedef int TPatchPosition;
     static constexpr TPatchPosition c_invalidPatchPosition = -1;
@@ -138,6 +138,10 @@ public:
     void setCurrentBank(uint16_t bank);
 
     void execute();
+
+protected:
+    // IJsonConvertible implementation
+    std::string getObjectType() const;
 
 private:
     static constexpr const char* c_isListeningToProgramChangeJsonKey    = "isListeningToProgramChange";
