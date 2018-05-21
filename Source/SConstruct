@@ -37,12 +37,6 @@ if ARGUMENTS.get('VERBOSE') != '1':
     env['CXXCOMSTR'] = 'Compiling $TARGET'
     env['LINKCOMSTR'] = 'Linking $TARGET'
 
-env.Append(CPPPATH=[
-    # For dependencies expected to be installed on the system:
-    # - nlohmann/json (https://github.com/nlohmann/json)
-    '/usr/local/include',
-])
-
 # Propagate the 'TERM' environment variable from the OS, so tools can decide if they should colorize output
 env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
 
