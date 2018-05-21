@@ -40,6 +40,9 @@ public:
     MOCK_CONST_METHOD2(calculate, Processing::TRgb(const Processing::TNoteState& noteState, Processing::TTime currentTime));
     MOCK_CONST_METHOD0(convertToJson, Json());
     MOCK_METHOD1(convertFromJson, void(const Json& rConverted));
+
+protected:
+    MOCK_CONST_METHOD0(getObjectType, std::string());
 };
 
 

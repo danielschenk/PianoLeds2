@@ -64,7 +64,7 @@ public:
                      "objectType": "MockRgbFunction",
                      "someParameter": 42
                  }
-             })"_json)
+             })")
     {
         // Store callbacks so we can simulate events
         EXPECT_CALL(m_mockMidiInput, subscribeNoteOnOff(_))
@@ -106,18 +106,8 @@ public:
 
     Processing::TNoteToLightMap m_noteToLightMap;
 
-    json m_exampleJson;
+    std::string m_exampleJson;
 };
-
-class JsonPropertyNoteRgbSourceTest
-    : public NoteRgbSourceTest
-    , public ::testing::WithParamInterface<std::string>
-{
-};
-
-INSTANTIATE_TEST_CASE_P(KnownJsonProperties,
-                        JsonPropertyNoteRgbSourceTest,
-                        ::testing::Values("usingPedal", "channel", "rgbFunction"));
 
 TEST_F(NoteRgbSourceTest, noNotesSounding)
 {
@@ -336,7 +326,7 @@ TEST_F(NoteRgbSourceTest, convertToJson)
     MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
     ASSERT_NE(nullptr, pMockRgbFunction);
 
-    json mockRgbFunctionJson;
+    Json::object mockRgbFunctionJson;
     mockRgbFunctionJson["objectType"] = "MockRgbFunction";
     mockRgbFunctionJson["someParameter"] = 42;
     EXPECT_CALL(*pMockRgbFunction, convertToJson())
@@ -347,18 +337,19 @@ TEST_F(NoteRgbSourceTest, convertToJson)
     m_pNoteRgbSource->setChannel(6);
     m_pNoteRgbSource->setUsingPedal(false);
 
-    json j = m_pNoteRgbSource->convertToJson();
-    EXPECT_EQ("NoteRgbSource", j.at("objectType").get<std::string>());
-    EXPECT_EQ(6, j.at("channel").get<int>());
-    EXPECT_EQ(false, j.at("usingPedal").get<bool>());
-    EXPECT_EQ("MockRgbFunction", j.at("rgbFunction").at("objectType").get<std::string>());
-    EXPECT_EQ(42, j.at("rgbFunction").at("someParameter").get<int>());
+    Json::object j = m_pNoteRgbSource->convertToJson().object_items();
+    EXPECT_EQ("NoteRgbSource", j.at("objectType").string_value());
+    EXPECT_EQ(6, j.at("channel").int_value());
+    EXPECT_EQ(false, j.at("usingPedal").bool_value());
+    EXPECT_EQ("MockRgbFunction", j.at("rgbFunction").object_items().at("objectType").string_value());
+    EXPECT_EQ(42, j.at("rgbFunction").object_items().at("someParameter").int_value());
 }
 
 TEST_F(NoteRgbSourceTest, convertFromJson)
 {
-    json j(m_exampleJson);
-    json mockRgbFunctionJson;
+    std::string err;
+    Json j(Json::parse(m_exampleJson, err, json11::STANDARD));
+    Json::object mockRgbFunctionJson;
     mockRgbFunctionJson["objectType"] = "MockRgbFunction";
     mockRgbFunctionJson["someParameter"] = 42;
 
@@ -367,7 +358,7 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
     EXPECT_CALL(*pMockRgbFunction, calculate(_, _))
         .WillRepeatedly(Return(Processing::TRgb(1, 2, 3)));
 
-    EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(mockRgbFunctionJson))
+    EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(Json(mockRgbFunctionJson)))
         .WillOnce(Return(pMockRgbFunction));
 
     m_pNoteRgbSource->convertFromJson(j);
@@ -381,24 +372,4 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
     Processing::TRgbStrip testStrip(3);
     m_pNoteRgbSource->execute(testStrip);
     EXPECT_EQ(reference, testStrip);
-}
-
-TEST_P(JsonPropertyNoteRgbSourceTest, convertFromJsonMissingProperty)
-{
-    json j(m_exampleJson);
-
-    ASSERT_EQ(1, j.erase(GetParam()));
-
-    if(GetParam() != "rgbFunction")
-    {
-        // RGB function is not deleted from JSON, so expect call to factory
-        MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
-        ASSERT_NE(nullptr, pMockRgbFunction);
-
-        EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(_))
-            .WillOnce(Return(pMockRgbFunction));
-    }
-
-    EXPECT_CALL(m_mockLoggingTarget, logMessage(_, Logging::LogLevel_Error, _, HasSubstr(GetParam())));
-    m_pNoteRgbSource->convertFromJson(j);
 }
