@@ -74,7 +74,7 @@ Json ProcessingChain::convertToJson() const
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
     Json::object converted;
-    converted[IProcessingBlock::c_objectTypeKey] = std::string(IProcessingBlock::c_typeNameProcessingChain);
+    converted[IProcessingBlock::c_objectTypeKey] = getObjectType();
 
     Json::array convertedChain;
     for(auto pProcessingBlock : m_processingChain)

@@ -62,13 +62,13 @@ TEST_F(PatchTest, convertToJson)
     m_patch.setProgram(43);
     m_patch.setName("Awesome patch");
 
-    std::vector<json> mockBlocksJson;
+    Json::array mockBlocksJson;
     for(unsigned int i = 0; i < 3; ++i)
     {
         TMockBlock* pMockBlock = new TMockBlock;
         ASSERT_NE(nullptr, pMockBlock);
 
-        json mockJson = createMockBlockJson(i);
+        Json mockJson = createMockBlockJson(i);
         EXPECT_CALL(*pMockBlock, convertToJson())
             .WillOnce(Return(mockJson));
         mockBlocksJson.push_back(mockJson);
@@ -76,14 +76,14 @@ TEST_F(PatchTest, convertToJson)
         m_patch.insertBlock(pMockBlock);
     }
 
-    json converted = m_patch.convertToJson();
-    EXPECT_EQ(42, converted.at("bank").get<int>());
-    EXPECT_EQ(43, converted.at("program").get<int>());
-    EXPECT_EQ(true, converted.at("hasBankAndProgram").get<bool>());
-    EXPECT_EQ("Awesome patch", converted.at("name").get<std::string>());
+    Json::object converted = m_patch.convertToJson().object_items();
+    EXPECT_EQ(42, converted.at("bank").number_value());
+    EXPECT_EQ(43, converted.at("program").number_value());
+    EXPECT_EQ(true, converted.at("hasBankAndProgram").bool_value());
+    EXPECT_EQ("Awesome patch", converted.at("name").string_value());
 
-    EXPECT_EQ(mockBlocksJson, converted["processingChain"]);
-    EXPECT_EQ("Patch", converted.at("objectType").get<std::string>());
+    EXPECT_EQ(mockBlocksJson, converted["processingChain"].array_items());
+    EXPECT_EQ("Patch", converted.at("objectType").string_value());
 }
 
 TEST_F(PatchTest, convertFromJson)
@@ -95,21 +95,21 @@ TEST_F(PatchTest, convertFromJson)
     m_pGreenSource = nullptr;
     m_pValueDoubler = nullptr;
 
-    std::vector<json> mockBlocksJson;
+    Json::array mockBlocksJson;
     for(unsigned int i = 0; i < mockBlocks.size(); ++i)
     {
-        json mockJson = createMockBlockJson(i);
+        Json mockJson = createMockBlockJson(i);
         mockBlocksJson.push_back(mockJson);
         EXPECT_CALL(m_processingBlockFactory, createProcessingBlock(mockJson))
             .WillOnce(Return(mockBlocks[i]));
     }
-    json j;
+    Json::object j;
     j["processingChain"] = mockBlocksJson;
     j["bank"] = 42;
     j["program"] = 43;
     j["hasBankAndProgram"] = true;
     j["name"] = std::string("Awesome patch");
-    m_patch.convertFromJson(j);
+    m_patch.convertFromJson(Json(j));
 
     Processing::TRgbStrip reference(3);
     reference[0] = {0, 20, 0};
