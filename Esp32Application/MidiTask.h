@@ -27,8 +27,7 @@
 #ifndef ESP32APPLICATION_MIDITASK_H_
 #define ESP32APPLICATION_MIDITASK_H_
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include "BaseTask.h"
 
 class ArduinoMidiInput;
 
@@ -36,6 +35,7 @@ class ArduinoMidiInput;
  * FreeRTOS task processing incoming MIDI bytes.
  */
 class MidiTask
+    : public BaseTask
 {
 public:
     /**
@@ -52,7 +52,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~MidiTask();
+    virtual ~MidiTask() = default;
 
     // Prevent implicit default constructors and assignment operator.
     MidiTask() = delete;
@@ -65,12 +65,9 @@ public:
     void wake();
 
 private:
-    static void taskFunction(void* pvParameters);
-
-    void run();
+    virtual void run();
 
     ArduinoMidiInput& m_rMidiInput;
-    TaskHandle_t m_taskHandle;
 };
 
 #endif /* ESP32APPLICATION_MIDITASK_H_ */

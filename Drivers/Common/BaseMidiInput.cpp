@@ -112,7 +112,7 @@ void BaseMidiInput::processMidiByte(uint8_t value)
         case NOTE_ON:
             if(m_currentMessage.size() >= 3)
             {
-                // Channel, pitch, velocity, note off
+                // Channel, pitch, velocity, note on
                 notifyNoteOnOff(channel, m_currentMessage[1], m_currentMessage[2], true);
                 m_buildingMessage = false;
             }

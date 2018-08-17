@@ -27,27 +27,18 @@
 #include "Common/LoggingEntryPoint.h"
 #include "LoggingTask.h"
 
-
 LoggingTask::LoggingTask(Stream& rSerial,
-                        uint32_t stackSize,
-                        UBaseType_t priority)
-    : m_rSerial(rSerial)
+                         uint32_t stackSize,
+                         UBaseType_t priority)
+    : BaseTask("logging", stackSize, priority)
+    , m_rSerial(rSerial)
 {
-    xTaskCreate(&LoggingTask::taskFunction,
-                "logging",
-                stackSize,
-                this,
-                priority,
-                &m_taskHandle);
-    assert(m_taskHandle != NULL);
-
     LoggingEntryPoint::subscribe(*this);
 }
 
 LoggingTask::~LoggingTask()
 {
     LoggingEntryPoint::unsubscribe(*this);
-    vTaskDelete(m_taskHandle);
 }
 
 void LoggingTask::logMessage(uint64_t time,
@@ -56,15 +47,6 @@ void LoggingTask::logMessage(uint64_t time,
                              std::string message)
 {
     // TODO put in queue?
-}
-
-void LoggingTask::taskFunction(void* pvParameters)
-{
-    while(true)
-    {
-        // pvParameters points to the instance
-        static_cast<LoggingTask*>(pvParameters)->run();
-    }
 }
 
 void LoggingTask::run()

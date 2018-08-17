@@ -34,34 +34,14 @@
 MidiTask::MidiTask(ArduinoMidiInput& rMidiInput,
                    uint32_t stackSize,
                    UBaseType_t priority)
-    : m_rMidiInput(rMidiInput)
+    : BaseTask("midi", stackSize, priority)
+    , m_rMidiInput(rMidiInput)
 {
-    xTaskCreate(&MidiTask::taskFunction,
-                "midi",
-                stackSize,
-                this,
-                priority,
-                &m_taskHandle);
-    assert(m_taskHandle != NULL);
-}
-
-MidiTask::~MidiTask()
-{
-    vTaskDelete(m_taskHandle);
-}
-
-void MidiTask::taskFunction(void* pvParameters)
-{
-    while(true)
-    {
-        // pvParameters points to the instance
-        static_cast<MidiTask*>(pvParameters)->run();
-    }
 }
 
 void MidiTask::wake()
 {
-    xTaskNotifyGive(m_taskHandle);
+    xTaskNotifyGive(getTaskHandle());
 }
 
 void MidiTask::run()

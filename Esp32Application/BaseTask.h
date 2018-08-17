@@ -24,50 +24,62 @@
  * SOFTWARE.
  */
 
-#ifndef ESP32APPLICATION_LOGGINGTASK_H_
-#define ESP32APPLICATION_LOGGINGTASK_H_
+#ifndef ESP32APPLICATION_BASETASK_H_
+#define ESP32APPLICATION_BASETASK_H_
 
-#include "Common/Interfaces/ILoggingTarget.h"
-#include "BaseTask.h"
-
-class Stream;
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 /**
- * The logging task.
+ * Base class for a FreeRTOS task.
  */
-class LoggingTask
-    : public ILoggingTarget
-    , public BaseTask
+class BaseTask
 {
 public:
     /**
      * Constructor.
      *
-     * @param rSerial   The Arduino Serial instance to use
+     * @param pName     Name of the task
      * @param stackSize Stack size in words
      * @param priority  Priority
      */
-    LoggingTask(Stream& rSerial,
-                uint32_t stackSize,
-                UBaseType_t priority);
+    BaseTask(const char* pName,
+             uint32_t stackSize,
+             UBaseType_t priority);
+
+    // Prevent implicit constructors and assignment operator
+    BaseTask() = delete;
+    BaseTask(const BaseTask&) = delete;
+    BaseTask& operator=(const BaseTask&) = delete;
 
     /**
      * Destructor.
      */
-    virtual ~LoggingTask();
+    virtual ~BaseTask();
 
-    // Prevent implicit constructors and assignment operator
-    LoggingTask() = delete;
-    LoggingTask(const LoggingTask&) = delete;
-    LoggingTask& operator=(const LoggingTask&) = delete;
+    /**
+     * Tell the task to terminate.
+     */
+    void terminate();
 
-    // ILoggingTarget implementation
-    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
+protected:
+    TaskHandle_t getTaskHandle() const;
 
 private:
-    virtual void run();
+    /**
+     * Run function of the task. Is repeatedly executed until termination.
+     */
+    virtual void run() = 0;
 
-    Stream& m_rSerial;
+    /**
+     * Entry point for FreeRTOS, needs to be static.
+     *
+     * @param pvParameters  Should point to the instance.
+     */
+    static void taskFunction(void* pvParameters);
+
+    TaskHandle_t m_taskHandle;
+    BaseType_t m_terminate;
 };
 
-#endif /* ESP32APPLICATION_LOGGINGTASK_H_ */
+#endif /* ESP32APPLICATION_BASETASK_H_ */

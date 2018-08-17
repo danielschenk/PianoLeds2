@@ -24,50 +24,47 @@
  * SOFTWARE.
  */
 
-#ifndef ESP32APPLICATION_LOGGINGTASK_H_
-#define ESP32APPLICATION_LOGGINGTASK_H_
-
-#include "Common/Interfaces/ILoggingTarget.h"
 #include "BaseTask.h"
 
-class Stream;
-
-/**
- * The logging task.
- */
-class LoggingTask
-    : public ILoggingTarget
-    , public BaseTask
+BaseTask::BaseTask(const char* pName,
+                   uint32_t stackSize,
+                   UBaseType_t priority)
+    : m_terminate(0)
 {
-public:
-    /**
-     * Constructor.
-     *
-     * @param rSerial   The Arduino Serial instance to use
-     * @param stackSize Stack size in words
-     * @param priority  Priority
-     */
-    LoggingTask(Stream& rSerial,
-                uint32_t stackSize,
-                UBaseType_t priority);
+    xTaskCreate(&BaseTask::taskFunction,
+                pName,
+                stackSize,
+                this,
+                priority,
+                &m_taskHandle);
+    assert(m_taskHandle != NULL);
+}
 
-    /**
-     * Destructor.
-     */
-    virtual ~LoggingTask();
+BaseTask::~BaseTask()
+{
+    assert(m_taskHandle == NULL);
+}
 
-    // Prevent implicit constructors and assignment operator
-    LoggingTask() = delete;
-    LoggingTask(const LoggingTask&) = delete;
-    LoggingTask& operator=(const LoggingTask&) = delete;
+void BaseTask::terminate()
+{
+    m_terminate = 1;
+}
 
-    // ILoggingTarget implementation
-    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
+TaskHandle_t BaseTask::getTaskHandle() const
+{
+    return m_taskHandle;
+}
 
-private:
-    virtual void run();
+void BaseTask::taskFunction(void* pvParameters)
+{
+    // pvPameters points to the instance
+    BaseTask* pInstance(static_cast<BaseTask*>(pvParameters));
 
-    Stream& m_rSerial;
-};
+    while(pInstance->m_terminate == 0)
+    {
+        pInstance->run();
+    }
 
-#endif /* ESP32APPLICATION_LOGGINGTASK_H_ */
+    vTaskDelete(pInstance->m_taskHandle);
+    pInstance->m_taskHandle = NULL;
+}
