@@ -22,55 +22,52 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * The MLC2 application for the ESP32, using the Arduino core.
  */
 
+#include "Common/LoggingEntryPoint.h"
 #include "LoggingTask.h"
 
-#include "Drivers/Arduino/ArduinoMidiInput.h"
-#include "MidiTask.h"
 
-static LoggingTask* gs_pLoggingTask(nullptr);
-
-static ArduinoMidiInput* gs_pMidiInput(nullptr);
-static MidiTask* gs_pMidiTask(nullptr);
-
-static constexpr uint32_t c_defaultStackSize(1024);
-
-enum
+LoggingTask::LoggingTask(Stream& rSerial,
+                        uint32_t stackSize,
+                        UBaseType_t priority)
+    : m_rSerial(rSerial)
 {
-    PRIORITY_IDLE = 0,
-    PRIORITY_LOW = 1,
-    PRIORITY_UI = 2,
-    PRIORITY_CRITICAL = 3
-};
+    xTaskCreate(&LoggingTask::taskFunction,
+                "logging",
+                stackSize,
+                this,
+                priority,
+                &m_taskHandle);
+    assert(m_taskHandle != NULL);
 
-void setup()
-{
-    // Initialize logging
-    Serial.begin(115200);
-    gs_pLoggingTask = new LoggingTask(Serial,
-                                      c_defaultStackSize,
-                                      PRIORITY_LOW);
-
-    // Initialize MIDI, baud rate is 31.25k
-    Serial2.begin(31250);
-
-    gs_pMidiInput = new ArduinoMidiInput(Serial2);
-    gs_pMidiTask = new MidiTask(*gs_pMidiInput,
-                                c_defaultStackSize,
-                                PRIORITY_CRITICAL);
+    LoggingEntryPoint::subscribe(*this);
 }
 
-
-void loop()
+LoggingTask::~LoggingTask()
 {
+    LoggingEntryPoint::unsubscribe(*this);
+    vTaskDelete(m_taskHandle);
 }
 
-
-// This function is called by the Arduino Serial driver
-void serialEvent2()
+void LoggingTask::logMessage(uint64_t time,
+                             Logging::TLogLevel level,
+                             std::string component,
+                             std::string message)
 {
-    gs_pMidiTask->wake();
+    // TODO put in queue?
+}
+
+void LoggingTask::taskFunction(void* pvParameters)
+{
+    while(true)
+    {
+        // pvParameters points to the instance
+        static_cast<LoggingTask*>(pvParameters)->run();
+    }
+}
+
+void LoggingTask::run()
+{
+    // TODO wait for something in the queue and send to serial?
 }

@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,41 +22,56 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
- * @brief Interface for logging targets.
  */
 
-#ifndef COMMON_INTERFACES_ILOGGINGTARGET_H_
-#define COMMON_INTERFACES_ILOGGINGTARGET_H_
+#ifndef ESP32APPLICATION_LOGGINGTASK_H_
+#define ESP32APPLICATION_LOGGINGTASK_H_
 
-#include <string>
-#include <cstdint>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
-#include "LoggingDefinitions.h"
+#include "Common/Interfaces/ILoggingTarget.h"
+
+class Stream;
 
 /**
- * Interface for logging targets.
+ * The logging task.
  */
-class ILoggingTarget
+class LoggingTask
+    : public ILoggingTarget
 {
 public:
     /**
-     * Log a message.
+     * Constructor.
      *
-     * @param[in]   time        Timestamp of the log call.
-     * @param[in]   level       Log level.
-     * @param[in]   component   Originating component.
-     * @param[in]   message     The log message.
+     * @param rSerial   The Arduino Serial instance to use
+     * @param stackSize Stack size in words
+     * @param priority  Priority
      */
-    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message) = 0;
+    LoggingTask(Stream& rSerial,
+                uint32_t stackSize,
+                UBaseType_t priority);
 
-protected:
     /**
      * Destructor.
      */
-    virtual ~ILoggingTarget() = default;
+    virtual ~LoggingTask();
+
+    // Prevent implicit constructors and assignment operator
+    LoggingTask() = delete;
+    LoggingTask(const LoggingTask&) = delete;
+    LoggingTask& operator=(const LoggingTask&) = delete;
+
+    // ILoggingTarget implementation
+    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
+
+private:
+    static void taskFunction(void* pvParameters);
+
+    void run();
+
+    Stream& m_rSerial;
+    TaskHandle_t m_taskHandle;
 };
 
-
-
-#endif /* COMMON_INTERFACES_ILOGGINGTARGET_H_ */
+#endif /* ESP32APPLICATION_LOGGINGTASK_H_ */
