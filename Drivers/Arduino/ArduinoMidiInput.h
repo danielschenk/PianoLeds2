@@ -22,45 +22,50 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * The MLC2 application for the ESP32, using the Arduino core.
  */
 
-#include "Drivers/Arduino/ArduinoMidiInput.h"
-#include "MidiTask.h"
+#ifndef DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_
+#define DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_
 
-static ArduinoMidiInput* gs_pMidiInput(nullptr);
-static MidiTask* gs_pMidiTask(nullptr);
+#include "Drivers/Common/BaseMidiInput.h"
 
-static constexpr uint32_t c_defaultStackSize(1024);
+class Stream;
 
-enum
+/**
+ * MIDI input implementation which uses Arduino Serial.
+ */
+class ArduinoMidiInput
+    : public BaseMidiInput
 {
-    PRIORITY_IDLE = 0,
-    PRIORITY_LOW = 1,
-    PRIORITY_UI = 2,
-    PRIORITY_CRITICAL = 3
+public:
+    /**
+     * Constructor.
+     *
+     * @param rSerial   The Arduino serial port driver to use.
+     */
+    explicit ArduinoMidiInput(Stream& rSerial);
+
+    /**
+     * Destructor.
+     */
+    virtual ~ArduinoMidiInput() = default;
+
+    // Prevent implicit default constructors and assignment operator.
+    ArduinoMidiInput() = delete;
+    ArduinoMidiInput(const ArduinoMidiInput&) = delete;
+    ArduinoMidiInput& operator=(const ArduinoMidiInput&) = delete;
+
+    /**
+     * Run the serial driver and process available data.
+     */
+    void run();
+
+    // IMidiInterface implementation
+    virtual unsigned int getPortCount() const;
+    virtual void openPort(int number);
+
+private:
+    Stream& m_rSerial;
 };
 
-void setup()
-{
-    // Initialize MIDI, baud rate is 31.25k
-    Serial2.begin(31250);
-
-    gs_pMidiInput = new ArduinoMidiInput(Serial2);
-    gs_pMidiTask = new MidiTask(*gs_pMidiInput,
-                                c_defaultStackSize,
-                                PRIORITY_CRITICAL);
-}
-
-
-void loop()
-{
-}
-
-
-// This function is called by the Arduino Serial driver
-void serialEvent2()
-{
-    gs_pMidiTask->wake();
-}
+#endif /* DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_ */

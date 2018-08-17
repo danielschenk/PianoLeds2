@@ -22,45 +22,55 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * The MLC2 application for the ESP32, using the Arduino core.
  */
 
-#include "Drivers/Arduino/ArduinoMidiInput.h"
-#include "MidiTask.h"
+#ifndef ESP32APPLICATION_MIDITASK_H_
+#define ESP32APPLICATION_MIDITASK_H_
 
-static ArduinoMidiInput* gs_pMidiInput(nullptr);
-static MidiTask* gs_pMidiTask(nullptr);
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
-static constexpr uint32_t c_defaultStackSize(1024);
+class ArduinoMidiInput;
 
-enum
+/**
+ * FreeRTOS task processing incoming MIDI bytes.
+ */
+class MidiTask
 {
-    PRIORITY_IDLE = 0,
-    PRIORITY_LOW = 1,
-    PRIORITY_UI = 2,
-    PRIORITY_CRITICAL = 3
+public:
+    /**
+     * Constructor.
+     *
+     * @param rMidiInput    The midi input to use
+     * @param stackSize     Stack size in words
+     * @param priority      Priority
+     */
+    MidiTask(ArduinoMidiInput& rMidiInput,
+             uint32_t stackSize,
+             UBaseType_t priority);
+
+    /**
+     * Destructor.
+     */
+    virtual ~MidiTask();
+
+    // Prevent implicit default constructors and assignment operator.
+    MidiTask() = delete;
+    MidiTask(const MidiTask&) = delete;
+    MidiTask& operator=(const MidiTask&) = delete;
+
+    /**
+     * Wake up the thread.
+     */
+    void wake();
+
+private:
+    static void taskFunction(void* pvParameters);
+
+    void run();
+
+    ArduinoMidiInput& m_rMidiInput;
+    TaskHandle_t m_taskHandle;
 };
 
-void setup()
-{
-    // Initialize MIDI, baud rate is 31.25k
-    Serial2.begin(31250);
-
-    gs_pMidiInput = new ArduinoMidiInput(Serial2);
-    gs_pMidiTask = new MidiTask(*gs_pMidiInput,
-                                c_defaultStackSize,
-                                PRIORITY_CRITICAL);
-}
-
-
-void loop()
-{
-}
-
-
-// This function is called by the Arduino Serial driver
-void serialEvent2()
-{
-    gs_pMidiTask->wake();
-}
+#endif /* ESP32APPLICATION_MIDITASK_H_ */

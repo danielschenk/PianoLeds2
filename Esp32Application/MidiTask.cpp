@@ -22,45 +22,53 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * The MLC2 application for the ESP32, using the Arduino core.
  */
+
+#include <cassert>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #include "Drivers/Arduino/ArduinoMidiInput.h"
 #include "MidiTask.h"
 
-static ArduinoMidiInput* gs_pMidiInput(nullptr);
-static MidiTask* gs_pMidiTask(nullptr);
-
-static constexpr uint32_t c_defaultStackSize(1024);
-
-enum
+MidiTask::MidiTask(ArduinoMidiInput& rMidiInput,
+                   uint32_t stackSize,
+                   UBaseType_t priority)
+    : m_rMidiInput(rMidiInput)
 {
-    PRIORITY_IDLE = 0,
-    PRIORITY_LOW = 1,
-    PRIORITY_UI = 2,
-    PRIORITY_CRITICAL = 3
-};
-
-void setup()
-{
-    // Initialize MIDI, baud rate is 31.25k
-    Serial2.begin(31250);
-
-    gs_pMidiInput = new ArduinoMidiInput(Serial2);
-    gs_pMidiTask = new MidiTask(*gs_pMidiInput,
-                                c_defaultStackSize,
-                                PRIORITY_CRITICAL);
+    xTaskCreate(&MidiTask::taskFunction,
+                "midi",
+                stackSize,
+                this,
+                priority,
+                &m_taskHandle);
+    assert(m_taskHandle != NULL);
 }
 
-
-void loop()
+MidiTask::~MidiTask()
 {
+    vTaskDelete(m_taskHandle);
 }
 
-
-// This function is called by the Arduino Serial driver
-void serialEvent2()
+void MidiTask::taskFunction(void* pvParameters)
 {
-    gs_pMidiTask->wake();
+    while(true)
+    {
+        // pvParameters points to the instance
+        static_cast<MidiTask*>(pvParameters)->run();
+    }
+}
+
+void MidiTask::wake()
+{
+    xTaskNotifyGive(m_taskHandle);
+}
+
+void MidiTask::run()
+{
+    // Wait for event forever.
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+    // Process any data.
+    m_rMidiInput.run();
 }

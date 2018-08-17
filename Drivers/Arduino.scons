@@ -22,35 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import components
+Import('base_env')
+env = base_env.Clone()
 
-# Import enviroment given to us by PlatformIO
-Import('env')
+env.Append(CPPPATH=['Interfaces', 'Arduino'])
 
-# Install the components module
-components.install(env)
+sources = Glob('Arduino/*.cpp') + Glob('Common/*.cpp') + env.GetComponents('Common')
 
-env.Append(CPPPATH=[
-    '#',
-    '#/StlFreertos',
-    '#/ExternalComponents/json11'
-])
-
-env.Append(CPPFLAGS=[
-    '-std=c++11',
-])
-
-# Define dependencies
-SConscript('ExternalComponents/json11.scons', exports={'base_env': env}, duplicate=False)
-SConscript('Common/Common.scons', exports={'base_env': env}, duplicate=False)
-SConscript('Processing/Processing.scons', exports={'base_env': env}, duplicate=False)
-SConscript('Drivers/Arduino.scons', exports={'base_env': env}, duplicate=False)
-
-# Build library of dependencies to be able to link it with the application which is built by PlatformIO
-dependencies = env.Library(env.GetComponents(
-    'Common',
-    'Processing',
-    'Drivers',
-))
-
-env.Append(LIBS=[dependencies])
+base_env.Component('Drivers', sources)

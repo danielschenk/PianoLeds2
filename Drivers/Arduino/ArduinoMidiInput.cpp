@@ -22,45 +22,32 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * The MLC2 application for the ESP32, using the Arduino core.
  */
 
-#include "Drivers/Arduino/ArduinoMidiInput.h"
-#include "MidiTask.h"
+#include <Stream.h>
 
-static ArduinoMidiInput* gs_pMidiInput(nullptr);
-static MidiTask* gs_pMidiTask(nullptr);
-
-static constexpr uint32_t c_defaultStackSize(1024);
-
-enum
-{
-    PRIORITY_IDLE = 0,
-    PRIORITY_LOW = 1,
-    PRIORITY_UI = 2,
-    PRIORITY_CRITICAL = 3
-};
-
-void setup()
-{
-    // Initialize MIDI, baud rate is 31.25k
-    Serial2.begin(31250);
-
-    gs_pMidiInput = new ArduinoMidiInput(Serial2);
-    gs_pMidiTask = new MidiTask(*gs_pMidiInput,
-                                c_defaultStackSize,
-                                PRIORITY_CRITICAL);
-}
+#include "ArduinoMidiInput.h"
 
 
-void loop()
+ArduinoMidiInput::ArduinoMidiInput(Stream& rSerial)
+    : m_rSerial(rSerial)
 {
 }
 
-
-// This function is called by the Arduino Serial driver
-void serialEvent2()
+void ArduinoMidiInput::run()
 {
-    gs_pMidiTask->wake();
+    while(m_rSerial.available())
+    {
+        processMidiByte(static_cast<uint8_t>(m_rSerial.read()));
+    }
+}
+
+unsigned int ArduinoMidiInput::getPortCount() const
+{
+    return 1;
+}
+
+void ArduinoMidiInput::openPort(int number)
+{
+    // Nothing to do.
 }
