@@ -27,6 +27,9 @@
 #ifndef ESP32APPLICATION_LOGGINGTASK_H_
 #define ESP32APPLICATION_LOGGINGTASK_H_
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
+
 #include "Common/Interfaces/ILoggingTarget.h"
 #include "BaseTask.h"
 
@@ -65,9 +68,18 @@ public:
     virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
 
 private:
+    struct QueueEntry
+    {
+        uint64_t time;
+        Logging::TLogLevel level;
+        std::string* pComponent;
+        std::string* pMessage;
+    };
+
     virtual void run();
 
     Stream& m_rSerial;
+    QueueHandle_t m_queue;
 };
 
 #endif /* ESP32APPLICATION_LOGGINGTASK_H_ */
