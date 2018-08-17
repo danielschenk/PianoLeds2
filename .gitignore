@@ -2,7 +2,7 @@
 .project
 .pydevproject
 .settings
-Source/Build
+Build
 Documentation
 .sconsign.dblite
 .idea/

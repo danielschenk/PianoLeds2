@@ -31,9 +31,9 @@ Import('env')
 components.install(env)
 
 env.Append(CPPPATH=[
-    '#/Source',
-    '#/Source/StlFreertos',
-    '#/Source/ExternalComponents/json11'
+    '#',
+    '#/StlFreertos',
+    '#/ExternalComponents/json11'
 ])
 
 env.Append(CPPFLAGS=[
