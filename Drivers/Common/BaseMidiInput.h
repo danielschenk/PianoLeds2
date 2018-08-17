@@ -29,7 +29,9 @@
 #ifndef DRIVERS_COMMON_BASEMIDIINPUT_H_
 #define DRIVERS_COMMON_BASEMIDIINPUT_H_
 
+#include <cstdint>
 #include <map>
+#include <vector>
 #include <Common/ObserverList.h>
 
 #include "../Interfaces/IMidiInput.h"
@@ -44,7 +46,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~BaseMidiInput();
+    virtual ~BaseMidiInput() = default;
 
     // Prevent implicit copy constructor and assignment operator.
     BaseMidiInput(const BaseMidiInput&) = delete;
@@ -64,6 +66,12 @@ protected:
      */
     BaseMidiInput();
 
+    /**
+     * Process a single incoming MIDI byte.
+     */
+    void processMidiByte(uint8_t value);
+
+private:
     /**
      * Notify all note on/off subscribers.
      *
@@ -90,7 +98,6 @@ protected:
      */
     virtual void notifyProgramChange(uint8_t channel, uint8_t number) const;
 
-private:
     /** Collection of note on/off subscribers. */
     ObserverList<uint8_t, uint8_t, uint8_t, bool> m_noteOnOffSubscribers;
 
@@ -99,6 +106,12 @@ private:
 
     /** Collection of program change subscribers. */
     ObserverList<uint8_t, uint8_t> m_programChangeSubscribers;
+
+    /** Whether incoming bytes are stored to build a message. */
+    bool m_buildingMessage;
+
+    /** The message currently being built. */
+    std::vector<uint8_t> m_currentMessage;
 };
 
 #endif /* DRIVERS_COMMON_BASEMIDIINPUT_H_ */

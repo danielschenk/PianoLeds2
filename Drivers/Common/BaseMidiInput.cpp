@@ -29,10 +29,8 @@
 BaseMidiInput::BaseMidiInput()
     : m_noteOnOffSubscribers()
     , m_controlChangeSubscribers()
-{
-}
-
-BaseMidiInput::~BaseMidiInput()
+    , m_buildingMessage(false)
+    , m_currentMessage()
 {
 }
 
@@ -79,4 +77,69 @@ void BaseMidiInput::notifyControlChange(uint8_t channel, IMidiInterface::TContro
 void BaseMidiInput::notifyProgramChange(uint8_t channel, uint8_t number) const
 {
     m_programChangeSubscribers.notifySubscribers(channel, number);
+}
+
+void BaseMidiInput::processMidiByte(uint8_t value)
+{
+    if(!m_buildingMessage && ((value & 0x80) == 0x80))
+    {
+        // Is a status byte. Start building new message
+        m_currentMessage.clear();
+        m_buildingMessage = true;
+    }
+
+    if(m_buildingMessage)
+    {
+        m_currentMessage.push_back(value);
+
+        // Get status (high nibble) and channel (low nibble) from status byte
+        uint8_t statusByte(m_currentMessage[0]);
+        uint8_t status(statusByte & 0xF0);
+        uint8_t channel(statusByte & 0x0F);
+
+        // Check if a message can be parsed and sent to subscribers.
+        switch(static_cast<IMidiInterface::TStatus>(status))
+        {
+        case NOTE_OFF:
+            if(m_currentMessage.size() >= 3)
+            {
+                // Channel, pitch, velocity, note off
+                notifyNoteOnOff(channel, m_currentMessage[1], m_currentMessage[2], false);
+                m_buildingMessage = false;
+            }
+            break;
+
+        case NOTE_ON:
+            if(m_currentMessage.size() >= 3)
+            {
+                // Channel, pitch, velocity, note off
+                notifyNoteOnOff(channel, m_currentMessage[1], m_currentMessage[2], true);
+                m_buildingMessage = false;
+            }
+            break;
+
+        case CONTROL_CHANGE:
+            if(m_currentMessage.size() >= 3)
+            {
+                // Channel, controller number, value
+                notifyControlChange(channel, (IMidiInterface::TControllerNumber)m_currentMessage[1], m_currentMessage[2]);
+                m_buildingMessage = false;
+            }
+            break;
+
+        case PROGRAM_CHANGE:
+            if(m_currentMessage.size() >= 2)
+            {
+                // Channel, number
+                notifyProgramChange(channel, m_currentMessage[1]);
+                m_buildingMessage = false;
+            }
+            break;
+
+        default:
+            // Unsupported status.
+            m_buildingMessage = false;
+            break;
+        }
+    }
 }

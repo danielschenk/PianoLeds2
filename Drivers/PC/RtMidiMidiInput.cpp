@@ -64,29 +64,8 @@ void RtMidiMidiInput::RtMidiCommonCallback(double deltatime, std::vector<unsigne
 
 void RtMidiMidiInput::RtMidiCallback(double deltatime, std::vector<unsigned char> *pMessage)
 {
-    // Get status (high nibble) and channel (low nibble) from status byte
-    uint8_t status = pMessage->at(0) & 0xF0;
-    uint8_t channel = pMessage->at(0) & 0x0F;
-
-    switch(status)
+    for(auto byte : *pMessage)
     {
-        case NOTE_OFF:
-            // Channel, pitch, velocity, note off
-            notifyNoteOnOff(channel, pMessage->at(1), pMessage->at(2), false);
-            break;
-        case NOTE_ON:
-            // Channel, pitch, velocity, note on
-            notifyNoteOnOff(channel, pMessage->at(1), pMessage->at(2), true);
-            break;
-        case CONTROL_CHANGE:
-            // Channel, controller number, value
-            notifyControlChange(channel, (IMidiInterface::TControllerNumber)pMessage->at(1), pMessage->at(2));
-            break;
-        case PROGRAM_CHANGE:
-            // Channel, number
-            notifyProgramChange(channel, pMessage->at(1));
-            break;
-        default:
-            break;
+        processMidiByte(byte);
     }
 }

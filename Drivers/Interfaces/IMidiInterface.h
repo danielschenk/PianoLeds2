@@ -29,6 +29,8 @@
 #ifndef DRIVERS_INTERFACES_IMIDIINTERFACE_H_
 #define DRIVERS_INTERFACES_IMIDIINTERFACE_H_
 
+#include <cstdint>
+
 /**
  * Interface for MIDI inputs/outputs.
  */
@@ -36,7 +38,7 @@ class IMidiInterface
 {
 public:
     /** Status type. */
-    enum TStatus
+    enum TStatus : uint8_t
     {
         NOTE_OFF = 0x80,
         NOTE_ON = 0x90,
@@ -45,7 +47,7 @@ public:
     };
 
     /** Controller number type. */
-    enum TControllerNumber
+    enum TControllerNumber : uint8_t
     {
         BANK_SELECT_MSB = 0x00,
         BANK_SELECT_LSB = 0x20,
