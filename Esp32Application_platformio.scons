@@ -47,10 +47,11 @@ SConscript('Processing/Processing.scons', exports={'base_env': env}, duplicate=F
 SConscript('Drivers/Arduino.scons', exports={'base_env': env}, duplicate=False)
 
 # Build library of dependencies to be able to link it with the application which is built by PlatformIO
-dependencies = env.Library(env.GetComponents(
+dependencies = env.Library('dependencies', env.GetComponents(
     'Common',
     'Processing',
     'Drivers',
+    'json11',
 ))
 
 env.Append(LIBS=[dependencies])

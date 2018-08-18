@@ -26,5 +26,4 @@ Import('base_env')
 env = base_env.Clone()
 env.Append(CPPPATH=['json11'])
 
-lib = env.Library('json11', ['json11/json11.cpp'])
-base_env.Component('json11', lib)
+base_env.Component('json11', [env.File('json11/json11.cpp')])

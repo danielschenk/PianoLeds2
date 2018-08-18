@@ -38,10 +38,19 @@ class RgbFunctionFactory
     : public IRgbFunctionFactory
 {
 public:
-    // Prevent implicit constructor, copy constructor and assignment operator
-    RgbFunctionFactory() = delete;
+    /**
+     * Constructor.
+     */
+    RgbFunctionFactory() = default;
+
+    // Prevent implicit copy constructor and assignment operator
     RgbFunctionFactory(const RgbFunctionFactory&) = delete;
     RgbFunctionFactory& operator=(const RgbFunctionFactory&) = delete;
+
+    /**
+     * Destructor.
+     */
+    virtual ~RgbFunctionFactory() = default;
 
     // IRgbFunctionFactory implementation
     virtual IRgbFunction* createRgbFunction(const Json& rConverted) const;
