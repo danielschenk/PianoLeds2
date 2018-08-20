@@ -38,6 +38,9 @@
 #include "Processing/ProcessingBlockFactory.h"
 #include "Processing/Concert.h"
 #include "Processing/Interfaces/IPatch.h"
+#include "Processing/EqualRangeRgbSource.h"
+#include "Processing/NoteRgbSource.h"
+#include "Processing/LinearRgbFunction.h"
 
 static LoggingTask* gs_pLoggingTask(nullptr);
 
@@ -98,8 +101,22 @@ static void initTask(void* pvParameters)
     // TODO read concert from storage
     // For now, add something to test with.
     IPatch* pPatch(gs_pConcert->getPatch(gs_pConcert->addPatch()));
-    pPatch->setName("test");
+    pPatch->setName("whiteOnBlue");
     pPatch->activate();
+
+    // Add constant blue background
+    EqualRangeRgbSource* pSrc1(new EqualRangeRgbSource);
+    pSrc1->setColor(Processing::TRgb({0, 0, 255}));
+    pPatch->getProcessingChain().insertBlock(pSrc1);
+
+    // Full white for any sounding key
+    NoteRgbSource* pSrc2(new NoteRgbSource(*gs_pMidiInput,
+                                           *gs_pNoteToLightMap,
+                                           *gs_pRgbFunctionFactory));
+    LinearRgbFunction* pRgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
+    pSrc2->setRgbFunction(pRgbFunction);
+    pSrc2->setUsingPedal(true);
+    pPatch->getProcessingChain().insertBlock(pSrc2);
 
     // Delete ourselves.
     vTaskDelete(NULL);
