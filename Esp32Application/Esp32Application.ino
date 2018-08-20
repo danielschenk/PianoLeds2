@@ -26,6 +26,9 @@
  * The MLC2 application for the ESP32, using the Arduino core.
  */
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 #include "LoggingTask.h"
 
 #include "Drivers/Arduino/ArduinoMidiInput.h"
@@ -56,7 +59,7 @@ enum
     PRIORITY_CRITICAL = 3
 };
 
-void setup()
+static void initTask(void* pvParameters)
 {
     // Initialize logging
     Serial.begin(115200);
@@ -97,11 +100,27 @@ void setup()
     IPatch* pPatch(gs_pConcert->getPatch(gs_pConcert->addPatch()));
     pPatch->setName("test");
     pPatch->activate();
+
+    // Delete ourselves.
+    vTaskDelete(NULL);
 }
 
+void setup()
+{
+    // Start the init task, which will initialize everything and delete itself.
+    xTaskCreate(initTask,
+                "init",
+                c_defaultStackSize,
+                nullptr,            // no parameters
+                PRIORITY_CRITICAL,
+                nullptr);           // no need to store task handle
+
+    xPortStartScheduler();
+}
 
 void loop()
 {
+    // Nothing to do, leave everything to the OS.
 }
 
 
