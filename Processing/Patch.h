@@ -32,10 +32,8 @@
 #include <string>
 
 #include "Interfaces/IPatch.h"
-#include "ProcessingChain.h"
 
 class IProcessingBlockFactory;
-class IProcessingChain;
 
 /**
  * Class which represents a patch.
@@ -65,16 +63,12 @@ public:
     Patch(const Patch&) = delete;
     Patch& operator=(const Patch&) = delete;
 
-    /**
-     * Get the processing chain.
-     */
-    IProcessingChain& getProcessingChain() const;
-
     // IJsonConvertible implementation
     virtual Json convertToJson() const;
     virtual void convertFromJson(const Json& rConverted);
 
     // IPatch implementation
+    virtual IProcessingChain& getProcessingChain() const;
     virtual void activate();
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& strip);

@@ -37,6 +37,7 @@ class MockPatch
     : public IPatch
 {
 public:
+    MOCK_CONST_METHOD0(getProcessingChain, IProcessingChain& ());
     MOCK_METHOD0(activate, void());
     MOCK_METHOD0(deactivate, void());
     MOCK_METHOD1(execute, void(Processing::TRgbStrip& strip));

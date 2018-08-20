@@ -29,11 +29,20 @@
 #include "IJsonConvertible.h"
 #include "ProcessingTypes.h"
 
+// Technically this is not needed. But it's nice if you want to do:
+// getProcessingChain().someMethod();
+#include "IProcessingChain.h"
+
 class IPatch
     : public IJsonConvertible
 {
 public:
     virtual ~IPatch() = default;
+
+    /**
+     * Get the processing chain.
+     */
+    virtual IProcessingChain& getProcessingChain() const = 0;
 
     /**
      * Activate this patch.
