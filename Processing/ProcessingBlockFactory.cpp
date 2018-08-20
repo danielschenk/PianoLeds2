@@ -68,11 +68,6 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& rCon
             // A processing chain needs the factory to construct its children
             processingBlock = new ProcessingChain(*this);
         }
-        else if(objectType == IProcessingBlock::c_typeNamePatch)
-        {
-            // A patch needs the factory to construct its children
-            processingBlock = createPatch();
-        }
 
         if(processingBlock != nullptr)
         {
@@ -99,4 +94,10 @@ IPatch* ProcessingBlockFactory::createPatch(const Json& rConverted) const
     }
 
     return pPatch;
+}
+
+IProcessingChain* ProcessingBlockFactory::createProcessingChain() const
+{
+    // A patch needs the factory to construct its children
+    return new ProcessingChain(*this);
 }

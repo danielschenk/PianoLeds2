@@ -35,6 +35,7 @@
 #include "ProcessingChain.h"
 
 class IProcessingBlockFactory;
+class IProcessingChain;
 
 /**
  * Class which represents a patch.
@@ -45,7 +46,6 @@ class IProcessingBlockFactory;
  */
 class Patch
     : public IPatch
-    , public ProcessingChain
 {
 public:
     /**
@@ -60,20 +60,24 @@ public:
      */
     virtual ~Patch();
 
-    /**
-     * Copy constructor.
-     */
-    Patch(const Patch&);
-
-    // Prevent implicit constructor and assignment operator.
+    // Prevent implicit constructors and assignment operator.
     Patch() = delete;
+    Patch(const Patch&) = delete;
     Patch& operator=(const Patch&) = delete;
+
+    /**
+     * Get the processing chain.
+     */
+    IProcessingChain& getProcessingChain() const;
 
     // IJsonConvertible implementation
     virtual Json convertToJson() const;
     virtual void convertFromJson(const Json& rConverted);
 
     // IPatch implementation
+    virtual void activate();
+    virtual void deactivate();
+    virtual void execute(Processing::TRgbStrip& strip);
     virtual bool hasBankAndProgram() const;
     virtual uint8_t getBank() const;
     virtual void setBank(uint8_t bank);
@@ -88,10 +92,15 @@ protected:
     std::string getObjectType() const;
 
 private:
+    static constexpr const char* c_typeName                 = "Patch";
     static constexpr const char* c_hasBankAndProgramJsonKey = "hasBankAndProgram";
     static constexpr const char* c_bankJsonKey              = "bank";
     static constexpr const char* c_programJsonKey           = "program";
     static constexpr const char* c_nameJsonKey              = "name";
+    static constexpr const char* c_processingChainJsonKey   = "processingChain";
+
+    /** Mutex to protect the members. */
+    mutable std::mutex m_mutex;
 
     /** Whether this patch is bound to a bank and program number. */
     bool m_hasBankAndProgram;
@@ -104,6 +113,11 @@ private:
 
     /** The name of the patch. */
     std::string m_name;
+
+    /** The processing chain. */
+    IProcessingChain* m_pProcessingChain;
+
+    const IProcessingBlockFactory& m_rProcessingBlockFactory;
 };
 
 #endif /* PROCESSING_PATCH_H_ */

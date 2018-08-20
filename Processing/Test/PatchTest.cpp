@@ -25,102 +25,121 @@
 
 #include <gtest/gtest.h>
 
-#include "ProcessingBlockContainerTest.h"
 #include "../Patch.h"
+#include "../Mock/MockProcessingChain.h"
+#include "../Mock/MockProcessingBlockFactory.h"
 
 using ::testing::Return;
+using ::testing::NiceMock;
+using ::testing::_;
+using ::testing::Invoke;
 
 class PatchTest
-    : public ProcessingBlockContainerTest
+    : public ::testing::Test
 {
 public:
     PatchTest()
-        : ProcessingBlockContainerTest()
-        , m_patch(m_processingBlockFactory)
+        : m_processingBlockFactory()
+        , m_pProcessingChain(new NiceMock<MockProcessingChain>)
     {
+        ON_CALL(m_processingBlockFactory, createProcessingChain())
+            .WillByDefault(Return(m_pProcessingChain));
+
+        m_pPatch = new Patch(m_processingBlockFactory);
     }
 
     virtual ~PatchTest()
     {
+        delete m_pPatch;
+
+        // deleted by Patch
+        m_pProcessingChain = nullptr;
     }
 
-    Patch m_patch;
+    NiceMock<MockProcessingBlockFactory> m_processingBlockFactory;
+    NiceMock<MockProcessingChain>* m_pProcessingChain;
+    Patch* m_pPatch;
 };
 
 TEST_F(PatchTest, defaults)
 {
-    EXPECT_EQ(0, m_patch.getBank());
-    EXPECT_EQ(0, m_patch.getProgram());
-    EXPECT_EQ(false, m_patch.hasBankAndProgram());
-    EXPECT_EQ("Untitled Patch", m_patch.getName());
+    EXPECT_EQ(0, m_pPatch->getBank());
+    EXPECT_EQ(0, m_pPatch->getProgram());
+    EXPECT_EQ(false, m_pPatch->hasBankAndProgram());
+    EXPECT_EQ("Untitled Patch", m_pPatch->getName());
 }
 
 TEST_F(PatchTest, convertToJson)
 {
     // Set some non-defaults
-    m_patch.setBank(42);
-    m_patch.setProgram(43);
-    m_patch.setName("Awesome patch");
+    m_pPatch->setBank(42);
+    m_pPatch->setProgram(43);
+    m_pPatch->setName("Awesome patch");
 
-    Json::array mockBlocksJson;
-    for(unsigned int i = 0; i < 3; ++i)
-    {
-        TMockBlock* pMockBlock = new TMockBlock;
-        ASSERT_NE(nullptr, pMockBlock);
+    Json::object mockChainJson;
+    mockChainJson["objectType"] = "mockChain";
+    mockChainJson["someProperty"] = 42;
+    EXPECT_CALL(*m_pProcessingChain, convertToJson())
+        .WillOnce(Return(mockChainJson));
 
-        Json mockJson = createMockBlockJson(i);
-        EXPECT_CALL(*pMockBlock, convertToJson())
-            .WillOnce(Return(mockJson));
-        mockBlocksJson.push_back(mockJson);
-
-        m_patch.insertBlock(pMockBlock);
-    }
-
-    Json::object converted = m_patch.convertToJson().object_items();
+    Json::object converted = m_pPatch->convertToJson().object_items();
     EXPECT_EQ(42, converted.at("bank").number_value());
     EXPECT_EQ(43, converted.at("program").number_value());
     EXPECT_EQ(true, converted.at("hasBankAndProgram").bool_value());
     EXPECT_EQ("Awesome patch", converted.at("name").string_value());
 
-    EXPECT_EQ(mockBlocksJson, converted["processingChain"].array_items());
+    EXPECT_EQ(mockChainJson, converted["processingChain"].object_items());
     EXPECT_EQ("Patch", converted.at("objectType").string_value());
 }
 
 TEST_F(PatchTest, convertFromJson)
 {
-    std::vector<IProcessingBlock*> mockBlocks({m_pGreenSource, m_pValueDoubler});
+    Json::object mockChainJson;
+    mockChainJson["objectType"] = "mockChain";
+    mockChainJson["someProperty"] = 42;
 
-    // Processing chain takes over ownership of the mock block when our mock factory returns it.
-    // Prevent that the fixture teardown deletes already deleted object
-    m_pGreenSource = nullptr;
-    m_pValueDoubler = nullptr;
-
-    Json::array mockBlocksJson;
-    for(unsigned int i = 0; i < mockBlocks.size(); ++i)
-    {
-        Json mockJson = createMockBlockJson(i);
-        mockBlocksJson.push_back(mockJson);
-        EXPECT_CALL(m_processingBlockFactory, createProcessingBlock(mockJson))
-            .WillOnce(Return(mockBlocks[i]));
-    }
     Json::object j;
-    j["processingChain"] = mockBlocksJson;
+    j["processingChain"] = mockChainJson;
     j["bank"] = 42;
     j["program"] = 43;
     j["hasBankAndProgram"] = true;
     j["name"] = std::string("Awesome patch");
-    m_patch.convertFromJson(Json(j));
 
-    Processing::TRgbStrip reference(3);
-    reference[0] = {0, 20, 0};
-    reference[1] = {0, 20, 0};
-    reference[2] = {0, 20, 0};
-    Processing::TRgbStrip testStrip(3);
-    m_patch.execute(testStrip);
-    EXPECT_EQ(reference, testStrip);
+    EXPECT_CALL(*m_pProcessingChain, convertFromJson(Json(mockChainJson)));
+    m_pPatch->convertFromJson(Json(j));
 
-    EXPECT_EQ(42, m_patch.getBank());
-    EXPECT_EQ(43, m_patch.getProgram());
-    EXPECT_EQ(true, m_patch.hasBankAndProgram());
-    EXPECT_EQ("Awesome patch", m_patch.getName());
+    EXPECT_EQ(42, m_pPatch->getBank());
+    EXPECT_EQ(43, m_pPatch->getProgram());
+    EXPECT_EQ(true, m_pPatch->hasBankAndProgram());
+    EXPECT_EQ("Awesome patch", m_pPatch->getName());
+}
+
+TEST_F(PatchTest, activate)
+{
+    EXPECT_CALL(*m_pProcessingChain, activate());
+    m_pPatch->activate();
+}
+
+TEST_F(PatchTest, deactivate)
+{
+    EXPECT_CALL(*m_pProcessingChain, deactivate());
+    m_pPatch->deactivate();
+}
+
+TEST_F(PatchTest, execute)
+{
+    Processing::TRgbStrip strip;
+    strip.push_back(Processing::TRgb({0, 0, 0}));
+
+    // Let the mock processing chain do something with the strip which we can verify
+    Processing::TRgb valueAfterProcessing({1, 2, 3});
+    ASSERT_NE(valueAfterProcessing, strip[0]);
+
+    EXPECT_CALL(*m_pProcessingChain, execute(_))
+        .WillOnce(Invoke([valueAfterProcessing](Processing::TRgbStrip& rStrip){
+            rStrip[0] = valueAfterProcessing;
+    }));
+    m_pPatch->execute(strip);
+
+    EXPECT_EQ(valueAfterProcessing, strip[0]);
 }

@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,38 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * @brief Mock processing block factory.
  */
 
-#ifndef PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_
-#define PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_
+#ifndef PROCESSING_INTERFACES_IPROCESSINGCHAIN_H_
+#define PROCESSING_INTERFACES_IPROCESSINGCHAIN_H_
 
-#include <gmock/gmock.h>
+#include "IProcessingBlock.h"
 
-#include "../Interfaces/IProcessingBlockFactory.h"
-
-class MockProcessingBlockFactory
-    : public IProcessingBlockFactory
+/**
+ * Interface for processing chains.
+ */
+class IProcessingChain
+    : public IProcessingBlock
 {
 public:
-    MOCK_CONST_METHOD1(createProcessingBlock, IProcessingBlock*(const Json& rConverted));
-    MOCK_CONST_METHOD0(createPatch, IPatch*());
-    MOCK_CONST_METHOD1(createPatch, IPatch*(const Json& rConverted));
-    MOCK_CONST_METHOD0(createProcessingChain, IProcessingChain*());
+    virtual ~IProcessingChain() = default;
+
+    /**
+     * Insert a processing block.
+     *
+     * @param[in]   pBlock  Pointer to the processing block.
+     * @param[in]   index   Index in the chain at which the block should be inserted.
+     */
+    virtual void insertBlock(IProcessingBlock* pBlock, unsigned int index) = 0;
+
+    /**
+     * Insert a processing block at the end.
+     *
+     * @param[in]   pBlock  Pointer to the processing block.
+     */
+    virtual void insertBlock(IProcessingBlock* pBlock) = 0;
 };
 
 
-#endif /* PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_ */
+
+#endif /* PROCESSING_INTERFACES_IPROCESSINGCHAIN_H_ */

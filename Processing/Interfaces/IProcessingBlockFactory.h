@@ -35,6 +35,7 @@ using Json = json11::Json;
 
 class IProcessingBlock;
 class IPatch;
+class IProcessingChain;
 
 /**
  * Interface for processing block factories.
@@ -67,6 +68,11 @@ public:
      * @param[in]   rConverted  JSON object containing the persistent properties.
      */
     virtual IPatch* createPatch(const Json& rConverted) const = 0;
+
+    /**
+     * Create a new processing chain.
+     */
+    virtual IProcessingChain* createProcessingChain() const = 0;
 };
 
 

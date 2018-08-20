@@ -30,31 +30,33 @@
 #include "Interfaces/IProcessingBlockFactory.h"
 
 Patch::Patch(const IProcessingBlockFactory& rProcessingBlockFactory)
-    : ProcessingChain(rProcessingBlockFactory)
+    : IPatch()
+    , m_mutex()
     , m_hasBankAndProgram(false)
     , m_bank(0)
     , m_program(0)
     , m_name("Untitled Patch")
+    , m_pProcessingChain(rProcessingBlockFactory.createProcessingChain())
+    , m_rProcessingBlockFactory(rProcessingBlockFactory)
 {
-}
-
-Patch::Patch(const Patch& rOther)
-    : ProcessingChain(rOther.m_rProcessingBlockFactory)
-{
-    // Use JSON because the base doesn't implement a copy constructor.
-    convertFromJson(rOther.convertToJson());
 }
 
 Patch::~Patch()
 {
+    delete m_pProcessingChain;
+}
+
+IProcessingChain& Patch::getProcessingChain() const
+{
+    return *m_pProcessingChain;
 }
 
 Json Patch::convertToJson() const
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
-    // Start with contents of base (also sets object type using our override)
-    Json::object converted = ProcessingChain::convertToJson().object_items();
+    Json::object converted;
+    converted[IJsonConvertible::c_objectTypeKey] = getObjectType();
 
     // Add items specific for Patch
     converted[c_hasBankAndProgramJsonKey] = m_hasBankAndProgram;
@@ -62,12 +64,15 @@ Json Patch::convertToJson() const
     converted[c_programJsonKey] = m_program;
     converted[c_nameJsonKey] = m_name;
 
+    // Add processing chain
+    converted[c_processingChainJsonKey] = m_pProcessingChain->convertToJson();
+
     return converted;
 }
 
 void Patch::convertFromJson(const Json& rConverted)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     // Get items specific for Patch
     Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
@@ -76,53 +81,78 @@ void Patch::convertFromJson(const Json& rConverted)
     helper.getItemIfPresent(c_bankJsonKey, m_bank);
     helper.getItemIfPresent(c_nameJsonKey, m_name);
     
-    // Get contents of base
-    ProcessingChain::convertFromJson(rConverted);
+    // Get processing chain
+    Json::object convertedProcessingChain;
+    if(helper.getItemIfPresent(c_processingChainJsonKey, convertedProcessingChain))
+    {
+        m_pProcessingChain->convertFromJson(convertedProcessingChain);
+    }
+    else
+    {
+        // Reset to default.
+        delete m_pProcessingChain;
+        m_pProcessingChain = m_rProcessingBlockFactory.createProcessingChain();
+    }
 }
 
 std::string Patch::getObjectType() const
 {
-    return IProcessingBlock::c_typeNamePatch;
+    return c_typeName;
+}
+
+void Patch::activate()
+{
+    m_pProcessingChain->activate();
+}
+
+void Patch::deactivate()
+{
+    m_pProcessingChain->deactivate();
+}
+
+void Patch::execute(Processing::TRgbStrip& strip)
+{
+    m_pProcessingChain->execute(strip);
 }
 
 uint8_t Patch::getBank() const
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     return m_bank;
 }
 
 void Patch::setBank(uint8_t bank)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     m_bank = bank;
 }
 
 bool Patch::hasBankAndProgram() const
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     return m_hasBankAndProgram;
 }
 
 uint8_t Patch::getProgram() const
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     return m_program;
 }
 
 void Patch::clearBankAndProgram()
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     m_hasBankAndProgram = false;
 }
 
 void Patch::setProgram(uint8_t program)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     m_program = program;
     m_hasBankAndProgram = true;
@@ -130,14 +160,14 @@ void Patch::setProgram(uint8_t program)
 
 std::string Patch::getName() const
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     return m_name;
 }
 
 void Patch::setName(const std::string name)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     m_name = name;
 }

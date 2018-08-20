@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,30 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * @brief Mock processing block factory.
  */
 
-#ifndef PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_
-#define PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_
+#ifndef PROCESSING_MOCK_MOCKPROCESSINGCHAIN_H_
+#define PROCESSING_MOCK_MOCKPROCESSINGCHAIN_H_
 
 #include <gmock/gmock.h>
+#include "../Interfaces/IProcessingChain.h"
 
-#include "../Interfaces/IProcessingBlockFactory.h"
-
-class MockProcessingBlockFactory
-    : public IProcessingBlockFactory
+class MockProcessingChain
+    : public IProcessingChain
 {
 public:
-    MOCK_CONST_METHOD1(createProcessingBlock, IProcessingBlock*(const Json& rConverted));
-    MOCK_CONST_METHOD0(createPatch, IPatch*());
-    MOCK_CONST_METHOD1(createPatch, IPatch*(const Json& rConverted));
-    MOCK_CONST_METHOD0(createProcessingChain, IProcessingChain*());
+    MOCK_METHOD2(insertBlock, void(IProcessingBlock* pBlock, unsigned int index));
+    MOCK_METHOD1(insertBlock, void(IProcessingBlock* pBlock));
+    MOCK_METHOD0(activate, void());
+    MOCK_METHOD0(deactivate, void());
+    MOCK_METHOD1(execute, void(Processing::TRgbStrip& strip));
+    MOCK_CONST_METHOD0(convertToJson, Json());
+    MOCK_METHOD1(convertFromJson, void(const Json& rConverted));
+
+protected:
+    MOCK_CONST_METHOD0(getObjectType, std::string());
 };
 
 
-#endif /* PROCESSING_MOCK_MOCKPROCESSINGBLOCKFACTORY_H_ */
+
+#endif /* PROCESSING_MOCK_MOCKPROCESSINGCHAIN_H_ */

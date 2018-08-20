@@ -225,7 +225,7 @@ void Concert::execute()
 
 std::string Concert::getObjectType() const
 {
-    return IProcessingBlock::c_typeNameConcert;
+    return c_typeName;
 }
 
 void Concert::onProgramChange(uint8_t channel, uint8_t program)

@@ -32,7 +32,7 @@
 #include <mutex>
 #include <list>
 
-#include "Interfaces/IProcessingBlock.h"
+#include "Interfaces/IProcessingChain.h"
 
 class IProcessingBlockFactory;
 
@@ -40,7 +40,7 @@ class IProcessingBlockFactory;
  * A processing chain which can hold multiple processing blocks connected in series.
  */
 class ProcessingChain
-    : public virtual IProcessingBlock
+    : public IProcessingChain
 {
 public:
     /**
@@ -58,25 +58,12 @@ public:
     ProcessingChain(const ProcessingChain&) = delete;
     ProcessingChain& operator=(const ProcessingChain&) = delete;
 
-    /**
-     * Insert a processing block.
-     *
-     * @param[in]   pBlock  Pointer to the processing block.
-     * @param[in]   index   Index in the chain at which the block should be inserted.
-     */
-    void insertBlock(IProcessingBlock* pBlock, unsigned int index);
-
-    /**
-     * Insert a processing block at the end.
-     *
-     * @param[in]   pBlock  Pointer to the processing block.
-     */
-    void insertBlock(IProcessingBlock* pBlock);
-
-    // IProcessingBlock implementation
+    // IProcessingChain implementation
     virtual void activate();
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& strip);
+    virtual void insertBlock(IProcessingBlock* pBlock, unsigned int index);
+    virtual void insertBlock(IProcessingBlock* pBlock);
     virtual Json convertToJson() const;
     virtual void convertFromJson(const Json& rConverted);
 
@@ -84,14 +71,14 @@ protected:
     // IProcessingBlock implementation
     virtual std::string getObjectType() const;
 
+private:
+    static constexpr const char* c_processingChainJsonKey = "processingChain";
+
     /** Mutex to protect the members. */
-    mutable std::recursive_mutex m_mutex;
+    mutable std::mutex m_mutex;
 
     /** Reference to the processing block factory. */
     const IProcessingBlockFactory& m_rProcessingBlockFactory;
-
-private:
-    static constexpr const char* c_processingChainJsonKey = "processingChain";
 
     /** Whether all blocks in the chain are active or not. */
     bool m_active;

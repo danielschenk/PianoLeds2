@@ -34,7 +34,7 @@
 #include "../Interfaces/IProcessingBlock.h"
 
 class MockProcessingBlock
-    : public virtual IProcessingBlock
+    : public IProcessingBlock
 {
 public:
     // IProcessingBlock implementation

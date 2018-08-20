@@ -57,6 +57,11 @@ bool TRgb::operator ==(const TRgb& other) const
            (other.b == b);
 }
 
+bool TRgb::operator !=(const TRgb& other) const
+{
+    return !(other == *this);
+}
+
 TRgb TRgb::operator *(float factor) const
 {
     return {

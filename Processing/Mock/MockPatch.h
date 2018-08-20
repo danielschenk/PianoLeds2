@@ -32,13 +32,14 @@
 #include <gmock/gmock.h>
 
 #include "../Interfaces/IPatch.h"
-#include "MockProcessingBlock.h"
 
 class MockPatch
     : public IPatch
-    , public virtual MockProcessingBlock
 {
 public:
+    MOCK_METHOD0(activate, void());
+    MOCK_METHOD0(deactivate, void());
+    MOCK_METHOD1(execute, void(Processing::TRgbStrip& strip));
     MOCK_CONST_METHOD0(hasBankAndProgram, bool());
     MOCK_CONST_METHOD0(getBank, uint8_t());
     MOCK_METHOD1(setBank, void(uint8_t bank));
@@ -47,6 +48,11 @@ public:
     MOCK_METHOD0(clearBankAndProgram, void());
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_METHOD1(setName, void(std::string name));
+    MOCK_CONST_METHOD0(convertToJson, Json());
+    MOCK_METHOD1(convertFromJson, void(const Json& rConverted));
+
+protected:
+    MOCK_CONST_METHOD0(getObjectType, std::string());
 };
 
 

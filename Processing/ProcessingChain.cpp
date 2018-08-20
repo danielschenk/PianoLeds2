@@ -50,7 +50,7 @@ ProcessingChain::~ProcessingChain()
 
 void ProcessingChain::insertBlock(IProcessingBlock* pBlock, unsigned int index)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     if(index > m_processingChain.size())
     {
@@ -63,7 +63,7 @@ void ProcessingChain::insertBlock(IProcessingBlock* pBlock, unsigned int index)
 
 void ProcessingChain::insertBlock(IProcessingBlock* pBlock)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     m_processingChain.insert(m_processingChain.end(), pBlock);
     m_active ? pBlock->activate() : pBlock->deactivate();
@@ -71,7 +71,7 @@ void ProcessingChain::insertBlock(IProcessingBlock* pBlock)
 
 Json ProcessingChain::convertToJson() const
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     Json::object converted;
     converted[IProcessingBlock::c_objectTypeKey] = getObjectType();
@@ -88,7 +88,7 @@ Json ProcessingChain::convertToJson() const
 
 void ProcessingChain::convertFromJson(const Json& rConverted)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     deleteProcessingBlocks();
 
@@ -116,7 +116,7 @@ std::string ProcessingChain::getObjectType() const
 
 void ProcessingChain::activate()
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     for(auto pProcessingBlock : m_processingChain)
     {
@@ -128,7 +128,7 @@ void ProcessingChain::activate()
 
 void ProcessingChain::deactivate()
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     for(auto pProcessingBlock : m_processingChain)
     {
@@ -140,7 +140,7 @@ void ProcessingChain::deactivate()
 
 void ProcessingChain::execute(Processing::TRgbStrip& strip)
 {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     for(auto pProcessingBlock : m_processingChain)
     {

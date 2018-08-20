@@ -56,6 +56,7 @@ public:
     virtual IProcessingBlock* createProcessingBlock(const Json& rConverted) const;
     virtual IPatch* createPatch() const;
     virtual IPatch* createPatch(const Json& rConverted) const;
+    virtual IProcessingChain* createProcessingChain() const;
 
 private:
     /** Reference to the MIDI input to pass to new blocks. */

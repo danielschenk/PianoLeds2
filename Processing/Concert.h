@@ -144,6 +144,7 @@ protected:
     std::string getObjectType() const;
 
 private:
+    static constexpr const char* c_typeName                             = "Concert";
     static constexpr const char* c_isListeningToProgramChangeJsonKey    = "isListeningToProgramChange";
     static constexpr const char* c_noteToLightMapJsonKey                = "noteToLightMap";
     static constexpr const char* c_programChangeChannelJsonKey          = "programChangeChannel";

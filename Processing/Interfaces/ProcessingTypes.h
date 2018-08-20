@@ -60,6 +60,7 @@ struct TRgb
      * Compare with another @ref TRgb.
      */
     bool operator ==(const TRgb& other) const;
+    bool operator !=(const TRgb& other) const;
 
     /**
      * Multiply every color by a single factor.

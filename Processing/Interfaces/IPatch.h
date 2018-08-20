@@ -26,19 +26,36 @@
  * @brief Interface to a patch.
  */
 
-#include "IProcessingBlock.h"
+#include "IJsonConvertible.h"
 #include "ProcessingTypes.h"
 
 class IPatch
-    : public virtual IProcessingBlock
+    : public IJsonConvertible
 {
 public:
+    virtual ~IPatch() = default;
+
     /**
-     * Destructor.
+     * Activate this patch.
+     *
+     * @post The patch responds to events.
      */
-    virtual ~IPatch()
-    {
-    }
+    virtual void activate() = 0;
+
+    /**
+     * Deactivate this patch.
+     *
+     * @post The patch ignores events.
+     * @post The patch is in a clean state (as if no events have ever been received).
+     */
+    virtual void deactivate() = 0;
+
+    /**
+     * Execute this patch on the given strip.
+     *
+     * @param   [in/out]    strip   The strip to operate on.
+     */
+    virtual void execute(Processing::TRgbStrip& strip) = 0;
 
     /**
      * Check if the patch has a valid bank and program number.
