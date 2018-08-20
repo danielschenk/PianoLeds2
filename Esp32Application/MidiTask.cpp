@@ -34,9 +34,10 @@
 MidiTask::MidiTask(ArduinoMidiInput& rMidiInput,
                    uint32_t stackSize,
                    UBaseType_t priority)
-    : BaseTask("midi", stackSize, priority)
+    : BaseTask()
     , m_rMidiInput(rMidiInput)
 {
+    start("midi", stackSize, priority);
 }
 
 void MidiTask::wake()

@@ -26,23 +26,31 @@
 
 #include "BaseTask.h"
 
-BaseTask::BaseTask(const char* pName,
-                   uint32_t stackSize,
-                   UBaseType_t priority)
-    : m_terminate(0)
+BaseTask::BaseTask()
+    : m_taskHandle(NULL)
+    , m_terminate(0)
 {
+}
+
+BaseTask::~BaseTask()
+{
+    assert(m_taskHandle == NULL);
+}
+
+void BaseTask::start(const char* pName,
+                     uint32_t stackSize,
+                     UBaseType_t priority)
+{
+    assert(m_taskHandle == NULL);
+
     xTaskCreate(&BaseTask::taskFunction,
                 pName,
                 stackSize,
                 this,
                 priority,
                 &m_taskHandle);
-    assert(m_taskHandle != NULL);
-}
 
-BaseTask::~BaseTask()
-{
-    assert(m_taskHandle == NULL);
+    assert(m_taskHandle != NULL);
 }
 
 void BaseTask::terminate()

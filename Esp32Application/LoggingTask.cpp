@@ -33,10 +33,11 @@
 LoggingTask::LoggingTask(Stream& rSerial,
                          uint32_t stackSize,
                          UBaseType_t priority)
-    : BaseTask("logging", stackSize, priority)
+    : BaseTask()
     , m_rSerial(rSerial)
 {
     m_queue = xQueueCreate(10, sizeof(QueueEntry));
+    start("logging", stackSize, priority);
     LoggingEntryPoint::subscribe(*this);
 }
 

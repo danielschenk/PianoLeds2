@@ -36,19 +36,7 @@
 class BaseTask
 {
 public:
-    /**
-     * Constructor.
-     *
-     * @param pName     Name of the task
-     * @param stackSize Stack size in words
-     * @param priority  Priority
-     */
-    BaseTask(const char* pName,
-             uint32_t stackSize,
-             UBaseType_t priority);
-
     // Prevent implicit constructors and assignment operator
-    BaseTask() = delete;
     BaseTask(const BaseTask&) = delete;
     BaseTask& operator=(const BaseTask&) = delete;
 
@@ -63,6 +51,22 @@ public:
     void terminate();
 
 protected:
+    /**
+     * Constructor.
+     */
+    BaseTask();
+
+    /**
+     * Create and start the task.
+     *
+     * @param pName     Name of the task
+     * @param stackSize Stack size in words
+     * @param priority  Priority
+     */
+    void start(const char* pName,
+               uint32_t stackSize,
+               UBaseType_t priority);
+
     TaskHandle_t getTaskHandle() const;
 
 private:
