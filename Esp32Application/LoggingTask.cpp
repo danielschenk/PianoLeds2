@@ -91,7 +91,7 @@ void LoggingTask::run()
             break;
         }
 
-        snprintf(buf, sizeof(buf), "%llu %s(%s): %s",
+        snprintf(buf, sizeof(buf), "%llu %s(%s): %s\r\n",
                  entry.time,
                  pLevelString,
                  entry.pComponent->c_str(),

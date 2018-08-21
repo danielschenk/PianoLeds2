@@ -30,6 +30,7 @@
 #include <freertos/task.h>
 
 #include "LoggingTask.h"
+#include "Common/Logging.h"
 
 #include "Drivers/Arduino/ArduinoMidiInput.h"
 #include "MidiTask.h"
@@ -42,6 +43,8 @@
 #include "Processing/NoteRgbSource.h"
 #include "Processing/LinearRgbFunction.h"
 
+#define LOGGING_COMPONENT "Esp32Application"
+
 static LoggingTask* gs_pLoggingTask(nullptr);
 
 static ArduinoMidiInput* gs_pMidiInput(nullptr);
@@ -52,23 +55,45 @@ static ProcessingBlockFactory* gs_pProcessingBlockFactory(nullptr);
 static Processing::TNoteToLightMap* gs_pNoteToLightMap(nullptr);
 static Concert* gs_pConcert(nullptr);
 
-static constexpr uint32_t c_defaultStackSize(1024);
+static constexpr uint32_t c_defaultStackSize(4096);
 
 enum
 {
+    /**
+     * Idle priority level.
+     */
     PRIORITY_IDLE = 0,
+
+    /**
+     * Priority level for everything which is least important.
+     * @note Same as the task which runs the setup/loop functions.
+     * Examples: logging
+     */
     PRIORITY_LOW = 1,
+
+    /**
+     * Priority level for things which are not critical, but should not be delayed by logging.
+     * Examples: web UI for configuration
+     * */
     PRIORITY_UI = 2,
+
+    /**
+     * Priority level for the main tasks of the device which should always have priority.
+     * Examples: MIDI, processing, SPI
+     */
     PRIORITY_CRITICAL = 3
 };
 
-static void initTask(void* pvParameters)
+void setup()
 {
     // Initialize logging
     Serial.begin(115200);
     gs_pLoggingTask = new LoggingTask(Serial,
                                       c_defaultStackSize,
                                       PRIORITY_LOW);
+
+    LOG_INFO("MIDI-LED-Controller (MLC) (c) Daniel Schenk, 2017");
+    LOG_INFO("initializing application...");
 
     // Initialize MIDI, baud rate is 31.25k
     Serial2.begin(31250);
@@ -118,26 +143,16 @@ static void initTask(void* pvParameters)
     pSrc2->setUsingPedal(true);
     pPatch->getProcessingChain().insertBlock(pSrc2);
 
-    // Delete ourselves.
-    vTaskDelete(NULL);
-}
-
-void setup()
-{
-    // Start the init task, which will initialize everything and delete itself.
-    xTaskCreate(initTask,
-                "init",
-                c_defaultStackSize,
-                nullptr,            // no parameters
-                PRIORITY_CRITICAL,
-                nullptr);           // no need to store task handle
-
-    xPortStartScheduler();
+    LOG_INFO("initialization done");
 }
 
 void loop()
 {
-    // Nothing to do, leave everything to the OS.
+    // TODO toggle a run LED instead?
+    LOG_INFO("still alive :-)");
+
+    // Nothing to do, leave everything to the other tasks.
+    vTaskDelay(10000);
 }
 
 
