@@ -73,10 +73,9 @@ public:
      */
     static void logMessage(uint64_t time, Logging::TLogLevel level, const char *component, const char *fmt, ...) __attribute__((format (printf, 4, 5)));
 
-private:
     /** Max log message size, excluding file, line and level information. */
-    static constexpr unsigned int c_maxMessageSize = 256;
-
+    static constexpr unsigned int c_maxMessageSize = 2048;
+private:
     /** The list of subscribers. */
     static std::vector<ILoggingTarget*> s_subscribers;
 

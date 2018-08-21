@@ -151,6 +151,10 @@ void loop()
     // TODO toggle a run LED instead?
     LOG_INFO("still alive :-)");
 
+    std::string json;
+    gs_pConcert->convertToJson().dump(json);
+    LOG_INFO(json.c_str());
+
     // Nothing to do, leave everything to the other tasks.
     vTaskDelay(10000);
 }

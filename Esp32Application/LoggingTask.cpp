@@ -68,7 +68,8 @@ void LoggingTask::run()
     // Wait for item forever
     while(xQueueReceive(m_queue, &entry, portMAX_DELAY) == pdTRUE)
     {
-        char buf[256];
+        // Some extra for component and level information
+        char buf[LoggingEntryPoint::c_maxMessageSize + 100];
 
         const char* pLevelString;
         switch(entry.level)
