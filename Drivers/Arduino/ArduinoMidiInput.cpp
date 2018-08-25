@@ -29,16 +29,16 @@
 #include "ArduinoMidiInput.h"
 
 
-ArduinoMidiInput::ArduinoMidiInput(Stream& rSerial)
-    : m_rSerial(rSerial)
+ArduinoMidiInput::ArduinoMidiInput(Stream& serial)
+    : m_serial(serial)
 {
 }
 
 void ArduinoMidiInput::run()
 {
-    while(m_rSerial.available())
+    while(m_serial.available())
     {
-        processMidiByte(static_cast<uint8_t>(m_rSerial.read()));
+        processMidiByte(static_cast<uint8_t>(m_serial.read()));
     }
 }
 

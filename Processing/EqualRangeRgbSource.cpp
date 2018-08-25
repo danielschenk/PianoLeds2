@@ -86,11 +86,11 @@ Json EqualRangeRgbSource::convertToJson() const
     return Json(json);
 }
 
-void EqualRangeRgbSource::convertFromJson(const Json& rConverted)
+void EqualRangeRgbSource::convertFromJson(const Json& converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+    Json11Helper helper(__PRETTY_FUNCTION__, converted);
     helper.getItemIfPresent(c_rJsonKey, m_color.r);
     helper.getItemIfPresent(c_gJsonKey, m_color.g);
     helper.getItemIfPresent(c_bJsonKey, m_color.b);

@@ -59,9 +59,9 @@ public:
     /**
      * Convert object from JSON.
      *
-     * @param[in]   rConverted  The JSON object containing the persistent properties of the object.
+     * @param[in]   converted   The JSON object containing the persistent properties of the object.
      */
-    virtual void convertFromJson(const Json& rConverted) = 0;
+    virtual void convertFromJson(const Json& converted) = 0;
 
 protected:
     /**

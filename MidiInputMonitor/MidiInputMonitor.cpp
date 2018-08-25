@@ -31,7 +31,7 @@
 #include <cassert>
 #include <Drivers/PC/RtMidiMidiInput.h>
 
-static RtMidiMidiInput* gs_pMidiInput = nullptr;
+static RtMidiMidiInput* gs_midiInput = nullptr;
 
 static void OnNoteReceived(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on)
 {
@@ -50,18 +50,18 @@ static void OnProgramChangeReceived(uint8_t channel, uint8_t number)
 
 int main()
 {
-    gs_pMidiInput = new RtMidiMidiInput();
-    assert(gs_pMidiInput != nullptr);
+    gs_midiInput = new RtMidiMidiInput();
+    assert(gs_midiInput != nullptr);
 
-    int numFoundInputs = gs_pMidiInput->getPortCount();
+    int numFoundInputs = gs_midiInput->getPortCount();
     std::cout << "Found " << numFoundInputs << " MIDI inputs.\n";
 
     if(numFoundInputs > 0)
     {
-        gs_pMidiInput->subscribeNoteOnOff(&OnNoteReceived);
-        gs_pMidiInput->subscribeControlChange(&OnControlChangeReceived);
-        gs_pMidiInput->subscribeProgramChange(&OnProgramChangeReceived);
-        gs_pMidiInput->openPort(0);
+        gs_midiInput->subscribeNoteOnOff(&OnNoteReceived);
+        gs_midiInput->subscribeControlChange(&OnControlChangeReceived);
+        gs_midiInput->subscribeProgramChange(&OnProgramChangeReceived);
+        gs_midiInput->openPort(0);
         std::cout << "Opened port 0, incoming notes and control changes will be printed to stdout. Type <q> <ENTER> to quit.\n";
 
         while(std::getchar() != 'q')
@@ -69,12 +69,12 @@ int main()
             // Wait for input
         }
 
-        delete gs_pMidiInput;
+        delete gs_midiInput;
         return 0;
     }
     else
     {
-        delete gs_pMidiInput;
+        delete gs_midiInput;
         return 1;
     }
 }

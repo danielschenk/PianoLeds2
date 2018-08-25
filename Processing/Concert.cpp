@@ -32,34 +32,34 @@
 #include "Concert.h"
 #include "Interfaces/IPatch.h"
 
-Concert::Concert(IMidiInput& rMidiInput, IProcessingBlockFactory& rProcessingBlockFactory)
+Concert::Concert(IMidiInput& midiInput, IProcessingBlockFactory& processingBlockFactory)
     : m_noteToLightMap()
     , m_patches()
     , m_activePatch(m_patches.end())
     , m_listeningToProgramChange(false)
     , m_programChangeChannel(0)
     , m_currentBank(0)
-    , m_rMidiInput(rMidiInput)
-    , m_rProcessingBlockFactory(rProcessingBlockFactory)
+    , m_midiInput(midiInput)
+    , m_processingBlockFactory(processingBlockFactory)
     , m_scheduler()
     , m_mutex()
 {
-    m_controlChangeSubscription = m_rMidiInput.subscribeControlChange(
+    m_controlChangeSubscription = m_midiInput.subscribeControlChange(
         std::bind(&Concert::onControlChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
     );
-    m_programChangeSubscription = m_rMidiInput.subscribeProgramChange(
+    m_programChangeSubscription = m_midiInput.subscribeProgramChange(
         std::bind(&Concert::onProgramChange, this, std::placeholders::_1, std::placeholders::_2)
     );
 }
 
 Concert::~Concert()
 {
-    m_rMidiInput.unsubscribeProgramChange(m_programChangeSubscription);
-    m_rMidiInput.unsubscribeControlChange(m_controlChangeSubscription);
+    m_midiInput.unsubscribeProgramChange(m_programChangeSubscription);
+    m_midiInput.unsubscribeControlChange(m_controlChangeSubscription);
 
-    for(auto pPatch : m_patches)
+    for(auto patch : m_patches)
     {
-        delete pPatch;
+        delete patch;
     }
 }
 
@@ -74,13 +74,13 @@ Concert::TPatchPosition Concert::addPatch()
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    IPatch* pPatch = m_rProcessingBlockFactory.createPatch();
-    if(pPatch == nullptr)
+    IPatch* patch = m_processingBlockFactory.createPatch();
+    if(patch == nullptr)
     {
         return c_invalidPatchPosition;
     }
 
-    m_patches.push_back(pPatch);
+    m_patches.push_back(patch);
     return m_patches.size() - 1;
 }
 
@@ -121,20 +121,20 @@ Json Concert::convertToJson() const
     converted[c_noteToLightMapJsonKey] = Processing::convert(m_noteToLightMap);
 
     Json::array convertedPatches;
-    for(const IPatch* pPatch : m_patches)
+    for(const IPatch* patch : m_patches)
     {
-        convertedPatches.push_back(pPatch->convertToJson());
+        convertedPatches.push_back(patch->convertToJson());
     }
     converted[c_patchesJsonKey] = convertedPatches;
 
     return Json(converted);
 }
 
-void Concert::convertFromJson(const Json& rConverted)
+void Concert::convertFromJson(const Json& converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     
-    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+    Json11Helper helper(__PRETTY_FUNCTION__, converted);
     helper.getItemIfPresent(c_isListeningToProgramChangeJsonKey, m_listeningToProgramChange);
     helper.getItemIfPresent(c_programChangeChannelJsonKey, m_programChangeChannel);
     helper.getItemIfPresent(c_currentBankJsonKey, m_currentBank);
@@ -145,18 +145,18 @@ void Concert::convertFromJson(const Json& rConverted)
         m_noteToLightMap = Processing::convert(convertedNoteToLightMap);
     }
 
-    for(IPatch* pPatch : m_patches)
+    for(IPatch* patch : m_patches)
     {
-        delete pPatch;
+        delete patch;
     }
     m_patches.clear();
 
     Json::array convertedPatches;
     if(helper.getItemIfPresent(c_patchesJsonKey, convertedPatches))
     {
-        for(const Json& rConvertedPatch : convertedPatches)
+        for(const Json& convertedPatch : convertedPatches)
         {
-            m_patches.push_back(m_rProcessingBlockFactory.createPatch(rConvertedPatch));
+            m_patches.push_back(m_processingBlockFactory.createPatch(convertedPatch));
         }
     }
 }
@@ -240,19 +240,19 @@ void Concert::onProgramChange(uint8_t channel, uint8_t program)
 
         for(auto patchIt = m_patches.begin(); patchIt != m_patches.end(); ++patchIt)
         {
-            IPatch* pPatch = *patchIt;
-            if(pPatch->hasBankAndProgram())
+            IPatch* patch = *patchIt;
+            if(patch->hasBankAndProgram())
             {
-                if(pPatch->getBank() == m_currentBank)
+                if(patch->getBank() == m_currentBank)
                 {
-                    if(pPatch->getProgram() == program)
+                    if(patch->getProgram() == program)
                     {
                         // Found a patch which matches the received program number and active bank.
                         if(m_activePatch != m_patches.end())
                         {
                             (*m_activePatch)->deactivate();
                         }
-                        pPatch->activate();
+                        patch->activate();
                         m_activePatch = patchIt;
                     }
                 }

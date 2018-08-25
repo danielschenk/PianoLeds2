@@ -46,11 +46,11 @@ public:
     /**
      * Constructor.
      *
-     * @param rSerial   The Arduino Serial instance to use
+     * @param serial    The Arduino Serial instance to use
      * @param stackSize Stack size in words
      * @param priority  Priority
      */
-    LoggingTask(Stream& rSerial,
+    LoggingTask(Stream& serial,
                 uint32_t stackSize,
                 UBaseType_t priority);
 
@@ -72,13 +72,13 @@ private:
     {
         uint64_t time;
         Logging::TLogLevel level;
-        std::string* pComponent;
-        std::string* pMessage;
+        std::string* component;
+        std::string* message;
     };
 
     virtual void run();
 
-    Stream& m_rSerial;
+    Stream& m_serial;
     QueueHandle_t m_queue;
 };
 

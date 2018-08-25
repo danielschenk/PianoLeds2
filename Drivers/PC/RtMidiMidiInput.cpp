@@ -31,40 +31,40 @@
 #include "RtMidiMidiInput.h"
 
 RtMidiMidiInput::RtMidiMidiInput()
-    : m_pRtMidiIn(new RtMidiIn())
+    : m_rtMidiIn(new RtMidiIn())
 {
-    assert(m_pRtMidiIn != nullptr);
-    m_pRtMidiIn->setCallback(&RtMidiCommonCallback, (void*)this);
+    assert(m_rtMidiIn != nullptr);
+    m_rtMidiIn->setCallback(&RtMidiCommonCallback, (void*)this);
 }
 
 RtMidiMidiInput::~RtMidiMidiInput()
 {
-    delete m_pRtMidiIn;
+    delete m_rtMidiIn;
 }
 
 unsigned int RtMidiMidiInput::getPortCount() const
 {
-    return m_pRtMidiIn->getPortCount();
+    return m_rtMidiIn->getPortCount();
 }
 
 void RtMidiMidiInput::openPort(int number)
 {
-    m_pRtMidiIn->openPort(number);
+    m_rtMidiIn->openPort(number);
 }
 
 void RtMidiMidiInput::RtMidiCommonCallback(double deltatime, std::vector<unsigned char> *message, void *userData)
 {
     // userData tells us the instance to call the specific callback on
-    RtMidiMidiInput* pMidiInput = static_cast<RtMidiMidiInput*>(userData);
-    if(pMidiInput != nullptr)
+    RtMidiMidiInput* midiInput = static_cast<RtMidiMidiInput*>(userData);
+    if(midiInput != nullptr)
     {
-        pMidiInput->RtMidiCallback(deltatime, message);
+        midiInput->RtMidiCallback(deltatime, message);
     }
 }
 
-void RtMidiMidiInput::RtMidiCallback(double deltatime, std::vector<unsigned char> *pMessage)
+void RtMidiMidiInput::RtMidiCallback(double deltatime, std::vector<unsigned char> *message)
 {
-    for(auto byte : *pMessage)
+    for(auto byte : *message)
     {
         processMidiByte(byte);
     }

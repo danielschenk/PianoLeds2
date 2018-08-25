@@ -28,19 +28,19 @@
 
 #define LOGGING_COMPONENT "Json11Helper"
 
-Json11Helper::Json11Helper(std::string user, const Json& rJson, bool logMissingKeys)
+Json11Helper::Json11Helper(std::string user, const Json& json, bool logMissingKeys)
     : m_user(user)
-    , m_rJson(rJson)
+    , m_json(json)
     , m_logMissingKeys(logMissingKeys)
 {
 }
 
-Json11Helper::Json11Helper(const char* user, const Json& rJson, bool logMissingKeys)
+Json11Helper::Json11Helper(const char* user, const Json& json, bool logMissingKeys)
     : m_user(user)
-    , m_rJson(rJson)
+    , m_json(json)
     , m_logMissingKeys(logMissingKeys)
 {
-    if(!m_rJson.is_object())
+    if(!m_json.is_object())
     {
         LOG_ERROR_PARAMS("%s: Passed object not a JSON object", m_user.c_str());
     }
@@ -50,38 +50,38 @@ Json11Helper::~Json11Helper()
 {
 }
 
-bool Json11Helper::getItem(std::string key, int& rTarget) const
+bool Json11Helper::getItem(std::string key, int& target) const
 {
-    return getInt(key, rTarget);
+    return getInt(key, target);
 }
 
-bool Json11Helper::getItem(std::string key, uint8_t& rTarget) const
+bool Json11Helper::getItem(std::string key, uint8_t& target) const
 {
-    return getInt(key, rTarget);
+    return getInt(key, target);
 }
 
-bool Json11Helper::getItem(std::string key, uint16_t& rTarget) const
+bool Json11Helper::getItem(std::string key, uint16_t& target) const
 {
-    return getInt(key, rTarget);
+    return getInt(key, target);
 }
 
-bool Json11Helper::getItem(std::string key, float& rTarget) const
+bool Json11Helper::getItem(std::string key, float& target) const
 {
-    return getFloat(key, rTarget);
+    return getFloat(key, target);
 }
 
-bool Json11Helper::getItem(std::string key, double& rTarget) const
+bool Json11Helper::getItem(std::string key, double& target) const
 {
-    return getFloat(key, rTarget);
+    return getFloat(key, target);
 }
 
-bool Json11Helper::getItem(std::string key, bool& rTarget) const
+bool Json11Helper::getItem(std::string key, bool& target) const
 {
-    const auto& rItem = m_rJson[key];
+    const auto& item = m_json[key];
 
-    if(rItem.is_bool())
+    if(item.is_bool())
     {
-        rTarget = rItem.bool_value();
+        target = item.bool_value();
         return true;
     }
     else
@@ -91,13 +91,13 @@ bool Json11Helper::getItem(std::string key, bool& rTarget) const
     }
 }
 
-bool Json11Helper::getItem(std::string key, std::string& rTarget) const
+bool Json11Helper::getItem(std::string key, std::string& target) const
 {
-    const auto& rItem = m_rJson[key];
+    const auto& item = m_json[key];
 
-    if(rItem.is_string())
+    if(item.is_string())
     {
-        rTarget = rItem.string_value();
+        target = item.string_value();
         return true;
     }
     else
@@ -107,13 +107,13 @@ bool Json11Helper::getItem(std::string key, std::string& rTarget) const
     }
 }
 
-bool Json11Helper::getItem(std::string key, Json::object& rTarget) const
+bool Json11Helper::getItem(std::string key, Json::object& target) const
 {
-    const auto& rItem = m_rJson[key];
+    const auto& item = m_json[key];
 
-    if(rItem.is_object())
+    if(item.is_object())
     {
-        rTarget = rItem.object_items();
+        target = item.object_items();
         return true;
     }
     else
@@ -123,13 +123,13 @@ bool Json11Helper::getItem(std::string key, Json::object& rTarget) const
     }
 }
 
-bool Json11Helper::getItem(std::string key, Json::array& rTarget) const
+bool Json11Helper::getItem(std::string key, Json::array& target) const
 {
-    const auto& rItem = m_rJson[key];
+    const auto& item = m_json[key];
 
-    if(rItem.is_array())
+    if(item.is_array())
     {
-        rTarget = rItem.array_items();
+        target = item.array_items();
         return true;
     }
     else

@@ -59,11 +59,11 @@ protected:
     /**
      * Create and start the task.
      *
-     * @param pName     Name of the task
+     * @param name      Name of the task
      * @param stackSize Stack size in words
      * @param priority  Priority
      */
-    void start(const char* pName,
+    void start(const char* name,
                uint32_t stackSize,
                UBaseType_t priority);
 

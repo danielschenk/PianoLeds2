@@ -53,7 +53,7 @@ public:
     virtual ~RgbFunctionFactory() = default;
 
     // IRgbFunctionFactory implementation
-    virtual IRgbFunction* createRgbFunction(const Json& rConverted) const;
+    virtual IRgbFunction* createRgbFunction(const Json& converted) const;
 };
 
 #endif /* PROCESSING_RGBFUNCTIONFACTORY_H_ */

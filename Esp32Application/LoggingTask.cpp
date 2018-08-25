@@ -30,11 +30,11 @@
 #include "Common/LoggingEntryPoint.h"
 #include "LoggingTask.h"
 
-LoggingTask::LoggingTask(Stream& rSerial,
+LoggingTask::LoggingTask(Stream& serial,
                          uint32_t stackSize,
                          UBaseType_t priority)
     : BaseTask()
-    , m_rSerial(rSerial)
+    , m_serial(serial)
 {
     m_queue = xQueueCreate(10, sizeof(QueueEntry));
     start("logging", stackSize, priority);
@@ -55,8 +55,8 @@ void LoggingTask::logMessage(uint64_t time,
     QueueEntry entry;
     entry.time = time;
     entry.level = level;
-    entry.pComponent = new std::string(component);
-    entry.pMessage = new std::string(message);
+    entry.component = new std::string(component);
+    entry.message = new std::string(message);
 
     xQueueSend(m_queue, &entry, portMAX_DELAY);
 }
@@ -71,36 +71,36 @@ void LoggingTask::run()
         // Some extra for component and level information
         char buf[LoggingEntryPoint::c_maxMessageSize + 100];
 
-        const char* pLevelString;
+        const char* levelString;
         switch(entry.level)
         {
         case Logging::LogLevel_Debug:
-            pLevelString = "Debug";
+            levelString = "Debug";
             break;
 
         case Logging::LogLevel_Info:
-            pLevelString = "Info";
+            levelString = "Info";
             break;
 
         case Logging::LogLevel_Warning:
-            pLevelString = "Warning";
+            levelString = "Warning";
             break;
 
         case Logging::LogLevel_Error:
         default:
-            pLevelString = "Error";
+            levelString = "Error";
             break;
         }
 
         snprintf(buf, sizeof(buf), "%llu %s(%s): %s\r\n",
                  entry.time,
-                 pLevelString,
-                 entry.pComponent->c_str(),
-                 entry.pMessage->c_str());
+                 levelString,
+                 entry.component->c_str(),
+                 entry.message->c_str());
 
-        delete entry.pComponent;
-        delete entry.pMessage;
+        delete entry.component;
+        delete entry.message;
 
-        m_rSerial.print(buf);
+        m_serial.print(buf);
     }
 }

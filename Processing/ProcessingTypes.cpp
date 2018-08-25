@@ -95,22 +95,22 @@ TRgb rgbFromFloat(float initialR, float initialG, float initialB)
     return TRgb((uint8_t)initialR, (uint8_t)initialG, (uint8_t)initialB);
 }
 
-Json convert(const TNoteToLightMap& rSource)
+Json convert(const TNoteToLightMap& source)
 {
     Json::object converted;
-    for(const auto& rPair : rSource)
+    for(const auto& pair : source)
     {
         char buf[4];
-        snprintf(buf, sizeof(buf), "%u", rPair.first);
-        converted[std::string(buf)] = Json(rPair.second);
+        snprintf(buf, sizeof(buf), "%u", pair.first);
+        converted[std::string(buf)] = Json(pair.second);
     }
 
     return Json(converted);
 }
 
-TNoteToLightMap convert(const Json& rSource)
+TNoteToLightMap convert(const Json& source)
 {
-    Json11Helper helper(__PRETTY_FUNCTION__, rSource, false /* logMissingKeys */);
+    Json11Helper helper(__PRETTY_FUNCTION__, source, false /* logMissingKeys */);
 
     TNoteToLightMap converted;
     for(unsigned int noteNumber = 0; noteNumber <= UINT8_MAX; ++noteNumber)

@@ -57,7 +57,7 @@ public:
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& output);
     virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& rConverted);
+    virtual void convertFromJson(const Json& converted);
 
     /**
      * Get color.

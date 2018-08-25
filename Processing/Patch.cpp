@@ -29,26 +29,26 @@
 #include "Patch.h"
 #include "Interfaces/IProcessingBlockFactory.h"
 
-Patch::Patch(const IProcessingBlockFactory& rProcessingBlockFactory)
+Patch::Patch(const IProcessingBlockFactory& processingBlockFactory)
     : IPatch()
     , m_mutex()
     , m_hasBankAndProgram(false)
     , m_bank(0)
     , m_program(0)
     , m_name("Untitled Patch")
-    , m_pProcessingChain(rProcessingBlockFactory.createProcessingChain())
-    , m_rProcessingBlockFactory(rProcessingBlockFactory)
+    , m_processingChain(processingBlockFactory.createProcessingChain())
+    , m_processingBlockFactory(processingBlockFactory)
 {
 }
 
 Patch::~Patch()
 {
-    delete m_pProcessingChain;
+    delete m_processingChain;
 }
 
 IProcessingChain& Patch::getProcessingChain() const
 {
-    return *m_pProcessingChain;
+    return *m_processingChain;
 }
 
 Json Patch::convertToJson() const
@@ -65,17 +65,17 @@ Json Patch::convertToJson() const
     converted[c_nameJsonKey] = m_name;
 
     // Add processing chain
-    converted[c_processingChainJsonKey] = m_pProcessingChain->convertToJson();
+    converted[c_processingChainJsonKey] = m_processingChain->convertToJson();
 
     return converted;
 }
 
-void Patch::convertFromJson(const Json& rConverted)
+void Patch::convertFromJson(const Json& converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
     // Get items specific for Patch
-    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+    Json11Helper helper(__PRETTY_FUNCTION__, converted);
     helper.getItemIfPresent(c_hasBankAndProgramJsonKey, m_hasBankAndProgram);
     helper.getItemIfPresent(c_programJsonKey, m_program);
     helper.getItemIfPresent(c_bankJsonKey, m_bank);
@@ -85,13 +85,13 @@ void Patch::convertFromJson(const Json& rConverted)
     Json::object convertedProcessingChain;
     if(helper.getItemIfPresent(c_processingChainJsonKey, convertedProcessingChain))
     {
-        m_pProcessingChain->convertFromJson(convertedProcessingChain);
+        m_processingChain->convertFromJson(convertedProcessingChain);
     }
     else
     {
         // Reset to default.
-        delete m_pProcessingChain;
-        m_pProcessingChain = m_rProcessingBlockFactory.createProcessingChain();
+        delete m_processingChain;
+        m_processingChain = m_processingBlockFactory.createProcessingChain();
     }
 }
 
@@ -102,17 +102,17 @@ std::string Patch::getObjectType() const
 
 void Patch::activate()
 {
-    m_pProcessingChain->activate();
+    m_processingChain->activate();
 }
 
 void Patch::deactivate()
 {
-    m_pProcessingChain->deactivate();
+    m_processingChain->deactivate();
 }
 
 void Patch::execute(Processing::TRgbStrip& strip)
 {
-    m_pProcessingChain->execute(strip);
+    m_processingChain->execute(strip);
 }
 
 uint8_t Patch::getBank() const

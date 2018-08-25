@@ -71,8 +71,8 @@ TEST_F(ProcessingChainTest, empty)
 
 TEST_F(ProcessingChainTest, insertOne)
 {
-    m_processingChain.insertBlock(m_pRedSource);
-    m_pRedSource = nullptr;
+    m_processingChain.insertBlock(m_redSource);
+    m_redSource = nullptr;
 
     auto reference = Processing::TRgbStrip(c_stripSize);
     reference[0] = { 10, 0, 0 };
@@ -85,10 +85,10 @@ TEST_F(ProcessingChainTest, insertOne)
 
 TEST_F(ProcessingChainTest, insertTwo)
 {
-    m_processingChain.insertBlock(m_pRedSource);
-    m_pRedSource = nullptr;
-    m_processingChain.insertBlock(m_pValueDoubler);
-    m_pValueDoubler = nullptr;
+    m_processingChain.insertBlock(m_redSource);
+    m_redSource = nullptr;
+    m_processingChain.insertBlock(m_valueDoubler);
+    m_valueDoubler = nullptr;
 
     auto reference = Processing::TRgbStrip(c_stripSize);
     reference[0] = { 20, 0, 0 };
@@ -104,15 +104,15 @@ TEST_F(ProcessingChainTest, convertToJson)
     Json::array mockBlocksJson;
     for(unsigned int i = 0; i < 3; ++i)
     {
-        TMockBlock* pMockBlock = new TMockBlock;
-        ASSERT_NE(nullptr, pMockBlock);
+        TMockBlock* mockBlock = new TMockBlock;
+        ASSERT_NE(nullptr, mockBlock);
 
         Json mockJson = createMockBlockJson(i);
-        EXPECT_CALL(*pMockBlock, convertToJson())
+        EXPECT_CALL(*mockBlock, convertToJson())
             .WillOnce(Return(mockJson));
         mockBlocksJson.push_back(mockJson);
 
-        m_processingChain.insertBlock(pMockBlock);
+        m_processingChain.insertBlock(mockBlock);
     }
 
     Json::object converted = m_processingChain.convertToJson().object_items();
@@ -122,12 +122,12 @@ TEST_F(ProcessingChainTest, convertToJson)
 
 TEST_F(ProcessingChainTest, convertFromJson)
 {
-    std::vector<IProcessingBlock*> mockBlocks({m_pGreenSource, m_pValueDoubler});
+    std::vector<IProcessingBlock*> mockBlocks({m_greenSource, m_valueDoubler});
 
     // Processing chain takes over ownership of the mock block when our mock factory returns it.
     // Prevent that the fixture teardown deletes already deleted object
-    m_pGreenSource = nullptr;
-    m_pValueDoubler = nullptr;
+    m_greenSource = nullptr;
+    m_valueDoubler = nullptr;
 
     Json::array mockBlocksJson;
     for(unsigned int i = 0; i < mockBlocks.size(); ++i)
@@ -154,10 +154,10 @@ TEST_F(ProcessingChainTest, activate)
 {
     for(int i = 0; i < 3; i++)
     {
-        TMockBlock* pBlock = new TMockBlock;
-        m_processingChain.insertBlock(pBlock);
-        EXPECT_CALL(*pBlock, activate());
-        pBlock = nullptr;
+        TMockBlock* block = new TMockBlock;
+        m_processingChain.insertBlock(block);
+        EXPECT_CALL(*block, activate());
+        block = nullptr;
     }
 
     m_processingChain.activate();
@@ -167,10 +167,10 @@ TEST_F(ProcessingChainTest, deactivate)
 {
     for(int i = 0; i < 3; i++)
     {
-        TMockBlock* pBlock = new TMockBlock;
-        m_processingChain.insertBlock(pBlock);
-        EXPECT_CALL(*pBlock, deactivate());
-        pBlock = nullptr;
+        TMockBlock* block = new TMockBlock;
+        m_processingChain.insertBlock(block);
+        EXPECT_CALL(*block, deactivate());
+        block = nullptr;
     }
 
     m_processingChain.deactivate();
@@ -182,10 +182,10 @@ TEST_F(ProcessingChainTest, activateOnInsert)
 
     for(int i = 0; i < 3; i++)
     {
-        TMockBlock* pBlock = new TMockBlock;
-        EXPECT_CALL(*pBlock, activate());
-        m_processingChain.insertBlock(pBlock);
-        pBlock = nullptr;
+        TMockBlock* block = new TMockBlock;
+        EXPECT_CALL(*block, activate());
+        m_processingChain.insertBlock(block);
+        block = nullptr;
     }
 }
 
@@ -193,9 +193,9 @@ TEST_F(ProcessingChainTest, deactivateOnInsert)
 {
     for(int i = 0; i < 3; i++)
     {
-        TMockBlock* pBlock = new TMockBlock;
-        EXPECT_CALL(*pBlock, deactivate());
-        m_processingChain.insertBlock(pBlock);
-        pBlock = nullptr;
+        TMockBlock* block = new TMockBlock;
+        EXPECT_CALL(*block, deactivate());
+        m_processingChain.insertBlock(block);
+        block = nullptr;
     }
 }

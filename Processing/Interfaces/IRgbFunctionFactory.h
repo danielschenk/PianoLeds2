@@ -55,7 +55,7 @@ public:
      *
      * @return  The newly created RGB function or nullptr if type could not be determined.
      */
-    virtual IRgbFunction* createRgbFunction(const Json& rConverted) const = 0;
+    virtual IRgbFunction* createRgbFunction(const Json& converted) const = 0;
 };
 
 

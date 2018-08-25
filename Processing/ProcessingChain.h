@@ -46,7 +46,7 @@ public:
     /**
      * Constructor.
      */
-    ProcessingChain(const IProcessingBlockFactory& rProcessingBlockFactory);
+    ProcessingChain(const IProcessingBlockFactory& processingBlockFactory);
 
     /**
      * Destructor.
@@ -62,10 +62,10 @@ public:
     virtual void activate();
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& strip);
-    virtual void insertBlock(IProcessingBlock* pBlock, unsigned int index);
-    virtual void insertBlock(IProcessingBlock* pBlock);
+    virtual void insertBlock(IProcessingBlock* block, unsigned int index);
+    virtual void insertBlock(IProcessingBlock* block);
     virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& rConverted);
+    virtual void convertFromJson(const Json& converted);
 
 protected:
     // IProcessingBlock implementation
@@ -78,7 +78,7 @@ private:
     mutable std::mutex m_mutex;
 
     /** Reference to the processing block factory. */
-    const IProcessingBlockFactory& m_rProcessingBlockFactory;
+    const IProcessingBlockFactory& m_processingBlockFactory;
 
     /** Whether all blocks in the chain are active or not. */
     bool m_active;

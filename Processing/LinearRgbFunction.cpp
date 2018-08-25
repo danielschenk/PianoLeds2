@@ -70,9 +70,9 @@ Json LinearRgbFunction::convertToJson() const
     return Json(json);
 }
 
-void LinearRgbFunction::convertFromJson(const Json& rConverted)
+void LinearRgbFunction::convertFromJson(const Json& converted)
 {
-    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+    Json11Helper helper(__PRETTY_FUNCTION__, converted);
     helper.getItemIfPresent(c_rFactorJsonKey, m_redConstants.factor);
     helper.getItemIfPresent(c_rOffsetJsonKey, m_redConstants.offset);
     helper.getItemIfPresent(c_gFactorJsonKey, m_greenConstants.factor);

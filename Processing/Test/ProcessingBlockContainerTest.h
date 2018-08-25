@@ -39,27 +39,27 @@ using ::testing::NiceMock;
 
 static void addRed(Processing::TRgbStrip& strip)
 {
-    for(auto& rLed : strip)
+    for(auto& led : strip)
     {
-        rLed.r = 10;
+        led.r = 10;
     }
 }
 
 static void addGreen(Processing::TRgbStrip& strip)
 {
-    for(auto& rLed : strip)
+    for(auto& led : strip)
     {
-        rLed.g = 10;
+        led.g = 10;
     }
 }
 
 static void doubleValue(Processing::TRgbStrip& strip)
 {
-    for(auto& rLed : strip)
+    for(auto& led : strip)
     {
-        rLed.r = std::min(0xff, rLed.r*2);
-        rLed.g = std::min(0xff, rLed.g*2);
-        rLed.b = std::min(0xff, rLed.b*2);
+        led.r = std::min(0xff, led.r*2);
+        led.g = std::min(0xff, led.g*2);
+        led.b = std::min(0xff, led.b*2);
     }
 }
 
@@ -77,28 +77,28 @@ public:
 
     ProcessingBlockContainerTest()
         : LoggingTest()
-        , m_pRedSource(new TMockBlock())
-        , m_pGreenSource(new TMockBlock())
-        , m_pValueDoubler(new TMockBlock())
+        , m_redSource(new TMockBlock())
+        , m_greenSource(new TMockBlock())
+        , m_valueDoubler(new TMockBlock())
         , m_strip(c_stripSize)
         , m_processingBlockFactory()
     {
-        ON_CALL(*m_pRedSource, execute(_))
+        ON_CALL(*m_redSource, execute(_))
             .WillByDefault(Invoke(addRed));
-        ON_CALL(*m_pGreenSource, execute(_))
+        ON_CALL(*m_greenSource, execute(_))
             .WillByDefault(Invoke(addGreen));
-        ON_CALL(*m_pValueDoubler, execute(_))
+        ON_CALL(*m_valueDoubler, execute(_))
             .WillByDefault(Invoke(doubleValue));
     }
 
     virtual ~ProcessingBlockContainerTest()
     {
-        delete m_pRedSource;
-        m_pRedSource = nullptr;
-        delete m_pGreenSource;
-        m_pGreenSource = nullptr;
-        delete m_pValueDoubler;
-        m_pValueDoubler = nullptr;
+        delete m_redSource;
+        m_redSource = nullptr;
+        delete m_greenSource;
+        m_greenSource = nullptr;
+        delete m_valueDoubler;
+        m_valueDoubler = nullptr;
     }
 
     Json createMockBlockJson(unsigned int id)
@@ -110,9 +110,9 @@ public:
     }
 
     // These have to be manually allocated, as the container under test takes ownership and will try to delete it's children.
-    TMockBlock* m_pRedSource;
-    TMockBlock* m_pGreenSource;
-    TMockBlock* m_pValueDoubler;
+    TMockBlock* m_redSource;
+    TMockBlock* m_greenSource;
+    TMockBlock* m_valueDoubler;
 
     Processing::TRgbStrip m_strip;
 

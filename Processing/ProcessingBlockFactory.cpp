@@ -33,12 +33,12 @@
 #include "ProcessingChain.h"
 #include "Patch.h"
 
-ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& rMidiInput,
-                                               const Processing::TNoteToLightMap& rNoteToLightMap,
-                                               const IRgbFunctionFactory& rRgbFunctionFactory)
-    : m_rMidiInput(rMidiInput)
-    , m_rNoteToLightMap(rNoteToLightMap)
-    , m_rRgbFunctionFactory(rRgbFunctionFactory)
+ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& midiInput,
+                                               const Processing::TNoteToLightMap& noteToLightMap,
+                                               const IRgbFunctionFactory& rgbFunctionFactory)
+    : m_midiInput(midiInput)
+    , m_noteToLightMap(noteToLightMap)
+    , m_rgbFunctionFactory(rgbFunctionFactory)
 {
 }
 
@@ -46,11 +46,11 @@ ProcessingBlockFactory::~ProcessingBlockFactory()
 {
 }
 
-IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& rConverted) const
+IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& converted) const
 {
     IProcessingBlock* processingBlock = nullptr;
 
-    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+    Json11Helper helper(__PRETTY_FUNCTION__, converted);
 
     std::string objectType;
     if(helper.getItemIfPresent(IJsonConvertible::c_objectTypeKey, objectType))
@@ -61,7 +61,7 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& rCon
         }
         else if(objectType == IProcessingBlock::c_typeNameNoteRgbSource)
         {
-            processingBlock = new NoteRgbSource(m_rMidiInput, m_rNoteToLightMap, m_rRgbFunctionFactory);
+            processingBlock = new NoteRgbSource(m_midiInput, m_noteToLightMap, m_rgbFunctionFactory);
         }
         else if(objectType == IProcessingBlock::c_typeNameProcessingChain)
         {
@@ -71,7 +71,7 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& rCon
 
         if(processingBlock != nullptr)
         {
-            processingBlock->convertFromJson(rConverted);
+            processingBlock->convertFromJson(converted);
         }
     }
 
@@ -84,16 +84,16 @@ IPatch* ProcessingBlockFactory::createPatch() const
     return new Patch(*this);
 }
 
-IPatch* ProcessingBlockFactory::createPatch(const Json& rConverted) const
+IPatch* ProcessingBlockFactory::createPatch(const Json& converted) const
 {
-    IPatch* pPatch = createPatch();
+    IPatch* patch = createPatch();
 
-    if(pPatch != nullptr)
+    if(patch != nullptr)
     {
-        pPatch->convertFromJson(rConverted);
+        patch->convertFromJson(converted);
     }
 
-    return pPatch;
+    return patch;
 }
 
 IProcessingChain* ProcessingBlockFactory::createProcessingChain() const

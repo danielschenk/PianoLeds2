@@ -42,7 +42,7 @@ public:
     MOCK_METHOD0(deactivate, void());
     MOCK_METHOD1(execute, void(Processing::TRgbStrip& strip));
     MOCK_CONST_METHOD0(convertToJson, Json());
-    MOCK_METHOD1(convertFromJson, void(const Json& rConverted));
+    MOCK_METHOD1(convertFromJson, void(const Json& converted));
 
 protected:
     MOCK_CONST_METHOD0(getObjectType, std::string());

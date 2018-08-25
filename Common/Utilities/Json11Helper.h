@@ -48,20 +48,20 @@ public:
      * Constructor.
      *
      * @param[in]   user            Name of the user for logging errors.
-     * @param[in]   rJson           JSON object to work with.
+     * @param[in]   json            JSON object to work with.
      * @param[in]   logMissingKeys  If missing keys should be logged.
      */
-    Json11Helper(std::string user, const Json& rJson, bool logMissingKeys = true);
-    Json11Helper(const char* user, const Json& rJson, bool logMissingKeys = true);
+    Json11Helper(std::string user, const Json& json, bool logMissingKeys = true);
+    Json11Helper(const char* user, const Json& json, bool logMissingKeys = true);
 
     virtual ~Json11Helper();
 
     template<typename T>
-    bool getItemIfPresent(std::string key, T& rTarget) const
+    bool getItemIfPresent(std::string key, T& target) const
     {
-        if(!m_rJson[key].is_null())
+        if(!m_json[key].is_null())
         {
-            return getItem(key, rTarget);
+            return getItem(key, target);
         }
         else
         {
@@ -79,13 +79,13 @@ public:
 
 private:
     template <typename IntegerType>
-    bool getInt(std::string key, IntegerType& rTarget) const
+    bool getInt(std::string key, IntegerType& target) const
     {
-        const auto& rItem = m_rJson[key];
+        const auto& item = m_json[key];
 
-        if(rItem.is_number())
+        if(item.is_number())
         {
-            rTarget = static_cast<IntegerType>(rItem.int_value());
+            target = static_cast<IntegerType>(item.int_value());
             return true;
         }
         else
@@ -96,13 +96,13 @@ private:
     }
 
     template <typename FloatType>
-    bool getFloat(std::string key, FloatType& rTarget) const
+    bool getFloat(std::string key, FloatType& target) const
     {
-        const auto& rItem = m_rJson[key];
+        const auto& item = m_json[key];
 
-        if(rItem.is_number())
+        if(item.is_number())
         {
-            rTarget = static_cast<FloatType>(rItem.number_value());
+            target = static_cast<FloatType>(item.number_value());
             return true;
         }
         else
@@ -112,18 +112,18 @@ private:
         }
     }
 
-    bool getItem(std::string key, int& rTarget) const;
-    bool getItem(std::string key, uint8_t& rTarget) const;
-    bool getItem(std::string key, uint16_t& rTarget) const;
-    bool getItem(std::string key, float& rTarget) const;
-    bool getItem(std::string key, double& rTarget) const;
-    bool getItem(std::string key, bool& rTarget) const;
-    bool getItem(std::string key, std::string& rTarget) const;
-    bool getItem(std::string key, Json::object& rTarget) const;
-    bool getItem(std::string key, Json::array& rTarget) const;
+    bool getItem(std::string key, int& target) const;
+    bool getItem(std::string key, uint8_t& target) const;
+    bool getItem(std::string key, uint16_t& target) const;
+    bool getItem(std::string key, float& target) const;
+    bool getItem(std::string key, double& target) const;
+    bool getItem(std::string key, bool& target) const;
+    bool getItem(std::string key, std::string& target) const;
+    bool getItem(std::string key, Json::object& target) const;
+    bool getItem(std::string key, Json::array& target) const;
 
     std::string     m_user;
-    const Json&     m_rJson;
+    const Json&     m_json;
     bool            m_logMissingKeys;
 };
 

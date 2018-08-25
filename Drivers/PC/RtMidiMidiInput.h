@@ -66,7 +66,7 @@ private:
     void RtMidiCallback(double deltatime, std::vector<unsigned char> *message);
 
     /** Pointer to the RtMidiIn instance. */
-    RtMidiIn* m_pRtMidiIn;
+    RtMidiIn* m_rtMidiIn;
 };
 
 #endif /* SOURCE_DRIVERS_SOURCE_RTMIDIMIDIINPUT_H_ */

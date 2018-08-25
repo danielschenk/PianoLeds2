@@ -41,17 +41,17 @@ public:
     /**
      * Insert a processing block.
      *
-     * @param[in]   pBlock  Pointer to the processing block.
+     * @param[in]   block   Pointer to the processing block.
      * @param[in]   index   Index in the chain at which the block should be inserted.
      */
-    virtual void insertBlock(IProcessingBlock* pBlock, unsigned int index) = 0;
+    virtual void insertBlock(IProcessingBlock* block, unsigned int index) = 0;
 
     /**
      * Insert a processing block at the end.
      *
-     * @param[in]   pBlock  Pointer to the processing block.
+     * @param[in]   block   Pointer to the processing block.
      */
-    virtual void insertBlock(IProcessingBlock* pBlock) = 0;
+    virtual void insertBlock(IProcessingBlock* block) = 0;
 };
 
 

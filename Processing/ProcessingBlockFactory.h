@@ -45,7 +45,7 @@ public:
     /**
      * Constructor.
      */
-    ProcessingBlockFactory(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory);
+    ProcessingBlockFactory(IMidiInput& midiInput, const Processing::TNoteToLightMap& noteToLightMap, const IRgbFunctionFactory& rgbFunctionFactory);
 
     /**
      * Destructor.
@@ -53,20 +53,20 @@ public:
     virtual ~ProcessingBlockFactory();
 
     // IProcessingBlockFactory implementation
-    virtual IProcessingBlock* createProcessingBlock(const Json& rConverted) const;
+    virtual IProcessingBlock* createProcessingBlock(const Json& converted) const;
     virtual IPatch* createPatch() const;
-    virtual IPatch* createPatch(const Json& rConverted) const;
+    virtual IPatch* createPatch(const Json& converted) const;
     virtual IProcessingChain* createProcessingChain() const;
 
 private:
     /** Reference to the MIDI input to pass to new blocks. */
-    IMidiInput& m_rMidiInput;
+    IMidiInput& m_midiInput;
 
     /** Reference to the note to light map to pass to new blocks. */
-    const Processing::TNoteToLightMap& m_rNoteToLightMap;
+    const Processing::TNoteToLightMap& m_noteToLightMap;
 
     /** Reference to the RGB function factory to pass to new blocks. */
-    const IRgbFunctionFactory& m_rRgbFunctionFactory;
+    const IRgbFunctionFactory& m_rgbFunctionFactory;
 };
 
 #endif /* PROCESSING_PROCESSINGBLOCKFACTORY_H_ */

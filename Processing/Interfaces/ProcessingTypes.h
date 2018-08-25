@@ -88,8 +88,8 @@ typedef std::vector<TRgb> TRgbStrip;
 /** Type to map MIDI note numbers to lights. */
 typedef std::map<uint8_t, uint8_t> TNoteToLightMap;
 
-Json convert(const TNoteToLightMap& rSource);
-TNoteToLightMap convert(const Json& rSource);
+Json convert(const TNoteToLightMap& source);
+TNoteToLightMap convert(const Json& source);
 
 /** Type for actual time in milliseconds. */
 typedef uint64_t TTime;

@@ -31,11 +31,11 @@
 #include "Drivers/Arduino/ArduinoMidiInput.h"
 #include "MidiTask.h"
 
-MidiTask::MidiTask(ArduinoMidiInput& rMidiInput,
+MidiTask::MidiTask(ArduinoMidiInput& midiInput,
                    uint32_t stackSize,
                    UBaseType_t priority)
     : BaseTask()
-    , m_rMidiInput(rMidiInput)
+    , m_midiInput(midiInput)
 {
     start("midi", stackSize, priority);
 }
@@ -51,5 +51,5 @@ void MidiTask::run()
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
     // Process any data.
-    m_rMidiInput.run();
+    m_midiInput.run();
 }

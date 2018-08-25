@@ -36,30 +36,30 @@
 
 #define LOGGING_COMPONENT "NoteRgbSource"
 
-NoteRgbSource::NoteRgbSource(IMidiInput& rMidiInput, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory)
+NoteRgbSource::NoteRgbSource(IMidiInput& midiInput, const Processing::TNoteToLightMap& noteToLightMap, const IRgbFunctionFactory& rgbFunctionFactory)
     : m_mutex()
     , m_active()
     , m_usingPedal(true)
-    , m_rNoteToLightMap(rNoteToLightMap)
-    , m_rRgbFunctionFactory(rRgbFunctionFactory)
-    , m_rMidiInput(rMidiInput)
+    , m_noteToLightMap(noteToLightMap)
+    , m_rgbFunctionFactory(rgbFunctionFactory)
+    , m_midiInput(midiInput)
     , m_channel(0)
     , m_scheduler()
     , m_noteState()
     , m_pedalPressed(false)
-    , m_pRgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}))
+    , m_rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}))
 {
-    m_noteOnOffSubscription = m_rMidiInput.subscribeNoteOnOff(
+    m_noteOnOffSubscription = m_midiInput.subscribeNoteOnOff(
             std::bind(&NoteRgbSource::handleNoteOnOff, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3, std::placeholders::_4));
-    m_controlChangeSubscription = m_rMidiInput.subscribeControlChange(
+    m_controlChangeSubscription = m_midiInput.subscribeControlChange(
             std::bind(&NoteRgbSource::handleControlChange, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3));
 }
 
 NoteRgbSource::~NoteRgbSource()
 {
-    m_rMidiInput.unsubscribeNoteOnOff(m_noteOnOffSubscription);
-    m_rMidiInput.unsubscribeControlChange(m_controlChangeSubscription);
-    delete m_pRgbFunction;
+    m_midiInput.unsubscribeNoteOnOff(m_noteOnOffSubscription);
+    m_midiInput.unsubscribeControlChange(m_controlChangeSubscription);
+    delete m_rgbFunction;
 }
 
 void NoteRgbSource::activate()
@@ -88,12 +88,12 @@ void NoteRgbSource::execute(Processing::TRgbStrip& strip)
 {
     m_scheduler.executeAll();
 
-    for(auto pair : m_rNoteToLightMap)
+    for(auto pair : m_noteToLightMap)
     {
         // first: note number, second: light number
-        if(m_pRgbFunction != nullptr && pair.second < strip.size())
+        if(m_rgbFunction != nullptr && pair.second < strip.size())
         {
-            strip[pair.second] = m_pRgbFunction->calculate(m_noteState[pair.first], 0 /* TODO pass actual time */);
+            strip[pair.second] = m_rgbFunction->calculate(m_noteState[pair.first], 0 /* TODO pass actual time */);
         }
     }
 }
@@ -191,13 +191,13 @@ void NoteRgbSource::setUsingPedal(bool usingPedal)
     m_usingPedal = usingPedal;
 }
 
-void NoteRgbSource::setRgbFunction(IRgbFunction* pRgbFunction)
+void NoteRgbSource::setRgbFunction(IRgbFunction* rgbFunction)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
     // We have ownership
-    delete m_pRgbFunction;
-    m_pRgbFunction = pRgbFunction;
+    delete m_rgbFunction;
+    m_rgbFunction = rgbFunction;
 }
 
 Json NoteRgbSource::convertToJson() const
@@ -208,27 +208,27 @@ Json NoteRgbSource::convertToJson() const
     json[IJsonConvertible::c_objectTypeKey] = getObjectType();
     json[c_usingPedalJsonKey] = m_usingPedal;
     json[c_channelJsonKey] = m_channel;
-    if(m_pRgbFunction != nullptr)
+    if(m_rgbFunction != nullptr)
     {
-        json[c_rgbFunctionJsonKey] = m_pRgbFunction->convertToJson();
+        json[c_rgbFunctionJsonKey] = m_rgbFunction->convertToJson();
     }
 
     return json;
 }
 
-void NoteRgbSource::convertFromJson(const Json& rConverted)
+void NoteRgbSource::convertFromJson(const Json& converted)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    Json11Helper helper(__PRETTY_FUNCTION__, rConverted);
+    Json11Helper helper(__PRETTY_FUNCTION__, converted);
     helper.getItemIfPresent(c_usingPedalJsonKey, m_usingPedal);
     helper.getItemIfPresent(c_channelJsonKey, m_channel);
 
     Json::object convertedRgbFunction;
     if(helper.getItemIfPresent(c_rgbFunctionJsonKey, convertedRgbFunction))
     {
-        delete m_pRgbFunction;
-        m_pRgbFunction = m_rRgbFunctionFactory.createRgbFunction(convertedRgbFunction);
+        delete m_rgbFunction;
+        m_rgbFunction = m_rgbFunctionFactory.createRgbFunction(convertedRgbFunction);
     }
 }
 

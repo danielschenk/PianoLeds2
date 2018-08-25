@@ -41,11 +41,11 @@ public:
     /**
      * Constructor.
      *
-     * @param rMidiInput    The midi input to use
+     * @param midiInput     The midi input to use
      * @param stackSize     Stack size in words
      * @param priority      Priority
      */
-    MidiTask(ArduinoMidiInput& rMidiInput,
+    MidiTask(ArduinoMidiInput& midiInput,
              uint32_t stackSize,
              UBaseType_t priority);
 
@@ -67,7 +67,7 @@ public:
 private:
     virtual void run();
 
-    ArduinoMidiInput& m_rMidiInput;
+    ArduinoMidiInput& m_midiInput;
 };
 
 #endif /* ESP32APPLICATION_MIDITASK_H_ */

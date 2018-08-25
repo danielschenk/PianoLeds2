@@ -41,9 +41,9 @@ public:
     /**
      * Constructor.
      *
-     * @param rSerial   The Arduino serial port driver to use.
+     * @param serial   The Arduino serial port driver to use.
      */
-    explicit ArduinoMidiInput(Stream& rSerial);
+    explicit ArduinoMidiInput(Stream& serial);
 
     /**
      * Destructor.
@@ -65,7 +65,7 @@ public:
     virtual void openPort(int number);
 
 private:
-    Stream& m_rSerial;
+    Stream& m_serial;
 };
 
 #endif /* DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_ */

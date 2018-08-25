@@ -49,11 +49,11 @@ public:
     /**
      * Constructor.
      *
-     * @param   [in]    rMidiInput          Reference to the MIDI input.
-     * @param   [in]    rNoteToLightMap     Reference to the note to light map.
-     * @param   [in]    rRgbFunctionFactory Reference to the RGB function factory.
+     * @param   [in]    midiInput           Reference to the MIDI input.
+     * @param   [in]    noteToLightMap      Reference to the note to light map.
+     * @param   [in]    rgbFunctionFactory  Reference to the RGB function factory.
      */
-    NoteRgbSource(IMidiInput& rMidiDriver, const Processing::TNoteToLightMap& rNoteToLightMap, const IRgbFunctionFactory& rRgbFunctionFactory);
+    NoteRgbSource(IMidiInput& midiDriver, const Processing::TNoteToLightMap& noteToLightMap, const IRgbFunctionFactory& rgbFunctionFactory);
 
     /**
      * Destructor.
@@ -69,14 +69,14 @@ public:
     virtual void deactivate();
     virtual void execute(Processing::TRgbStrip& output);
     virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& rConverted);
+    virtual void convertFromJson(const Json& converted);
 
     uint8_t getChannel() const;
     void setChannel(uint8_t channel);
     bool isUsingPedal() const;
     void setUsingPedal(bool usingPedal);
 
-    void setRgbFunction(IRgbFunction* pRgbFunction);
+    void setRgbFunction(IRgbFunction* rgbFunction);
 
 protected:
     // IProcessingBlock implementation
@@ -107,13 +107,13 @@ private:
     bool m_usingPedal;
 
     /** Reference to the note to light map. */
-    const Processing::TNoteToLightMap& m_rNoteToLightMap;
+    const Processing::TNoteToLightMap& m_noteToLightMap;
 
     /** Reference to the RGB function factory. */
-    const IRgbFunctionFactory& m_rRgbFunctionFactory;
+    const IRgbFunctionFactory& m_rgbFunctionFactory;
 
     /** Reference to the MIDI input. */
-    IMidiInput& m_rMidiInput;
+    IMidiInput& m_midiInput;
 
     /** MIDI channel to listen to. */
     uint8_t m_channel;
@@ -134,7 +134,7 @@ private:
     bool m_pedalPressed;
 
     /** Pointer to the RGB function. */
-    IRgbFunction* m_pRgbFunction;
+    IRgbFunction* m_rgbFunction;
 };
 
 #endif /* PROCESSING_NOTERGBSOURCE_H_ */

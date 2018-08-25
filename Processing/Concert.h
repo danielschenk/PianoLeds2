@@ -55,10 +55,10 @@ public:
     /**
      * Constructor.
      *
-     * @param[in]   rMidiInput              Reference to the MIDI input.
-     * @param[in]   rProcessingBlockFactory Reference to the processing block factory.
+     * @param[in]   midiInput               Reference to the MIDI input.
+     * @param[in]   processingBlockFactory  Reference to the processing block factory.
      */
-    Concert(IMidiInput& rMidiInput, IProcessingBlockFactory& rProcessingBlockFactory);
+    Concert(IMidiInput& midiInput, IProcessingBlockFactory& processingBlockFactory);
 
     /**
      * Destructor.
@@ -72,7 +72,7 @@ public:
 
     // IJsonConvertible implementation
     virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& rConverted);
+    virtual void convertFromJson(const Json& converted);
 
     typedef int TPatchPosition;
     static constexpr TPatchPosition c_invalidPatchPosition = -1;
@@ -178,7 +178,7 @@ private:
     uint16_t m_currentBank;
     
     /** Reference to the MIDI input. */
-    IMidiInput& m_rMidiInput;
+    IMidiInput& m_midiInput;
 
     /** The control change subscription. */
     IMidiInput::TSubscriptionToken m_controlChangeSubscription;
@@ -187,7 +187,7 @@ private:
     IMidiInput::TSubscriptionToken m_programChangeSubscription;
 
     /** Reference to the processing block factory. */
-    IProcessingBlockFactory& m_rProcessingBlockFactory;
+    IProcessingBlockFactory& m_processingBlockFactory;
 
     /** Scheduler to decouple callbacks */
     Scheduler m_scheduler;

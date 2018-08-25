@@ -49,9 +49,9 @@ public:
     /**
      * Constructor.
      *
-     * @param[in]   rProcessingBlockFactory Reference to the processing block factory.
+     * @param[in]   processingBlockFactory  Reference to the processing block factory.
      */
-    Patch(const IProcessingBlockFactory& rProcessingBlockFactory);
+    Patch(const IProcessingBlockFactory& processingBlockFactory);
 
     /**
      * Destructor.
@@ -65,7 +65,7 @@ public:
 
     // IJsonConvertible implementation
     virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& rConverted);
+    virtual void convertFromJson(const Json& converted);
 
     // IPatch implementation
     virtual IProcessingChain& getProcessingChain() const;
@@ -109,9 +109,9 @@ private:
     std::string m_name;
 
     /** The processing chain. */
-    IProcessingChain* m_pProcessingChain;
+    IProcessingChain* m_processingChain;
 
-    const IProcessingBlockFactory& m_rProcessingBlockFactory;
+    const IProcessingBlockFactory& m_processingBlockFactory;
 };
 
 #endif /* PROCESSING_PATCH_H_ */

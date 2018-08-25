@@ -53,9 +53,9 @@ public:
     /**
      * Create a processing block from the given JSON.
      *
-     * @param[in]   rConverted  JSON object containing the persistent properties.
+     * @param[in]   converted   JSON object containing the persistent properties.
      */
-    virtual IProcessingBlock* createProcessingBlock(const Json& rConverted) const = 0;
+    virtual IProcessingBlock* createProcessingBlock(const Json& converted) const = 0;
 
     /**
      * Create a new patch.
@@ -65,9 +65,9 @@ public:
     /**
      * Create a patch from the given JSON.
      *
-     * @param[in]   rConverted  JSON object containing the persistent properties.
+     * @param[in]   converted   JSON object containing the persistent properties.
      */
-    virtual IPatch* createPatch(const Json& rConverted) const = 0;
+    virtual IPatch* createPatch(const Json& converted) const = 0;
 
     /**
      * Create a new processing chain.

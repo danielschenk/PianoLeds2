@@ -51,16 +51,16 @@ public:
     /**
      * Subscribe to logging events.
      *
-     * @param[in]   rSubscriber Reference to the subscriber.
+     * @param[in]   subscriber  Reference to the subscriber.
      */
-    static void subscribe(ILoggingTarget& rSubscriber);
+    static void subscribe(ILoggingTarget& subscriber);
 
     /**
      * Unsubscribe from logging events.
      *
-     * @param[in]   rSubscriber Reference to the subscriber.
+     * @param[in]   subscriber  Reference to the subscriber.
      */
-    static void unsubscribe(ILoggingTarget& rSubscriber);
+    static void unsubscribe(ILoggingTarget& subscriber);
 
     /**
      * Log a message.

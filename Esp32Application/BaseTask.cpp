@@ -37,14 +37,14 @@ BaseTask::~BaseTask()
     assert(m_taskHandle == NULL);
 }
 
-void BaseTask::start(const char* pName,
+void BaseTask::start(const char* name,
                      uint32_t stackSize,
                      UBaseType_t priority)
 {
     assert(m_taskHandle == NULL);
 
     xTaskCreate(&BaseTask::taskFunction,
-                pName,
+                name,
                 stackSize,
                 this,
                 priority,
@@ -66,13 +66,13 @@ TaskHandle_t BaseTask::getTaskHandle() const
 void BaseTask::taskFunction(void* pvParameters)
 {
     // pvPameters points to the instance
-    BaseTask* pInstance(static_cast<BaseTask*>(pvParameters));
+    BaseTask* instance(static_cast<BaseTask*>(pvParameters));
 
-    while(pInstance->m_terminate == 0)
+    while(instance->m_terminate == 0)
     {
-        pInstance->run();
+        instance->run();
     }
 
-    vTaskDelete(pInstance->m_taskHandle);
-    pInstance->m_taskHandle = NULL;
+    vTaskDelete(instance->m_taskHandle);
+    instance->m_taskHandle = NULL;
 }

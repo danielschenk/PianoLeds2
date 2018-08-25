@@ -77,8 +77,8 @@ public:
             // Default: simple 1-to-1 mapping
             m_noteToLightMap[i] = i;
         }
-        m_pNoteRgbSource = new NoteRgbSource(m_mockMidiInput, m_noteToLightMap, m_mockRgbFunctionFactory);
-        m_pNoteRgbSource->activate();
+        m_noteRgbSource = new NoteRgbSource(m_mockMidiInput, m_noteToLightMap, m_mockRgbFunctionFactory);
+        m_noteRgbSource->activate();
     }
 
     void SetUp()
@@ -93,12 +93,12 @@ public:
     {
         EXPECT_CALL(m_mockMidiInput, unsubscribeNoteOnOff(42));
         EXPECT_CALL(m_mockMidiInput, unsubscribeControlChange(69));
-        delete m_pNoteRgbSource;
+        delete m_noteRgbSource;
     }
 
     MockMidiInput m_mockMidiInput;
     MockRgbFunctionFactory m_mockRgbFunctionFactory;
-    NoteRgbSource* m_pNoteRgbSource;
+    NoteRgbSource* m_noteRgbSource;
     Processing::TRgbStrip m_strip;
 
     IMidiInput::TNoteOnOffFunction m_noteOnOffCallback;
@@ -118,7 +118,7 @@ TEST_F(NoteRgbSourceTest, noNotesSounding)
     m_strip[6] = {7, 8, 9};
     m_strip[c_StripSize-1] = {11, 12, 13};
 
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
 
     // No notes sounding should cause darkness
     ASSERT_EQ(darkStrip, m_strip);
@@ -130,7 +130,7 @@ TEST_F(NoteRgbSourceTest, noteOn)
     m_noteOnOffCallback(0, 0, 1, true);
     m_noteOnOffCallback(0, 5, 6, true);
 
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
@@ -146,9 +146,9 @@ TEST_F(NoteRgbSourceTest, deactivateDisablesAllNotes)
     m_noteOnOffCallback(0, 0, 1, true);
     m_noteOnOffCallback(0, 5, 6, true);
 
-    m_pNoteRgbSource->execute(m_strip);
-    m_pNoteRgbSource->deactivate();
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->deactivate();
+    m_noteRgbSource->execute(m_strip);
 
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
@@ -161,7 +161,7 @@ TEST_F(NoteRgbSourceTest, noteOff)
 
     m_noteOnOffCallback(0, 0, 8, false);
 
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
@@ -174,19 +174,19 @@ TEST_F(NoteRgbSourceTest, ignoreOtherChannel)
 {
     m_noteOnOffCallback(1, 0, 1, true);
 
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
 TEST_F(NoteRgbSourceTest, ignorePedal)
 {
-    m_pNoteRgbSource->setUsingPedal(false);
+    m_noteRgbSource->setUsingPedal(false);
 
     m_noteOnOffCallback(0, 0, 1, true);
     m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0xff);
     m_noteOnOffCallback(0, 0, 1, false);
 
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
@@ -205,7 +205,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     // Both notes are still sounding
     reference[0] = {0xff, 0xff, 0xff};
     reference[2] = {0xff, 0xff, 0xff};
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
     EXPECT_EQ(reference, m_strip);
 
     // Release keys
@@ -213,7 +213,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     m_noteOnOffCallback(0, 2, 1, false);
 
     // Both notes are still sounding
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
     EXPECT_EQ(reference, m_strip);
 
     // Release pedal
@@ -222,7 +222,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     // Notes are not sounding anymore
     reference[0] = {0, 0, 0};
     reference[2] = {0, 0, 0};
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
     EXPECT_EQ(reference, m_strip);
 }
 
@@ -244,16 +244,16 @@ ACTION(ReturnBlueWhenNoteSoundingOtherwiseRed)
 
 TEST_F(NoteRgbSourceTest, otherRgbFunction)
 {
-    MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
-    EXPECT_CALL(*pMockRgbFunction, calculate(_, _))
+    MockRgbFunction* mockRgbFunction = new MockRgbFunction();
+    EXPECT_CALL(*mockRgbFunction, calculate(_, _))
         .WillRepeatedly(ReturnBlueWhenNoteSoundingOtherwiseRed());
-    m_pNoteRgbSource->setRgbFunction(pMockRgbFunction);
+    m_noteRgbSource->setRgbFunction(mockRgbFunction);
 
     // (channel, number, velocity, on/off)
     m_noteOnOffCallback(0, 0, 1, true);
     m_noteOnOffCallback(0, 5, 6, true);
 
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
 
     auto reference = Processing::TRgbStrip(c_StripSize);
     reference[0] = {0, 0, 1};
@@ -280,7 +280,7 @@ TEST_F(NoteRgbSourceTest, otherNoteToLightMap)
     m_noteOnOffCallback(0, 0, 1, true);
     m_noteOnOffCallback(0, 5, 6, true);
 
-    m_pNoteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
@@ -297,7 +297,7 @@ TEST_F(NoteRgbSourceTest, doNotWriteOutsideStrip)
     m_noteOnOffCallback(0, 9, 6, true);
 
     auto shorterStrip = Processing::TRgbStrip(5);
-    m_pNoteRgbSource->execute(shorterStrip);
+    m_noteRgbSource->execute(shorterStrip);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(5);
@@ -308,36 +308,36 @@ TEST_F(NoteRgbSourceTest, doNotWriteOutsideStrip)
 
 TEST_F(NoteRgbSourceTest, deleteRgbFunction)
 {
-    MockRgbFunction* pMock1 = new MockRgbFunction();
-    MockRgbFunction* pMock2 = new MockRgbFunction();
+    MockRgbFunction* mock1 = new MockRgbFunction();
+    MockRgbFunction* mock2 = new MockRgbFunction();
 
     // Need to set an action, to make Google Test throw an error in case of a leaked mock.
-    ON_CALL(*pMock1, calculate(_, _))
+    ON_CALL(*mock1, calculate(_, _))
         .WillByDefault(Return(Processing::TRgb()));
-    ON_CALL(*pMock2, calculate(_, _))
+    ON_CALL(*mock2, calculate(_, _))
         .WillByDefault(Return(Processing::TRgb()));
 
-    m_pNoteRgbSource->setRgbFunction(pMock1);
-    m_pNoteRgbSource->setRgbFunction(pMock2);
+    m_noteRgbSource->setRgbFunction(mock1);
+    m_noteRgbSource->setRgbFunction(mock2);
 }
 
 TEST_F(NoteRgbSourceTest, convertToJson)
 {
-    MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
-    ASSERT_NE(nullptr, pMockRgbFunction);
+    MockRgbFunction* mockRgbFunction = new MockRgbFunction();
+    ASSERT_NE(nullptr, mockRgbFunction);
 
     Json::object mockRgbFunctionJson;
     mockRgbFunctionJson["objectType"] = "MockRgbFunction";
     mockRgbFunctionJson["someParameter"] = 42;
-    EXPECT_CALL(*pMockRgbFunction, convertToJson())
+    EXPECT_CALL(*mockRgbFunction, convertToJson())
         .WillOnce(Return(mockRgbFunctionJson));
 
     // Set some non-default values
-    m_pNoteRgbSource->setRgbFunction(pMockRgbFunction);
-    m_pNoteRgbSource->setChannel(6);
-    m_pNoteRgbSource->setUsingPedal(false);
+    m_noteRgbSource->setRgbFunction(mockRgbFunction);
+    m_noteRgbSource->setChannel(6);
+    m_noteRgbSource->setUsingPedal(false);
 
-    Json::object j = m_pNoteRgbSource->convertToJson().object_items();
+    Json::object j = m_noteRgbSource->convertToJson().object_items();
     EXPECT_EQ("NoteRgbSource", j.at("objectType").string_value());
     EXPECT_EQ(6, j.at("channel").int_value());
     EXPECT_EQ(false, j.at("usingPedal").bool_value());
@@ -353,23 +353,23 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
     mockRgbFunctionJson["objectType"] = "MockRgbFunction";
     mockRgbFunctionJson["someParameter"] = 42;
 
-    MockRgbFunction* pMockRgbFunction = new MockRgbFunction();
-    ASSERT_NE(nullptr, pMockRgbFunction);
-    EXPECT_CALL(*pMockRgbFunction, calculate(_, _))
+    MockRgbFunction* mockRgbFunction = new MockRgbFunction();
+    ASSERT_NE(nullptr, mockRgbFunction);
+    EXPECT_CALL(*mockRgbFunction, calculate(_, _))
         .WillRepeatedly(Return(Processing::TRgb(1, 2, 3)));
 
     EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(Json(mockRgbFunctionJson)))
-        .WillOnce(Return(pMockRgbFunction));
+        .WillOnce(Return(mockRgbFunction));
 
-    m_pNoteRgbSource->convertFromJson(j);
-    EXPECT_EQ(6, m_pNoteRgbSource->getChannel());
-    EXPECT_EQ(false, m_pNoteRgbSource->isUsingPedal());
+    m_noteRgbSource->convertFromJson(j);
+    EXPECT_EQ(6, m_noteRgbSource->getChannel());
+    EXPECT_EQ(false, m_noteRgbSource->isUsingPedal());
 
     Processing::TRgbStrip reference(3);
     reference[0] = {1, 2, 3};
     reference[1] = {1, 2, 3};
     reference[2] = {1, 2, 3};
     Processing::TRgbStrip testStrip(3);
-    m_pNoteRgbSource->execute(testStrip);
+    m_noteRgbSource->execute(testStrip);
     EXPECT_EQ(reference, testStrip);
 }

@@ -62,7 +62,7 @@ public:
     // IRgbFunction implementation
     virtual Processing::TRgb calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const;
     virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& rConverted);
+    virtual void convertFromJson(const Json& converted);
 
 protected:
     // IRgbFunction implementation

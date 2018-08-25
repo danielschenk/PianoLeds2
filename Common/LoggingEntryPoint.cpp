@@ -37,13 +37,13 @@
 std::vector<ILoggingTarget*> LoggingEntryPoint::s_subscribers;
 std::mutex LoggingEntryPoint::s_mutex;
 
-void LoggingEntryPoint::subscribe(ILoggingTarget& rSubscriber)
+void LoggingEntryPoint::subscribe(ILoggingTarget& subscriber)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     bool found(false);
-    for(auto pLoggingTarget : s_subscribers)
+    for(auto loggingTarget : s_subscribers)
     {
-        if(pLoggingTarget == &rSubscriber)
+        if(loggingTarget == &subscriber)
         {
             found = true;
             break;
@@ -51,14 +51,14 @@ void LoggingEntryPoint::subscribe(ILoggingTarget& rSubscriber)
     }
     if(!found)
     {
-        s_subscribers.push_back(&rSubscriber);
+        s_subscribers.push_back(&subscriber);
     }
 }
 
-void LoggingEntryPoint::unsubscribe(ILoggingTarget& rSubscriber)
+void LoggingEntryPoint::unsubscribe(ILoggingTarget& subscriber)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    s_subscribers.erase(std::remove(s_subscribers.begin(), s_subscribers.end(), &rSubscriber), s_subscribers.end());
+    s_subscribers.erase(std::remove(s_subscribers.begin(), s_subscribers.end(), &subscriber), s_subscribers.end());
 }
 
 void LoggingEntryPoint::logMessage(uint64_t time, Logging::TLogLevel level, const char *component, const char *fmt, ...)
@@ -74,11 +74,11 @@ void LoggingEntryPoint::logMessage(uint64_t time, Logging::TLogLevel level, cons
 
         std::string message(buffer.data());
         std::string componentStr(component);
-        for(auto pLoggingTarget : s_subscribers)
+        for(auto loggingTarget : s_subscribers)
         {
-            if (pLoggingTarget != nullptr)
+            if (loggingTarget != nullptr)
             {
-                pLoggingTarget->logMessage(time, level, componentStr, message);
+                loggingTarget->logMessage(time, level, componentStr, message);
             }
         }
     }
