@@ -39,6 +39,7 @@
 #include "Processing/EqualRangeRgbSource.h"
 #include "Processing/NoteRgbSource.h"
 #include "Processing/LinearRgbFunction.h"
+#include "ProcessingTask.h"
 
 #define LOGGING_COMPONENT "Esp32Application"
 
@@ -50,6 +51,7 @@ static MidiTask* gs_midiTask(nullptr);
 static RgbFunctionFactory* gs_rgbFunctionFactory(nullptr);
 static ProcessingBlockFactory* gs_processingBlockFactory(nullptr);
 static Concert* gs_concert(nullptr);
+static ProcessingTask* gs_processingTask(nullptr);
 
 static constexpr uint32_t c_defaultStackSize(4096);
 
@@ -135,6 +137,11 @@ void setup()
     src2->setRgbFunction(rgbFunction);
     src2->setUsingPedal(true);
     patch->getProcessingChain().insertBlock(src2);
+
+    // Start processing
+    gs_processingTask = new ProcessingTask(*gs_concert,
+                                           c_defaultStackSize,
+                                           PRIORITY_CRITICAL);
 
     LOG_INFO("initialization done");
 }
