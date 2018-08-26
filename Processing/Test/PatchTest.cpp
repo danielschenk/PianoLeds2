@@ -131,15 +131,20 @@ TEST_F(PatchTest, execute)
     Processing::TRgbStrip strip;
     strip.push_back(Processing::TRgb({0, 0, 0}));
 
+    // Pass a map with something we can verify
+    Processing::TNoteToLightMap map;
+    map[42] = 42;
+
     // Let the mock processing chain do something with the strip which we can verify
     Processing::TRgb valueAfterProcessing({1, 2, 3});
     ASSERT_NE(valueAfterProcessing, strip[0]);
 
-    EXPECT_CALL(*m_processingChain, execute(_))
-        .WillOnce(Invoke([valueAfterProcessing](Processing::TRgbStrip& strip){
+    EXPECT_CALL(*m_processingChain, execute(_, map))
+        .WillOnce(Invoke([valueAfterProcessing](Processing::TRgbStrip& strip, const Processing::TNoteToLightMap&){
             strip[0] = valueAfterProcessing;
     }));
-    m_patch->execute(strip);
+
+    m_patch->execute(strip, map);
 
     EXPECT_EQ(valueAfterProcessing, strip[0]);
 }

@@ -47,7 +47,7 @@ void EqualRangeRgbSource::deactivate()
 {
 }
 
-void EqualRangeRgbSource::execute(Processing::TRgbStrip& strip)
+void EqualRangeRgbSource::execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 

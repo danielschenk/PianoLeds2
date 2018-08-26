@@ -62,9 +62,10 @@ public:
     /**
      * Execute this patch on the given strip.
      *
-     * @param   [in/out]    strip   The strip to operate on.
+     * @param   [in/out]    strip           The strip to operate on.
+     * @param   [in/out]    noteToLightMap  To map from note number to light number.
      */
-    virtual void execute(Processing::TRgbStrip& strip) = 0;
+    virtual void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap) = 0;
 
     /**
      * Check if the patch has a valid bank and program number.

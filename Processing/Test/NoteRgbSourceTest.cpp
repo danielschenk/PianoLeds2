@@ -72,7 +72,7 @@ public:
             // Default: simple 1-to-1 mapping
             m_noteToLightMap[i] = i;
         }
-        m_noteRgbSource = new NoteRgbSource(m_mockMidiInput, m_noteToLightMap, m_mockRgbFunctionFactory);
+        m_noteRgbSource = new NoteRgbSource(m_mockMidiInput, m_mockRgbFunctionFactory);
         m_noteRgbSource->activate();
     }
 
@@ -99,7 +99,7 @@ TEST_F(NoteRgbSourceTest, noNotesSounding)
     m_strip[6] = {7, 8, 9};
     m_strip[c_StripSize-1] = {11, 12, 13};
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
     // No notes sounding should cause darkness
     ASSERT_EQ(darkStrip, m_strip);
@@ -111,7 +111,7 @@ TEST_F(NoteRgbSourceTest, noteOn)
     m_observer->onNoteChange(0, 0, 1, true);
     m_observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
@@ -127,9 +127,9 @@ TEST_F(NoteRgbSourceTest, deactivateDisablesAllNotes)
     m_observer->onNoteChange(0, 0, 1, true);
     m_observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     m_noteRgbSource->deactivate();
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
@@ -142,7 +142,7 @@ TEST_F(NoteRgbSourceTest, noteOff)
 
     m_observer->onNoteChange(0, 0, 8, false);
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
@@ -155,7 +155,7 @@ TEST_F(NoteRgbSourceTest, ignoreOtherChannel)
 {
     m_observer->onNoteChange(1, 0, 1, true);
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
@@ -167,7 +167,7 @@ TEST_F(NoteRgbSourceTest, ignorePedal)
     m_observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0xff);
     m_observer->onNoteChange(0, 0, 1, false);
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
@@ -186,7 +186,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     // Both notes are still sounding
     reference[0] = {0xff, 0xff, 0xff};
     reference[2] = {0xff, 0xff, 0xff};
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     EXPECT_EQ(reference, m_strip);
 
     // Release keys
@@ -194,7 +194,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     m_observer->onNoteChange(0, 2, 1, false);
 
     // Both notes are still sounding
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     EXPECT_EQ(reference, m_strip);
 
     // Release pedal
@@ -203,7 +203,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     // Notes are not sounding anymore
     reference[0] = {0, 0, 0};
     reference[2] = {0, 0, 0};
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     EXPECT_EQ(reference, m_strip);
 }
 
@@ -234,7 +234,7 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
     m_observer->onNoteChange(0, 0, 1, true);
     m_observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
     auto reference = Processing::TRgbStrip(c_StripSize);
     reference[0] = {0, 0, 1};
@@ -261,7 +261,7 @@ TEST_F(NoteRgbSourceTest, otherNoteToLightMap)
     m_observer->onNoteChange(0, 0, 1, true);
     m_observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip);
+    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
@@ -278,7 +278,7 @@ TEST_F(NoteRgbSourceTest, doNotWriteOutsideStrip)
     m_observer->onNoteChange(0, 9, 6, true);
 
     auto shorterStrip = Processing::TRgbStrip(5);
-    m_noteRgbSource->execute(shorterStrip);
+    m_noteRgbSource->execute(shorterStrip, m_noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(5);
@@ -351,6 +351,6 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
     reference[1] = {1, 2, 3};
     reference[2] = {1, 2, 3};
     Processing::TRgbStrip testStrip(3);
-    m_noteRgbSource->execute(testStrip);
+    m_noteRgbSource->execute(testStrip, m_noteToLightMap);
     EXPECT_EQ(reference, testStrip);
 }

@@ -36,8 +36,9 @@
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::NiceMock;
+using ::testing::Unused;
 
-static void addRed(Processing::TRgbStrip& strip)
+static void addRed(Processing::TRgbStrip& strip, Unused)
 {
     for(auto& led : strip)
     {
@@ -45,7 +46,7 @@ static void addRed(Processing::TRgbStrip& strip)
     }
 }
 
-static void addGreen(Processing::TRgbStrip& strip)
+static void addGreen(Processing::TRgbStrip& strip, Unused)
 {
     for(auto& led : strip)
     {
@@ -53,7 +54,7 @@ static void addGreen(Processing::TRgbStrip& strip)
     }
 }
 
-static void doubleValue(Processing::TRgbStrip& strip)
+static void doubleValue(Processing::TRgbStrip& strip, Unused)
 {
     for(auto& led : strip)
     {
@@ -83,11 +84,11 @@ public:
         , m_strip(c_stripSize)
         , m_processingBlockFactory()
     {
-        ON_CALL(*m_redSource, execute(_))
+        ON_CALL(*m_redSource, execute(_, _))
             .WillByDefault(Invoke(addRed));
-        ON_CALL(*m_greenSource, execute(_))
+        ON_CALL(*m_greenSource, execute(_, _))
             .WillByDefault(Invoke(addGreen));
-        ON_CALL(*m_valueDoubler, execute(_))
+        ON_CALL(*m_valueDoubler, execute(_, _))
             .WillByDefault(Invoke(doubleValue));
     }
 

@@ -71,7 +71,7 @@ public:
     virtual IProcessingChain& getProcessingChain() const;
     virtual void activate();
     virtual void deactivate();
-    virtual void execute(Processing::TRgbStrip& strip);
+    virtual void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap);
     virtual bool hasBankAndProgram() const;
     virtual uint8_t getBank() const;
     virtual void setBank(uint8_t bank);

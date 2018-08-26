@@ -36,11 +36,10 @@
 
 #define LOGGING_COMPONENT "NoteRgbSource"
 
-NoteRgbSource::NoteRgbSource(IMidiInput& midiInput, const Processing::TNoteToLightMap& noteToLightMap, const IRgbFunctionFactory& rgbFunctionFactory)
+NoteRgbSource::NoteRgbSource(IMidiInput& midiInput, const IRgbFunctionFactory& rgbFunctionFactory)
     : m_mutex()
     , m_active()
     , m_usingPedal(true)
-    , m_noteToLightMap(noteToLightMap)
     , m_rgbFunctionFactory(rgbFunctionFactory)
     , m_midiInput(midiInput)
     , m_channel(0)
@@ -80,11 +79,11 @@ void NoteRgbSource::deactivate()
     m_active = false;
 }
 
-void NoteRgbSource::execute(Processing::TRgbStrip& strip)
+void NoteRgbSource::execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap)
 {
     m_scheduler.executeAll();
 
-    for(auto pair : m_noteToLightMap)
+    for(auto pair : noteToLightMap)
     {
         // first: note number, second: light number
         if(m_rgbFunction != nullptr && pair.second < strip.size())

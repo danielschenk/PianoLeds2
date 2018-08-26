@@ -61,7 +61,7 @@ public:
     // IProcessingChain implementation
     virtual void activate();
     virtual void deactivate();
-    virtual void execute(Processing::TRgbStrip& strip);
+    virtual void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap);
     virtual void insertBlock(IProcessingBlock* block, unsigned int index);
     virtual void insertBlock(IProcessingBlock* block);
     virtual Json convertToJson() const;

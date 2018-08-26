@@ -55,7 +55,7 @@ public:
     // IProcessingBlock implementation.
     virtual void activate();
     virtual void deactivate();
-    virtual void execute(Processing::TRgbStrip& output);
+    virtual void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap);
     virtual Json convertToJson() const;
     virtual void convertFromJson(const Json& converted);
 

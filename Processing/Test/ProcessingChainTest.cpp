@@ -65,7 +65,7 @@ TEST_F(ProcessingChainTest, empty)
     reference[2] = { 0, 0, 1 };
     m_strip = reference;
 
-    m_processingChain.execute(m_strip);
+    m_processingChain.execute(m_strip, Processing::TNoteToLightMap());
     EXPECT_EQ(reference, m_strip);
 }
 
@@ -79,7 +79,7 @@ TEST_F(ProcessingChainTest, insertOne)
     reference[1] = { 10, 0, 0 };
     reference[2] = { 10, 0, 0 };
 
-    m_processingChain.execute(m_strip);
+    m_processingChain.execute(m_strip, Processing::TNoteToLightMap());
     EXPECT_EQ(reference, m_strip);
 }
 
@@ -95,7 +95,7 @@ TEST_F(ProcessingChainTest, insertTwo)
     reference[1] = { 20, 0, 0 };
     reference[2] = { 20, 0, 0 };
 
-    m_processingChain.execute(m_strip);
+    m_processingChain.execute(m_strip, Processing::TNoteToLightMap());
     EXPECT_EQ(reference, m_strip);
 }
 
@@ -146,7 +146,7 @@ TEST_F(ProcessingChainTest, convertFromJson)
     reference[1] = {0, 20, 0};
     reference[2] = {0, 20, 0};
     Processing::TRgbStrip testStrip(3);
-    m_processingChain.execute(testStrip);
+    m_processingChain.execute(testStrip, Processing::TNoteToLightMap());
     EXPECT_EQ(reference, testStrip);
 }
 

@@ -34,10 +34,8 @@
 #include "Patch.h"
 
 ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& midiInput,
-                                               const Processing::TNoteToLightMap& noteToLightMap,
                                                const IRgbFunctionFactory& rgbFunctionFactory)
     : m_midiInput(midiInput)
-    , m_noteToLightMap(noteToLightMap)
     , m_rgbFunctionFactory(rgbFunctionFactory)
 {
 }
@@ -61,7 +59,7 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& conv
         }
         else if(objectType == IProcessingBlock::c_typeNameNoteRgbSource)
         {
-            processingBlock = new NoteRgbSource(m_midiInput, m_noteToLightMap, m_rgbFunctionFactory);
+            processingBlock = new NoteRgbSource(m_midiInput, m_rgbFunctionFactory);
         }
         else if(objectType == IProcessingBlock::c_typeNameProcessingChain)
         {

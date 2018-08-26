@@ -110,9 +110,9 @@ void Patch::deactivate()
     m_processingChain->deactivate();
 }
 
-void Patch::execute(Processing::TRgbStrip& strip)
+void Patch::execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap)
 {
-    m_processingChain->execute(strip);
+    m_processingChain->execute(strip, noteToLightMap);
 }
 
 uint8_t Patch::getBank() const

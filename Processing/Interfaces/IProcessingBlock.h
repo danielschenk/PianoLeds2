@@ -48,9 +48,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~IProcessingBlock()
-    {
-    };
+    virtual ~IProcessingBlock() = default;
 
     /**
      * Activate this block.
@@ -70,9 +68,10 @@ public:
     /**
      * Execute this block on the given strip.
      *
-     * @param   [in/out]    strip   The strip to operate on.
+     * @param   [in/out]    strip           The strip to operate on.
+     * @param   [in/out]    noteToLightMap  To map from note number to light number.
      */
-    virtual void execute(Processing::TRgbStrip& strip) = 0;
+    virtual void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap) = 0;
 };
 
 #endif /* PROCESSING_IPROCESSINGBLOCK_H_ */

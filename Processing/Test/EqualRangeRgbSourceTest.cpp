@@ -48,7 +48,7 @@ TEST_F(EqualRangeRgbSourceTest, executeDifferentColors)
     for(const auto& colorIt : colors)
     {
         m_source.setColor(colorIt);
-        m_source.execute(strip);
+        m_source.execute(strip, Processing::TNoteToLightMap());
         for(const auto& outputIt : strip)
         {
             EXPECT_EQ(outputIt, colorIt);

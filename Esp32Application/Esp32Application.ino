@@ -26,9 +26,6 @@
  * The MLC2 application for the ESP32, using the Arduino core.
  */
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-
 #include "LoggingTask.h"
 #include "Common/Logging.h"
 
@@ -52,7 +49,6 @@ static MidiTask* gs_pMidiTask(nullptr);
 
 static RgbFunctionFactory* gs_pRgbFunctionFactory(nullptr);
 static ProcessingBlockFactory* gs_pProcessingBlockFactory(nullptr);
-static Processing::TNoteToLightMap* gs_pNoteToLightMap(nullptr);
 static Concert* gs_pConcert(nullptr);
 
 static constexpr uint32_t c_defaultStackSize(4096);
@@ -106,18 +102,15 @@ void setup()
     // Initialize concert dependencies.
     gs_pRgbFunctionFactory = new RgbFunctionFactory;
 
-    gs_pNoteToLightMap = new Processing::TNoteToLightMap;
-    // TODO read the note-to-light-map from storage
-    // For now add something to test with.
+    Processing::TNoteToLightMap noteToLightMap;
     uint8_t lightNumber = 0;
     for(uint8_t noteNumber = 60 /* middle C */; noteNumber < 72; ++noteNumber)
     {
-        (*gs_pNoteToLightMap)[noteNumber] = lightNumber;
+        noteToLightMap[noteNumber] = lightNumber;
         ++lightNumber;
     }
 
     gs_pProcessingBlockFactory = new ProcessingBlockFactory(*gs_pMidiInput,
-                                                            *gs_pNoteToLightMap,
                                                             *gs_pRgbFunctionFactory);
 
     gs_pConcert = new Concert(*gs_pMidiInput,
@@ -125,6 +118,7 @@ void setup()
 
     // TODO read concert from storage
     // For now, add something to test with.
+    gs_pConcert->setNoteToLightMap(noteToLightMap);
     IPatch* pPatch(gs_pConcert->getPatch(gs_pConcert->addPatch()));
     pPatch->setName("whiteOnBlue");
     pPatch->activate();
@@ -136,7 +130,6 @@ void setup()
 
     // Full white for any sounding key
     NoteRgbSource* pSrc2(new NoteRgbSource(*gs_pMidiInput,
-                                           *gs_pNoteToLightMap,
                                            *gs_pRgbFunctionFactory));
     LinearRgbFunction* pRgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
     pSrc2->setRgbFunction(pRgbFunction);

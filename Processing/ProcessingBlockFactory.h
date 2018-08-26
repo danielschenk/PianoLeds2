@@ -45,7 +45,7 @@ public:
     /**
      * Constructor.
      */
-    ProcessingBlockFactory(IMidiInput& midiInput, const Processing::TNoteToLightMap& noteToLightMap, const IRgbFunctionFactory& rgbFunctionFactory);
+    ProcessingBlockFactory(IMidiInput& midiInput, const IRgbFunctionFactory& rgbFunctionFactory);
 
     /**
      * Destructor.
@@ -61,9 +61,6 @@ public:
 private:
     /** Reference to the MIDI input to pass to new blocks. */
     IMidiInput& m_midiInput;
-
-    /** Reference to the note to light map to pass to new blocks. */
-    const Processing::TNoteToLightMap& m_noteToLightMap;
 
     /** Reference to the RGB function factory to pass to new blocks. */
     const IRgbFunctionFactory& m_rgbFunctionFactory;

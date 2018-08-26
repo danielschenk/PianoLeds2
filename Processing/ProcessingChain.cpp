@@ -138,13 +138,13 @@ void ProcessingChain::deactivate()
     m_active = false;
 }
 
-void ProcessingChain::execute(Processing::TRgbStrip& strip)
+void ProcessingChain::execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
     for(auto processingBlock : m_processingChain)
     {
-        processingBlock->execute(strip);
+        processingBlock->execute(strip, noteToLightMap);
     }
 }
 

@@ -51,10 +51,9 @@ public:
      * Constructor.
      *
      * @param   [in]    midiInput           Reference to the MIDI input.
-     * @param   [in]    noteToLightMap      Reference to the note to light map.
      * @param   [in]    rgbFunctionFactory  Reference to the RGB function factory.
      */
-    NoteRgbSource(IMidiInput& midiDriver, const Processing::TNoteToLightMap& noteToLightMap, const IRgbFunctionFactory& rgbFunctionFactory);
+    NoteRgbSource(IMidiInput& midiDriver, const IRgbFunctionFactory& rgbFunctionFactory);
 
     /**
      * Destructor.
@@ -68,7 +67,7 @@ public:
     // IProcessingBlock implementation.
     virtual void activate();
     virtual void deactivate();
-    virtual void execute(Processing::TRgbStrip& output);
+    virtual void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap);
     virtual Json convertToJson() const;
     virtual void convertFromJson(const Json& converted);
 
@@ -101,9 +100,6 @@ private:
 
     /** Indicates whether pedal should be used. */
     bool m_usingPedal;
-
-    /** Reference to the note to light map. */
-    const Processing::TNoteToLightMap& m_noteToLightMap;
 
     /** Reference to the RGB function factory. */
     const IRgbFunctionFactory& m_rgbFunctionFactory;

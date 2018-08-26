@@ -40,7 +40,7 @@ public:
     // IProcessingBlock implementation
     MOCK_METHOD0(activate, void());
     MOCK_METHOD0(deactivate, void());
-    MOCK_METHOD1(execute, void(Processing::TRgbStrip& strip));
+    MOCK_METHOD2(execute, void(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap));
     MOCK_CONST_METHOD0(convertToJson, Json());
     MOCK_METHOD1(convertFromJson, void(const Json& converted));
 
