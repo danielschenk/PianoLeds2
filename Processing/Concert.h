@@ -50,6 +50,7 @@ class IPatch;
  */
 class Concert
     : public IJsonConvertible
+    , public IMidiInput::IObserver
 {
 public:
     /**
@@ -139,6 +140,11 @@ public:
 
     void execute();
 
+    // IMidiInput::IObserver implementation
+    virtual void onNoteChange(uint8_t channel, uint8_t number, uint8_t velocity, bool on);
+    virtual void onProgramChange(uint8_t channel, uint8_t program);
+    virtual void onControlChange(uint8_t channel, IMidiInterface::TControllerNumber number, uint8_t value);
+
 protected:
     // IJsonConvertible implementation
     std::string getObjectType() const;
@@ -152,12 +158,6 @@ private:
     static constexpr const char* c_patchesJsonKey                       = "patches";
 
     typedef std::vector<IPatch*> TPatches;
-
-    /** Callback to handle program changes. */
-    void onProgramChange(uint8_t channel, uint8_t program);
-
-    /** Callback to handle control changes. */
-    void onControlChange(uint8_t channel, IMidiInterface::TControllerNumber controllerNumber, uint8_t value);
 
     /** The note-to-light mapping. */
     Processing::TNoteToLightMap m_noteToLightMap;
@@ -179,12 +179,6 @@ private:
     
     /** Reference to the MIDI input. */
     IMidiInput& m_midiInput;
-
-    /** The control change subscription. */
-    IMidiInput::TSubscriptionToken m_controlChangeSubscription;
-    
-    /** The program change subscription. */
-    IMidiInput::TSubscriptionToken m_programChangeSubscription;
 
     /** Reference to the processing block factory. */
     IProcessingBlockFactory& m_processingBlockFactory;

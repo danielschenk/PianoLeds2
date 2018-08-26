@@ -27,56 +27,53 @@
 #include "BaseMidiInput.h"
 
 BaseMidiInput::BaseMidiInput()
-    : m_noteOnOffSubscribers()
-    , m_controlChangeSubscribers()
+    : m_observers()
     , m_buildingMessage(false)
     , m_currentMessage()
+    , m_observersMutex()
 {
 }
 
-IMidiInput::TSubscriptionToken BaseMidiInput::subscribeNoteOnOff(IMidiInput::TNoteOnOffFunction callback)
+void BaseMidiInput::subscribe(IObserver& observer)
 {
-    return m_noteOnOffSubscribers.subscribe(callback);
+    std::lock_guard<std::mutex> lock(m_observersMutex);
+    m_observers.push_back(&observer);
 }
 
-void BaseMidiInput::unsubscribeNoteOnOff(IMidiInput::TSubscriptionToken token)
+void BaseMidiInput::unsubscribe(IObserver& observer)
 {
-    m_noteOnOffSubscribers.unsubscribe(token);
+    std::lock_guard<std::mutex> lock(m_observersMutex);
+    m_observers.remove(&observer);
 }
 
-IMidiInput::TSubscriptionToken BaseMidiInput::subscribeControlChange(IMidiInput::TControlChangeFunction callback)
+void BaseMidiInput::notifyNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) const
 {
-    return m_controlChangeSubscribers.subscribe(callback);
-}
+    std::lock_guard<std::mutex> lock(m_observersMutex);
 
-void BaseMidiInput::unsubscribeControlChange(IMidiInput::TSubscriptionToken token)
-{
-    m_controlChangeSubscribers.unsubscribe(token);
-}
-
-void BaseMidiInput::notifyNoteOnOff(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) const
-{
-    m_noteOnOffSubscribers.notifySubscribers(channel, pitch, velocity, on);
-}
-
-IMidiInput::TSubscriptionToken BaseMidiInput::subscribeProgramChange(TProgramChangeFunction callback)
-{
-    return m_programChangeSubscribers.subscribe(callback);
-}
-
-void BaseMidiInput::unsubscribeProgramChange(TSubscriptionToken token)
-{
-    m_programChangeSubscribers.unsubscribe(token);
+    for(auto observer : m_observers)
+    {
+        observer->onNoteChange(channel, pitch, velocity, on);
+    }
 }
 
 void BaseMidiInput::notifyControlChange(uint8_t channel, IMidiInterface::TControllerNumber controller, uint8_t value) const
 {
-    m_controlChangeSubscribers.notifySubscribers(channel, controller, value);
+    std::lock_guard<std::mutex> lock(m_observersMutex);
+
+    for(auto observer : m_observers)
+    {
+        observer->onControlChange(channel, controller, value);
+    }
 }
 
-void BaseMidiInput::notifyProgramChange(uint8_t channel, uint8_t number) const
+void BaseMidiInput::notifyProgramChange(uint8_t channel, uint8_t program) const
 {
-    m_programChangeSubscribers.notifySubscribers(channel, number);
+    std::lock_guard<std::mutex> lock(m_observersMutex);
+
+    for(auto observer : m_observers)
+    {
+        observer->onProgramChange(channel, program);
+    }
 }
 
 void BaseMidiInput::processMidiByte(uint8_t value)
@@ -104,7 +101,7 @@ void BaseMidiInput::processMidiByte(uint8_t value)
             if(m_currentMessage.size() >= 3)
             {
                 // Channel, pitch, velocity, note off
-                notifyNoteOnOff(channel, m_currentMessage[1], m_currentMessage[2], false);
+                notifyNoteChange(channel, m_currentMessage[1], m_currentMessage[2], false);
                 m_buildingMessage = false;
             }
             break;
@@ -113,7 +110,7 @@ void BaseMidiInput::processMidiByte(uint8_t value)
             if(m_currentMessage.size() >= 3)
             {
                 // Channel, pitch, velocity, note on
-                notifyNoteOnOff(channel, m_currentMessage[1], m_currentMessage[2], true);
+                notifyNoteChange(channel, m_currentMessage[1], m_currentMessage[2], true);
                 m_buildingMessage = false;
             }
             break;

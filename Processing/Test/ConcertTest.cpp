@@ -36,6 +36,8 @@ using testing::Return;
 using testing::Expectation;
 using testing::NiceMock;
 
+ACTION_P(StoreArg0Address, target) { *target = &arg0; }
+
 class ConcertTest
     : public testing::Test
 {
@@ -43,30 +45,24 @@ public:
     ConcertTest()
         : m_mockProcessingBlockFactory()
         , m_mockMidiInput()
-        , m_controlChangeCallback(0)
-        , m_programChangeCallback(0)
+        , m_observer(nullptr)
     {
-        // Store callbacks so we can simulate events
-        EXPECT_CALL(m_mockMidiInput, subscribeControlChange(_))
-            .WillOnce(DoAll(SaveArg<0>(&m_controlChangeCallback), Return(42)));
-        EXPECT_CALL(m_mockMidiInput, subscribeProgramChange(_))
-            .WillOnce(DoAll(SaveArg<0>(&m_programChangeCallback), Return(43)));
-        
+        // Capture observer so we can simulate events
+        ON_CALL(m_mockMidiInput, subscribe(_))
+            .WillByDefault(StoreArg0Address(&m_observer));
+
         m_concert = new Concert(m_mockMidiInput, m_mockProcessingBlockFactory);
     }
 
     void SetUp()
     {
         // It's not ideal to re-assert this in every test, but cleaner and safer as almost every test
-        // will call these
-        ASSERT_NE(nullptr, m_controlChangeCallback);
-        ASSERT_NE(nullptr, m_programChangeCallback);
+        // will use this
+        ASSERT_NE(nullptr, m_observer);
     }
 
     virtual ~ConcertTest()
     {
-        EXPECT_CALL(m_mockMidiInput, unsubscribeControlChange(42));
-        EXPECT_CALL(m_mockMidiInput, unsubscribeProgramChange(43));
         delete m_concert;
     }
 
@@ -74,12 +70,11 @@ public:
     static const uint16_t c_testBankNumber;
 
     // Required mocks
-    MockProcessingBlockFactory m_mockProcessingBlockFactory;
-    MockMidiInput m_mockMidiInput;
+    NiceMock<MockProcessingBlockFactory> m_mockProcessingBlockFactory;
+    NiceMock<MockMidiInput> m_mockMidiInput;
     
     // Mock subscriptions
-    IMidiInput::TControlChangeFunction m_controlChangeCallback;
-    IMidiInput::TProgramChangeFunction m_programChangeCallback;
+    IMidiInput::IObserver* m_observer;
 
     // Object under test
     Concert*  m_concert;
@@ -95,8 +90,8 @@ TEST_F(ConcertTest, bankSelect)
     m_concert->setProgramChangeChannel(channel);
 
     // Simulate a bank select sequence
-    m_controlChangeCallback(channel, IMidiInterface::BANK_SELECT_LSB, c_testBankNumber & 0xff);
-    m_controlChangeCallback(channel, IMidiInterface::BANK_SELECT_MSB, c_testBankNumber >> 8);
+    m_observer->onControlChange(channel, IMidiInterface::BANK_SELECT_LSB, c_testBankNumber & 0xff);
+    m_observer->onControlChange(channel, IMidiInterface::BANK_SELECT_MSB, c_testBankNumber >> 8);
 
     m_concert->execute();
 
@@ -113,8 +108,8 @@ TEST_F(ConcertTest, bankSelectFromOtherChannelIgnored)
     m_concert->setProgramChangeChannel(channel);
 
     // Simulate a bank select sequence
-    m_controlChangeCallback(channel + 1, IMidiInterface::BANK_SELECT_LSB, (bank + 1) & 0xff);
-    m_controlChangeCallback(channel + 1, IMidiInterface::BANK_SELECT_MSB, (bank + 1) >> 8);
+    m_observer->onControlChange(channel + 1, IMidiInterface::BANK_SELECT_LSB, (bank + 1) & 0xff);
+    m_observer->onControlChange(channel + 1, IMidiInterface::BANK_SELECT_MSB, (bank + 1) >> 8);
 
     m_concert->execute();
 

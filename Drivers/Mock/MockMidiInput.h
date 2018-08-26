@@ -42,12 +42,8 @@ public:
     MOCK_METHOD1(openPort, void(int number));
 
     // IMidiInput implementation
-    MOCK_METHOD1(subscribeNoteOnOff, TSubscriptionToken(TNoteOnOffFunction callback));
-    MOCK_METHOD1(unsubscribeNoteOnOff, void(TSubscriptionToken token));
-    MOCK_METHOD1(subscribeControlChange, TSubscriptionToken(TControlChangeFunction callback));
-    MOCK_METHOD1(unsubscribeControlChange, void(TSubscriptionToken token));
-    MOCK_METHOD1(subscribeProgramChange, TSubscriptionToken(TProgramChangeFunction callback));
-    MOCK_METHOD1(unsubscribeProgramChange, void(TSubscriptionToken token));
+    MOCK_METHOD1(subscribe, void(IObserver& observer));
+    MOCK_METHOD1(unsubscribe, void(IObserver& observer));
 };
 
 #endif /* DRIVERS_MOCK_MOCKMIDIINPUT_H_ */

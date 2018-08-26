@@ -38,66 +38,65 @@ class IMidiInput
     : public IMidiInterface
 {
 public:
-    /** Function type for note on and off events. Arguments: channel, note number, velocity, on/off. */
-    typedef std::function<void(uint8_t, uint8_t, uint8_t, bool)> TNoteOnOffFunction;
-
-    /** Function type for control change events. Arguments: channel, controller number, value. */
-    typedef std::function<void(uint8_t, TControllerNumber, uint8_t)> TControlChangeFunction;
-
-    /** Function type for program change events. Arguments: channel, number. */
-    typedef std::function<void(uint8_t, uint8_t)> TProgramChangeFunction;
-
-    /** Type of subscription token which can be used to unsubscribe. */
-    typedef unsigned int TSubscriptionToken;
-
     /**
-     * Destructor.
+     * Interface to implement by MIDI input observers.
      */
-    virtual ~IMidiInput()
+    class IObserver
     {
+    public:
+        /**
+         * Called when a note on/off message is received.
+         *
+         * @param channel       Channel number
+         * @param pitch         Pitch (note number)
+         * @param velocity      Velocity
+         * @param on            True = note on, false = note off
+         */
+        virtual void onNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) = 0;
+
+        /**
+         * Called when a control change message is received.
+         *
+         * @param channel       Channel number
+         * @param controller    Controller number
+         * @param value         New value of the changed control
+         */
+        virtual void onControlChange(uint8_t channel, TControllerNumber controller, uint8_t value) = 0;
+
+        /**
+         * Called when a program change message is received.
+         *
+         * @param channel       Channel number
+         * @param program       Number of the new active program
+         */
+        virtual void onProgramChange(uint8_t channel, uint8_t program) = 0;
+
+    protected:
+        /**
+         * Destructor.
+         */
+        ~IObserver() = default;
     };
 
     /**
-     * Subscribe to note receive events.
+     * Subscribe to MIDI events.
      *
-     * @param[in]   callback    The function to be called.
+     * @param   observer    The observer to subscribe
      */
-    virtual TSubscriptionToken subscribeNoteOnOff(TNoteOnOffFunction callback) = 0;
+    virtual void subscribe(IObserver& observer) = 0;
 
     /**
-     * Unsubscribe from note receive events.
+     * Unsubscribe from MIDI events.
      *
-     * @param[in]   token       The subscription to be removed.
+     * @param   observer    The observer to unsubscribe
      */
-    virtual void unsubscribeNoteOnOff(TSubscriptionToken token) = 0;
+    virtual void unsubscribe(IObserver& observer) = 0;
 
+protected:
     /**
-     * Subscribe to control change events.
-     *
-     * @param[in]   callback    The function to be called.
+     * Destructor.
      */
-    virtual TSubscriptionToken subscribeControlChange(TControlChangeFunction callback) = 0;
-
-    /**
-     * Unsubscribe from control change events.
-     *
-     * @param[in]   token       The subscription to be removed.
-     */
-    virtual void unsubscribeControlChange(TSubscriptionToken token) = 0;
-
-    /**
-     * Subscribe to program change events.
-     *
-     * @param[in]   callback    The function to be called.
-     */
-    virtual TSubscriptionToken subscribeProgramChange(TProgramChangeFunction callback) = 0;
-
-    /**
-     * Unsubscribe from program change events.
-     *
-     * @param[in]   token       The subscription to be removed.
-     */
-    virtual void unsubscribeProgramChange(TSubscriptionToken token) = 0;
+    virtual ~IMidiInput() = default;
 };
 
 

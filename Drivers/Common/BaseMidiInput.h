@@ -30,9 +30,9 @@
 #define DRIVERS_COMMON_BASEMIDIINPUT_H_
 
 #include <cstdint>
-#include <map>
+#include <list>
 #include <vector>
-#include <Common/ObserverList.h>
+#include <mutex>
 
 #include "../Interfaces/IMidiInput.h"
 
@@ -53,12 +53,8 @@ public:
     BaseMidiInput& operator=(const BaseMidiInput&) = delete;
 
     // IMidiInput implementation.
-    virtual TSubscriptionToken subscribeNoteOnOff(TNoteOnOffFunction callback);
-    virtual void unsubscribeNoteOnOff(TSubscriptionToken token);
-    virtual TSubscriptionToken subscribeControlChange(TControlChangeFunction callback);
-    virtual void unsubscribeControlChange(TSubscriptionToken token);
-    virtual TSubscriptionToken subscribeProgramChange(TProgramChangeFunction callback);
-    virtual void unsubscribeProgramChange(TSubscriptionToken token);
+    virtual void subscribe(IObserver& observer);
+    virtual void unsubscribe(IObserver& observer);
 
 protected:
     /**
@@ -73,16 +69,16 @@ protected:
 
 private:
     /**
-     * Notify all note on/off subscribers.
+     * Notify observers about a note change.
      *
      * @param[in]   channel     The channel the message was received on.
      * @param[in]   pitch       The pitch of the note.
-     * @param[in]   velocity    The pitch of the note.
+     * @param[in]   velocity    The velocity of the note.
      */
-    virtual void notifyNoteOnOff(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) const;
+    virtual void notifyNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) const;
 
     /**
-     * Notify all control change subscribers.
+     * Notify observers about a control change.
      *
      * @param[in]   channel     The channel the message was received on.
      * @param[in]   controller  The number of the controller.
@@ -91,27 +87,24 @@ private:
     virtual void notifyControlChange(uint8_t channel, IMidiInput::TControllerNumber control, uint8_t value) const;
 
     /**
-     * Notify all program change subscribers.
+     * Notify observers about a program change.
      *
      * @param[in]   channel     The channel the message was received on.
-     * @param[in]   number      The program number.
+     * @param[in]   program     The program number.
      */
-    virtual void notifyProgramChange(uint8_t channel, uint8_t number) const;
+    virtual void notifyProgramChange(uint8_t channel, uint8_t program) const;
 
-    /** Collection of note on/off subscribers. */
-    ObserverList<uint8_t, uint8_t, uint8_t, bool> m_noteOnOffSubscribers;
-
-    /** Collection of control change subscribers. */
-    ObserverList<uint8_t, IMidiInput::TControllerNumber, uint8_t> m_controlChangeSubscribers;
-
-    /** Collection of program change subscribers. */
-    ObserverList<uint8_t, uint8_t> m_programChangeSubscribers;
+    /** Collection of observers. */
+    std::list<IMidiInput::IObserver*> m_observers;
 
     /** Whether incoming bytes are stored to build a message. */
     bool m_buildingMessage;
 
     /** The message currently being built. */
     std::vector<uint8_t> m_currentMessage;
+
+    /** Mutex to protect the observers. */
+    mutable std::mutex m_observersMutex;
 };
 
 #endif /* DRIVERS_COMMON_BASEMIDIINPUT_H_ */

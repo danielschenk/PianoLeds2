@@ -44,18 +44,12 @@ Concert::Concert(IMidiInput& midiInput, IProcessingBlockFactory& processingBlock
     , m_scheduler()
     , m_mutex()
 {
-    m_controlChangeSubscription = m_midiInput.subscribeControlChange(
-        std::bind(&Concert::onControlChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
-    );
-    m_programChangeSubscription = m_midiInput.subscribeProgramChange(
-        std::bind(&Concert::onProgramChange, this, std::placeholders::_1, std::placeholders::_2)
-    );
+    m_midiInput.subscribe(*this);
 }
 
 Concert::~Concert()
 {
-    m_midiInput.unsubscribeProgramChange(m_programChangeSubscription);
-    m_midiInput.unsubscribeControlChange(m_controlChangeSubscription);
+    m_midiInput.unsubscribe(*this);
 
     for(auto patch : m_patches)
     {
@@ -226,6 +220,12 @@ void Concert::execute()
 std::string Concert::getObjectType() const
 {
     return c_typeName;
+}
+
+
+void Concert::onNoteChange(uint8_t channel, uint8_t number, uint8_t velocity, bool on)
+{
+    // ignore
 }
 
 void Concert::onProgramChange(uint8_t channel, uint8_t program)
