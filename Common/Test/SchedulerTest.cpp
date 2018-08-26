@@ -37,8 +37,10 @@ using ::testing::Expectation;
 
 class ITask
 {
-public:
     virtual void task() = 0;
+
+protected:
+    virtual ~ITask() = default;
 };
 
 class MockTask
