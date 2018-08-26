@@ -27,7 +27,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <Drivers/Mock/MockMidiInput.h>
+#include <Drivers/Test/MidiInputObserverTest.h>
 #include <Common/Mock/LoggingTest.h>
 
 #include "../NoteRgbSource.h"
@@ -46,13 +46,14 @@ using ::testing::Each;
 
 class NoteRgbSourceTest
     : public LoggingTest
+    , public MidiInputObserverTest
 {
 public:
     static constexpr unsigned int c_StripSize = 10;
 
     NoteRgbSourceTest()
         : LoggingTest()
-        , m_mockMidiInput()
+        , MidiInputObserverTest()
         , m_mockRgbFunctionFactory()
         , m_strip(c_StripSize)
         , m_exampleJson(R"(
@@ -66,12 +67,6 @@ public:
                  }
              })")
     {
-        // Store callbacks so we can simulate events
-        EXPECT_CALL(m_mockMidiInput, subscribeNoteOnOff(_))
-            .WillOnce(DoAll(SaveArg<0>(&m_noteOnOffCallback), Return(42)));
-        EXPECT_CALL(m_mockMidiInput, subscribeControlChange(_))
-            .WillOnce(DoAll(SaveArg<0>(&m_controlChangeCallback), Return(69)));
-
         for(int i = 0; i < c_StripSize; ++i)
         {
             // Default: simple 1-to-1 mapping
@@ -81,28 +76,14 @@ public:
         m_noteRgbSource->activate();
     }
 
-    void SetUp()
-    {
-        // It's not ideal to re-assert this in every test, but cleaner and safer as almost every test
-        // will call these
-        ASSERT_NE(nullptr, m_noteOnOffCallback);
-        ASSERT_NE(nullptr, m_controlChangeCallback);
-    }
-
     virtual ~NoteRgbSourceTest()
     {
-        EXPECT_CALL(m_mockMidiInput, unsubscribeNoteOnOff(42));
-        EXPECT_CALL(m_mockMidiInput, unsubscribeControlChange(69));
         delete m_noteRgbSource;
     }
 
-    MockMidiInput m_mockMidiInput;
     MockRgbFunctionFactory m_mockRgbFunctionFactory;
     NoteRgbSource* m_noteRgbSource;
     Processing::TRgbStrip m_strip;
-
-    IMidiInput::TNoteOnOffFunction m_noteOnOffCallback;
-    IMidiInput::TControlChangeFunction m_controlChangeCallback;
 
     Processing::TNoteToLightMap m_noteToLightMap;
 
@@ -127,8 +108,8 @@ TEST_F(NoteRgbSourceTest, noNotesSounding)
 TEST_F(NoteRgbSourceTest, noteOn)
 {
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 0, 1, true);
-    m_noteOnOffCallback(0, 5, 6, true);
+    m_observer->onNoteChange(0, 0, 1, true);
+    m_observer->onNoteChange(0, 5, 6, true);
 
     m_noteRgbSource->execute(m_strip);
 
@@ -143,8 +124,8 @@ TEST_F(NoteRgbSourceTest, noteOn)
 TEST_F(NoteRgbSourceTest, deactivateDisablesAllNotes)
 {
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 0, 1, true);
-    m_noteOnOffCallback(0, 5, 6, true);
+    m_observer->onNoteChange(0, 0, 1, true);
+    m_observer->onNoteChange(0, 5, 6, true);
 
     m_noteRgbSource->execute(m_strip);
     m_noteRgbSource->deactivate();
@@ -156,10 +137,10 @@ TEST_F(NoteRgbSourceTest, deactivateDisablesAllNotes)
 TEST_F(NoteRgbSourceTest, noteOff)
 {
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 0, 1, true);
-    m_noteOnOffCallback(0, 5, 6, true);
+    m_observer->onNoteChange(0, 0, 1, true);
+    m_observer->onNoteChange(0, 5, 6, true);
 
-    m_noteOnOffCallback(0, 0, 8, false);
+    m_observer->onNoteChange(0, 0, 8, false);
 
     m_noteRgbSource->execute(m_strip);
 
@@ -172,7 +153,7 @@ TEST_F(NoteRgbSourceTest, noteOff)
 
 TEST_F(NoteRgbSourceTest, ignoreOtherChannel)
 {
-    m_noteOnOffCallback(1, 0, 1, true);
+    m_observer->onNoteChange(1, 0, 1, true);
 
     m_noteRgbSource->execute(m_strip);
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
@@ -182,9 +163,9 @@ TEST_F(NoteRgbSourceTest, ignorePedal)
 {
     m_noteRgbSource->setUsingPedal(false);
 
-    m_noteOnOffCallback(0, 0, 1, true);
-    m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0xff);
-    m_noteOnOffCallback(0, 0, 1, false);
+    m_observer->onNoteChange(0, 0, 1, true);
+    m_observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0xff);
+    m_observer->onNoteChange(0, 0, 1, false);
 
     m_noteRgbSource->execute(m_strip);
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
@@ -194,12 +175,12 @@ TEST_F(NoteRgbSourceTest, usePedal)
 {
     // Press a key
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 0, 1, true);
+    m_observer->onNoteChange(0, 0, 1, true);
     // Press pedal
     // (channel, number, value)
-    m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0xff);
+    m_observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0xff);
     // Press another key
-    m_noteOnOffCallback(0, 2, 1, true);
+    m_observer->onNoteChange(0, 2, 1, true);
 
     auto reference = Processing::TRgbStrip(c_StripSize);
     // Both notes are still sounding
@@ -209,15 +190,15 @@ TEST_F(NoteRgbSourceTest, usePedal)
     EXPECT_EQ(reference, m_strip);
 
     // Release keys
-    m_noteOnOffCallback(0, 0, 1, false);
-    m_noteOnOffCallback(0, 2, 1, false);
+    m_observer->onNoteChange(0, 0, 1, false);
+    m_observer->onNoteChange(0, 2, 1, false);
 
     // Both notes are still sounding
     m_noteRgbSource->execute(m_strip);
     EXPECT_EQ(reference, m_strip);
 
     // Release pedal
-    m_controlChangeCallback(0, IMidiInterface::DAMPER_PEDAL, 0);
+    m_observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0);
 
     // Notes are not sounding anymore
     reference[0] = {0, 0, 0};
@@ -250,8 +231,8 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
     m_noteRgbSource->setRgbFunction(mockRgbFunction);
 
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 0, 1, true);
-    m_noteOnOffCallback(0, 5, 6, true);
+    m_observer->onNoteChange(0, 0, 1, true);
+    m_observer->onNoteChange(0, 5, 6, true);
 
     m_noteRgbSource->execute(m_strip);
 
@@ -277,8 +258,8 @@ TEST_F(NoteRgbSourceTest, otherNoteToLightMap)
     m_noteToLightMap[5] = 8;
 
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 0, 1, true);
-    m_noteOnOffCallback(0, 5, 6, true);
+    m_observer->onNoteChange(0, 0, 1, true);
+    m_observer->onNoteChange(0, 5, 6, true);
 
     m_noteRgbSource->execute(m_strip);
 
@@ -293,8 +274,8 @@ TEST_F(NoteRgbSourceTest, otherNoteToLightMap)
 TEST_F(NoteRgbSourceTest, doNotWriteOutsideStrip)
 {
     // (channel, number, velocity, on/off)
-    m_noteOnOffCallback(0, 0, 1, true);
-    m_noteOnOffCallback(0, 9, 6, true);
+    m_observer->onNoteChange(0, 0, 1, true);
+    m_observer->onNoteChange(0, 9, 6, true);
 
     auto shorterStrip = Processing::TRgbStrip(5);
     m_noteRgbSource->execute(shorterStrip);

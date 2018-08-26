@@ -44,6 +44,7 @@ class IRgbFunctionFactory;
  */
 class NoteRgbSource
     : public IProcessingBlock
+    , public IMidiInput::IObserver
 {
 public:
     /**
@@ -78,6 +79,11 @@ public:
 
     void setRgbFunction(IRgbFunction* rgbFunction);
 
+    // IMidiInput::IObserver implementation
+    virtual void onNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on);
+    virtual void onControlChange(uint8_t channel, IMidiInput::TControllerNumber controller, uint8_t value);
+    virtual void onProgramChange(uint8_t channel, uint8_t program);
+
 protected:
     // IProcessingBlock implementation
     virtual std::string getObjectType() const;
@@ -86,16 +92,6 @@ private:
     static constexpr const char* c_usingPedalJsonKey    = "usingPedal";
     static constexpr const char* c_channelJsonKey       = "channel";
     static constexpr const char* c_rgbFunctionJsonKey   = "rgbFunction";
-
-    /**
-     * Handler for note on/off events.
-     */
-    void handleNoteOnOff(uint8_t channel, uint8_t number, uint8_t velocity, bool on);
-
-    /**
-     * Handler for control change events.
-     */
-    void handleControlChange(uint8_t channel, IMidiInput::TControllerNumber number, uint8_t value);
 
     /** Mutex to protect the members. */
     mutable std::mutex m_mutex;
@@ -117,12 +113,6 @@ private:
 
     /** MIDI channel to listen to. */
     uint8_t m_channel;
-
-    /** MIDI note on/off subscription. */
-    IMidiInput::TSubscriptionToken m_noteOnOffSubscription;
-
-    /** MIDI pedal event subscription. */
-    IMidiInput::TSubscriptionToken m_controlChangeSubscription;
 
     /** Scheduler to decouple callbacks. */
     Scheduler m_scheduler;

@@ -41,7 +41,7 @@ ACTION_P(StoreArg0Address, target) { *target = &arg0; }
  * Base fixture for tests of classes which implement @ref IMidiInput::IObserver
  */
 class MidiInputObserverTest
-    : public ::testing::Test
+    : public virtual ::testing::Test
 {
 public:
     MidiInputObserverTest()

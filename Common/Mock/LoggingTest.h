@@ -39,7 +39,7 @@ using ::testing::_;
 using ::testing::AnyNumber;
 
 class LoggingTest
-    : public ::testing::Test
+    : public virtual ::testing::Test
 {
 public:
     LoggingTest()

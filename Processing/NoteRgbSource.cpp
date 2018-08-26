@@ -49,16 +49,12 @@ NoteRgbSource::NoteRgbSource(IMidiInput& midiInput, const Processing::TNoteToLig
     , m_pedalPressed(false)
     , m_rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}))
 {
-    m_noteOnOffSubscription = m_midiInput.subscribeNoteOnOff(
-            std::bind(&NoteRgbSource::handleNoteOnOff, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3, std::placeholders::_4));
-    m_controlChangeSubscription = m_midiInput.subscribeControlChange(
-            std::bind(&NoteRgbSource::handleControlChange, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3));
+    m_midiInput.subscribe(*this);
 }
 
 NoteRgbSource::~NoteRgbSource()
 {
-    m_midiInput.unsubscribeNoteOnOff(m_noteOnOffSubscription);
-    m_midiInput.unsubscribeControlChange(m_controlChangeSubscription);
+    m_midiInput.unsubscribe(*this);
     delete m_rgbFunction;
 }
 
@@ -98,7 +94,7 @@ void NoteRgbSource::execute(Processing::TRgbStrip& strip)
     }
 }
 
-void NoteRgbSource::handleNoteOnOff(uint8_t channel, uint8_t number, uint8_t velocity, bool on)
+void NoteRgbSource::onNoteChange(uint8_t channel, uint8_t number, uint8_t velocity, bool on)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -129,7 +125,7 @@ void NoteRgbSource::handleNoteOnOff(uint8_t channel, uint8_t number, uint8_t vel
     m_scheduler.schedule(fn);
 }
 
-void NoteRgbSource::handleControlChange(uint8_t channel, IMidiInput::TControllerNumber number, uint8_t value)
+void NoteRgbSource::onControlChange(uint8_t channel, IMidiInput::TControllerNumber number, uint8_t value)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -161,6 +157,11 @@ void NoteRgbSource::handleControlChange(uint8_t channel, IMidiInput::TController
         };
         m_scheduler.schedule(fn);
     }
+}
+
+void NoteRgbSource::onProgramChange(uint8_t channel, uint8_t program)
+{
+    // ignore
 }
 
 uint8_t NoteRgbSource::getChannel() const
