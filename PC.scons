@@ -36,6 +36,7 @@ symbols = [
 flags = [
     '-Wall',
     '-std=c++11',
+    '-Weffc++',
     '-Os',
     '-g3',
     '-fdata-sections',
