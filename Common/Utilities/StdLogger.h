@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,42 +22,33 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * @brief Simple test program using RtMidiMidiInput which prints received messages to stdout.
  */
 
-#include <iostream>
-#include <cstdio>
-#include <cassert>
+#ifndef COMMON_UTILITIES_STDLOGGER_H_
+#define COMMON_UTILITIES_STDLOGGER_H_
 
-#include "Drivers/PC/RtMidiMidiInput.h"
-#include "Common/Utilities/MidiMessageLogger.h"
-#include "Common/Utilities/StdLogger.h"
+#include "Common/Interfaces/ILoggingTarget.h"
+#include "Common/LoggingEntryPoint.h"
 
-int main()
+/**
+ * Logging target which logs to std::cout
+ */
+class StdLogger
+    : public ILoggingTarget
 {
-    StdLogger stdLogger;
-    RtMidiMidiInput midiInput;
-    MidiMessageLogger midiLogger(midiInput);
+public:
+    /**
+     * Constructor.
+     */
+    StdLogger();
 
-    int numFoundInputs = midiInput.getPortCount();
-    std::cout << "Found " << numFoundInputs << " MIDI inputs.\n";
+    /**
+     * Destructor.
+     */
+    virtual ~StdLogger();
 
-    if(numFoundInputs > 0)
-    {
-        midiInput.openPort(0);
-        std::cout << "Opened port 0, incoming notes and control changes will be printed to stdout. Type <q> <ENTER> to quit.\n";
+    // ILoggingTarget implementation
+    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
+};
 
-        while(std::getchar() != 'q')
-        {
-            // Wait for input
-        }
-
-        return 0;
-    }
-    else
-    {
-        return 1;
-    }
-}
-
+#endif /* COMMON_UTILITIES_STDLOGGER_H_ */

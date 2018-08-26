@@ -29,6 +29,9 @@ Import('base_env')
 env = base_env.Clone()
 
 symbols = [
+    'ENABLE_LOG_ERROR',
+    'ENABLE_LOG_WARNING',
+    'ENABLE_LOG_INFO',
 ]
 flags = [
     '-Wall',

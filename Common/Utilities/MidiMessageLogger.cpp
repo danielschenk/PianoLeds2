@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,42 +22,36 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * @brief Simple test program using RtMidiMidiInput which prints received messages to stdout.
  */
 
-#include <iostream>
-#include <cstdio>
-#include <cassert>
+#include "Common/Logging.h"
 
-#include "Drivers/PC/RtMidiMidiInput.h"
-#include "Common/Utilities/MidiMessageLogger.h"
-#include "Common/Utilities/StdLogger.h"
+#include "MidiMessageLogger.h"
 
-int main()
+#define LOGGING_COMPONENT "MidiMessageLogger"
+
+MidiMessageLogger::MidiMessageLogger(IMidiInput& midiInput)
+    : m_midiInput(midiInput)
 {
-    StdLogger stdLogger;
-    RtMidiMidiInput midiInput;
-    MidiMessageLogger midiLogger(midiInput);
-
-    int numFoundInputs = midiInput.getPortCount();
-    std::cout << "Found " << numFoundInputs << " MIDI inputs.\n";
-
-    if(numFoundInputs > 0)
-    {
-        midiInput.openPort(0);
-        std::cout << "Opened port 0, incoming notes and control changes will be printed to stdout. Type <q> <ENTER> to quit.\n";
-
-        while(std::getchar() != 'q')
-        {
-            // Wait for input
-        }
-
-        return 0;
-    }
-    else
-    {
-        return 1;
-    }
+    m_midiInput.subscribe(*this);
 }
 
+MidiMessageLogger::~MidiMessageLogger()
+{
+    m_midiInput.unsubscribe(*this);
+}
+
+void MidiMessageLogger::onNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on)
+{
+    LOG_INFO_PARAMS("%3s chan %2u pitch %3u vel %3u", on ? "ON" : "OFF", channel, pitch, velocity);
+}
+
+void MidiMessageLogger::onControlChange(uint8_t channel, IMidiInterface::TControllerNumber controller, uint8_t value)
+{
+    LOG_INFO_PARAMS("CON chan %2u controller %3u val %3u", channel, controller, value);
+}
+
+void MidiMessageLogger::onProgramChange(uint8_t channel, uint8_t program)
+{
+    LOG_INFO_PARAMS("PRG chan %2u num %2u", channel, program);
+}
