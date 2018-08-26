@@ -24,7 +24,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "Drivers/Mock/MockMidiInput.h"
+#include "Drivers/Test/MidiInputObserverTest.h"
 
 #include "../Concert.h"
 #include "../Mock/MockProcessingBlockFactory.h"
@@ -36,29 +36,15 @@ using testing::Return;
 using testing::Expectation;
 using testing::NiceMock;
 
-ACTION_P(StoreArg0Address, target) { *target = &arg0; }
-
 class ConcertTest
-    : public testing::Test
+    : public MidiInputObserverTest
 {
 public:
     ConcertTest()
-        : m_mockProcessingBlockFactory()
-        , m_mockMidiInput()
-        , m_observer(nullptr)
+        : MidiInputObserverTest()
+        , m_mockProcessingBlockFactory()
     {
-        // Capture observer so we can simulate events
-        ON_CALL(m_mockMidiInput, subscribe(_))
-            .WillByDefault(StoreArg0Address(&m_observer));
-
         m_concert = new Concert(m_mockMidiInput, m_mockProcessingBlockFactory);
-    }
-
-    void SetUp()
-    {
-        // It's not ideal to re-assert this in every test, but cleaner and safer as almost every test
-        // will use this
-        ASSERT_NE(nullptr, m_observer);
     }
 
     virtual ~ConcertTest()
@@ -71,10 +57,6 @@ public:
 
     // Required mocks
     NiceMock<MockProcessingBlockFactory> m_mockProcessingBlockFactory;
-    NiceMock<MockMidiInput> m_mockMidiInput;
-    
-    // Mock subscriptions
-    IMidiInput::IObserver* m_observer;
 
     // Object under test
     Concert*  m_concert;

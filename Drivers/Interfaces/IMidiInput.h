@@ -30,7 +30,6 @@
 #define SOURCE_DRIVERS_INCLUDE_IMIDIINPUT_H_
 
 #include <cstdint>
-#include <functional>
 
 #include "IMidiInterface.h"
 
