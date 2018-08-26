@@ -42,14 +42,14 @@
 
 #define LOGGING_COMPONENT "Esp32Application"
 
-static LoggingTask* gs_pLoggingTask(nullptr);
+static LoggingTask* gs_loggingTask(nullptr);
 
-static ArduinoMidiInput* gs_pMidiInput(nullptr);
-static MidiTask* gs_pMidiTask(nullptr);
+static ArduinoMidiInput* gs_midiInput(nullptr);
+static MidiTask* gs_midiTask(nullptr);
 
-static RgbFunctionFactory* gs_pRgbFunctionFactory(nullptr);
-static ProcessingBlockFactory* gs_pProcessingBlockFactory(nullptr);
-static Concert* gs_pConcert(nullptr);
+static RgbFunctionFactory* gs_rgbFunctionFactory(nullptr);
+static ProcessingBlockFactory* gs_processingBlockFactory(nullptr);
+static Concert* gs_concert(nullptr);
 
 static constexpr uint32_t c_defaultStackSize(4096);
 
@@ -84,9 +84,9 @@ void setup()
 {
     // Initialize logging
     Serial.begin(115200);
-    gs_pLoggingTask = new LoggingTask(Serial,
-                                      c_defaultStackSize,
-                                      PRIORITY_LOW);
+    gs_loggingTask = new LoggingTask(Serial,
+                                     c_defaultStackSize,
+                                     PRIORITY_LOW);
 
     LOG_INFO("MIDI-LED-Controller (MLC) (c) Daniel Schenk, 2017");
     LOG_INFO("initializing application...");
@@ -94,13 +94,13 @@ void setup()
     // Initialize MIDI, baud rate is 31.25k
     Serial2.begin(31250);
 
-    gs_pMidiInput = new ArduinoMidiInput(Serial2);
-    gs_pMidiTask = new MidiTask(*gs_pMidiInput,
-                                c_defaultStackSize,
-                                PRIORITY_CRITICAL);
+    gs_midiInput = new ArduinoMidiInput(Serial2);
+    gs_midiTask = new MidiTask(*gs_midiInput,
+                               c_defaultStackSize,
+                               PRIORITY_CRITICAL);
 
     // Initialize concert dependencies.
-    gs_pRgbFunctionFactory = new RgbFunctionFactory;
+    gs_rgbFunctionFactory = new RgbFunctionFactory;
 
     Processing::TNoteToLightMap noteToLightMap;
     uint8_t lightNumber = 0;
@@ -110,31 +110,31 @@ void setup()
         ++lightNumber;
     }
 
-    gs_pProcessingBlockFactory = new ProcessingBlockFactory(*gs_pMidiInput,
-                                                            *gs_pRgbFunctionFactory);
+    gs_processingBlockFactory = new ProcessingBlockFactory(*gs_midiInput,
+                                                           *gs_rgbFunctionFactory);
 
-    gs_pConcert = new Concert(*gs_pMidiInput,
-                              *gs_pProcessingBlockFactory);
+    gs_concert = new Concert(*gs_midiInput,
+                             *gs_processingBlockFactory);
 
     // TODO read concert from storage
     // For now, add something to test with.
-    gs_pConcert->setNoteToLightMap(noteToLightMap);
-    IPatch* pPatch(gs_pConcert->getPatch(gs_pConcert->addPatch()));
-    pPatch->setName("whiteOnBlue");
-    pPatch->activate();
+    gs_concert->setNoteToLightMap(noteToLightMap);
+    IPatch* patch(gs_concert->getPatch(gs_concert->addPatch()));
+    patch->setName("whiteOnBlue");
+    patch->activate();
 
     // Add constant blue background
-    EqualRangeRgbSource* pSrc1(new EqualRangeRgbSource);
-    pSrc1->setColor(Processing::TRgb({0, 0, 255}));
-    pPatch->getProcessingChain().insertBlock(pSrc1);
+    EqualRangeRgbSource* src1(new EqualRangeRgbSource);
+    src1->setColor(Processing::TRgb({0, 0, 255}));
+    patch->getProcessingChain().insertBlock(src1);
 
     // Full white for any sounding key
-    NoteRgbSource* pSrc2(new NoteRgbSource(*gs_pMidiInput,
-                                           *gs_pRgbFunctionFactory));
-    LinearRgbFunction* pRgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
-    pSrc2->setRgbFunction(pRgbFunction);
-    pSrc2->setUsingPedal(true);
-    pPatch->getProcessingChain().insertBlock(pSrc2);
+    NoteRgbSource* src2(new NoteRgbSource(*gs_midiInput,
+                                          *gs_rgbFunctionFactory));
+    LinearRgbFunction* rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
+    src2->setRgbFunction(rgbFunction);
+    src2->setUsingPedal(true);
+    patch->getProcessingChain().insertBlock(src2);
 
     LOG_INFO("initialization done");
 }
@@ -145,7 +145,7 @@ void loop()
     LOG_INFO("still alive :-)");
 
     std::string json;
-    gs_pConcert->convertToJson().dump(json);
+    gs_concert->convertToJson().dump(json);
     LOG_INFO(json.c_str());
 
     // Nothing to do, leave everything to the other tasks.
@@ -156,5 +156,5 @@ void loop()
 // This function is called by the Arduino Serial driver
 void serialEvent2()
 {
-    gs_pMidiTask->wake();
+    gs_midiTask->wake();
 }
