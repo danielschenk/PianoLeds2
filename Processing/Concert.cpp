@@ -34,6 +34,7 @@
 
 Concert::Concert(IMidiInput& midiInput, IProcessingBlockFactory& processingBlockFactory)
     : m_noteToLightMap()
+    , m_strip()
     , m_patches()
     , m_activePatch(m_patches.end())
     , m_listeningToProgramChange(false)
@@ -74,7 +75,27 @@ Concert::TPatchPosition Concert::addPatch()
         return c_invalidPatchPosition;
     }
 
+    return addPatchInternal(patch);
+}
+
+Concert::TPatchPosition Concert::addPatch(IPatch* patch)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    return addPatchInternal(patch);
+}
+
+Concert::TPatchPosition Concert::addPatchInternal(IPatch* patch)
+{
     m_patches.push_back(patch);
+
+    if(m_patches.size() == 1)
+    {
+        // First patch. Activate it.
+        patch->activate();
+        m_activePatch = m_patches.begin();
+    }
+
     return m_patches.size() - 1;
 }
 
@@ -214,14 +235,36 @@ void Concert::setCurrentBank(uint16_t bank)
 void Concert::execute()
 {
     m_scheduler.executeAll();
-    // TODO execute active patch
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    if(m_activePatch != m_patches.end())
+    {
+        (*m_activePatch)->execute(m_strip, m_noteToLightMap);
+
+        for(auto observer : m_observers)
+        {
+            observer->onStripUpdate(m_strip);
+        }
+    }
+}
+
+void Concert::subscribe(IObserver& observer)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_observers.push_back(&observer);
+}
+
+void Concert::unsubscribe(IObserver& observer)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_observers.remove(&observer);
 }
 
 std::string Concert::getObjectType() const
 {
     return c_typeName;
 }
-
 
 void Concert::onNoteChange(uint8_t channel, uint8_t number, uint8_t velocity, bool on)
 {

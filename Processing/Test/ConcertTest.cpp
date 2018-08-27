@@ -35,6 +35,14 @@ using testing::SaveArg;
 using testing::Return;
 using testing::Expectation;
 using testing::NiceMock;
+using testing::SetArgReferee;
+
+class MockObserver
+    : public Concert::IObserver
+{
+public:
+    MOCK_METHOD1(onStripUpdate, void(const Processing::TRgbStrip& strip));
+};
 
 class ConcertTest
     : public MidiInputObserverTest
@@ -99,6 +107,44 @@ TEST_F(ConcertTest, bankSelectFromOtherChannelIgnored)
     ASSERT_EQ(bank, m_concert->getCurrentBank());
 }
 
+TEST_F(ConcertTest, execute)
+{
+    Processing::TNoteToLightMap map;
+    map[42] = 42;
+    m_concert->setNoteToLightMap(map);
+
+    MockPatch* mockPatch(new NiceMock<MockPatch>);
+    m_concert->addPatch(mockPatch);
+
+    MockObserver observer;
+    m_concert->subscribe(observer);
+
+    Processing::TRgbStrip newStripValues({{42, 43, 44}});
+
+    // The mock patch should be executed, and given the configured note to light map.
+    // Let the mock patch set some values on the strip during its execute
+    EXPECT_CALL(*mockPatch, execute(_, map))
+        .WillOnce(SetArgReferee<0>(newStripValues));
+
+    // The new strip values should be notified
+    EXPECT_CALL(observer, onStripUpdate(newStripValues));
+
+    m_concert->execute();
+}
+
+TEST_F(ConcertTest, executeEmpty)
+{
+    // Should not crash
+    m_concert->execute();
+}
+
+TEST_F(ConcertTest, activateFirstPatch)
+{
+    MockPatch* mockPatch(new NiceMock<MockPatch>);
+    EXPECT_CALL(*mockPatch, activate());
+    m_concert->addPatch(mockPatch);
+}
+
 TEST_F(ConcertTest, convertToJson)
 {
     // Set some non-default values
@@ -115,9 +161,9 @@ TEST_F(ConcertTest, convertToJson)
     mockPatch2Json["objectType"] = "MockPatch";
     mockPatch2Json["someParameter"] = 43;
 
-    MockPatch* mockPatch = new MockPatch();
+    MockPatch* mockPatch = new NiceMock<MockPatch>();
     ASSERT_NE(nullptr, mockPatch);
-    MockPatch* mockPatch2 = new MockPatch();
+    MockPatch* mockPatch2 = new NiceMock<MockPatch>();
     ASSERT_NE(nullptr, mockPatch2);
 
     EXPECT_CALL(m_mockProcessingBlockFactory, createPatch())

@@ -30,6 +30,7 @@
 #define PROCESSING_CONCERT_H_
 
 #include <vector>
+#include <list>
 #include <cstdint>
 
 #include "Interfaces/IJsonConvertible.h"
@@ -91,6 +92,15 @@ public:
     TPatchPosition addPatch();
 
     /**
+     * Add an existing patch.
+     *
+     * @param[in] patch The patch to add.
+     *
+     * @return The patch position.
+     */
+    TPatchPosition addPatch(IPatch* patch);
+
+    /**
      * Get the patch at the specified position, for modifications.
      * Concert stays owner of the patch.
      * 
@@ -140,6 +150,21 @@ public:
 
     void execute();
 
+    /**
+     * Interface to implement by Concert observers.
+     */
+    class IObserver
+    {
+    public:
+        virtual void onStripUpdate(const Processing::TRgbStrip& strip) = 0;
+
+    protected:
+        virtual ~IObserver() = default;
+    };
+
+    void subscribe(IObserver& observer);
+    void unsubscribe(IObserver& observer);
+
     // IMidiInput::IObserver implementation
     virtual void onNoteChange(uint8_t channel, uint8_t number, uint8_t velocity, bool on);
     virtual void onProgramChange(uint8_t channel, uint8_t program);
@@ -159,8 +184,13 @@ private:
 
     typedef std::vector<IPatch*> TPatches;
 
+    TPatchPosition addPatchInternal(IPatch* patch);
+
     /** The note-to-light mapping. */
     Processing::TNoteToLightMap m_noteToLightMap;
+
+    /** The actual state of the RGB LED strip. */
+    Processing::TRgbStrip m_strip;
 
     /** The collection of patches. */
     TPatches m_patches;
@@ -185,6 +215,8 @@ private:
 
     /** Scheduler to decouple callbacks */
     Scheduler m_scheduler;
+
+    std::list<IObserver*> m_observers;
 
     /** Mutex to protect the members. */
     mutable std::mutex m_mutex;

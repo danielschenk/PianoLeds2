@@ -123,7 +123,6 @@ void setup()
     gs_concert->setNoteToLightMap(noteToLightMap);
     IPatch* patch(gs_concert->getPatch(gs_concert->addPatch()));
     patch->setName("whiteOnBlue");
-    patch->activate();
 
     // Add constant blue background
     EqualRangeRgbSource* src1(new EqualRangeRgbSource);
