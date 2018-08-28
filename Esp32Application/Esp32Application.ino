@@ -28,6 +28,7 @@
 
 #include "LoggingTask.h"
 #include "Common/Logging.h"
+#include "Common/Utilities/MidiMessageLogger.h"
 
 #include "Drivers/Arduino/ArduinoMidiInput.h"
 #include "MidiTask.h"
@@ -46,6 +47,7 @@
 static LoggingTask* gs_loggingTask(nullptr);
 
 static ArduinoMidiInput* gs_midiInput(nullptr);
+static MidiMessageLogger* gs_midiMessageLogger(nullptr);
 static MidiTask* gs_midiTask(nullptr);
 
 static RgbFunctionFactory* gs_rgbFunctionFactory(nullptr);
@@ -100,6 +102,9 @@ void setup()
     gs_midiTask = new MidiTask(*gs_midiInput,
                                c_defaultStackSize,
                                PRIORITY_CRITICAL);
+
+    // Initialize printing of MIDI messages
+    gs_midiMessageLogger = new MidiMessageLogger(*gs_midiInput);
 
     // Initialize concert dependencies.
     gs_rgbFunctionFactory = new RgbFunctionFactory;
