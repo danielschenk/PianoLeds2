@@ -163,6 +163,16 @@ void NoteRgbSource::onProgramChange(uint8_t channel, uint8_t program)
     // ignore
 }
 
+void NoteRgbSource::onChannelPressureChange(uint8_t channel, uint8_t value)
+{
+    // ignore
+}
+
+void NoteRgbSource::onPitchBendChange(uint8_t channel, uint16_t value)
+{
+    // ignore
+}
+
 uint8_t NoteRgbSource::getChannel() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);

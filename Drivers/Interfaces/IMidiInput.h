@@ -70,6 +70,22 @@ public:
          */
         virtual void onProgramChange(uint8_t channel, uint8_t program) = 0;
 
+        /**
+         * Called when a channel pressure (a.k.a. after-touch) message is received.
+         *
+         * @param channel       Channel number
+         * @param value         New channel pressure value
+         */
+        virtual void onChannelPressureChange(uint8_t channel, uint8_t value) = 0;
+
+        /**
+         * Called when a pitch bend message is received.
+         *
+         * @param channel       Channel number
+         * @param value         New pitch bend value
+         */
+        virtual void onPitchBendChange(uint8_t channel, uint16_t value) = 0;
+
     protected:
         /**
          * Destructor.

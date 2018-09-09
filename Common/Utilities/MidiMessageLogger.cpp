@@ -55,3 +55,13 @@ void MidiMessageLogger::onProgramChange(uint8_t channel, uint8_t program)
 {
     LOG_INFO_PARAMS("PRG chan %2u num %2u", channel, program);
 }
+
+void MidiMessageLogger::onChannelPressureChange(uint8_t channel, uint8_t value)
+{
+    LOG_INFO_PARAMS("CHP chan %2u val %2u", channel, value);
+}
+
+void MidiMessageLogger::onPitchBendChange(uint8_t channel, uint16_t value)
+{
+    LOG_INFO_PARAMS(" PB chan %2u val %5u", channel, value);
+}

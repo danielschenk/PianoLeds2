@@ -26,6 +26,10 @@
 
 #include "BaseMidiInput.h"
 
+#include <Common/Logging.h>
+
+#define LOGGING_COMPONENT "BaseMidiInput"
+
 BaseMidiInput::BaseMidiInput()
     : m_observers()
     , m_buildingMessage(false)
@@ -73,6 +77,26 @@ void BaseMidiInput::notifyProgramChange(uint8_t channel, uint8_t program) const
     for(auto observer : m_observers)
     {
         observer->onProgramChange(channel, program);
+    }
+}
+
+void BaseMidiInput::notifyChannelPressureChange(uint8_t channel, uint8_t value) const
+{
+    std::lock_guard<std::mutex> lock(m_observersMutex);
+
+    for(auto observer : m_observers)
+    {
+        observer->onChannelPressureChange(channel, value);
+    }
+}
+
+void BaseMidiInput::notifyPitchBendChange(uint8_t channel, uint16_t value) const
+{
+    std::lock_guard<std::mutex> lock(m_observersMutex);
+
+    for(auto observer : m_observers)
+    {
+        observer->onPitchBendChange(channel, value);
     }
 }
 
@@ -133,8 +157,31 @@ void BaseMidiInput::processMidiByte(uint8_t value)
             }
             break;
 
+        case CHANNEL_PRESSURE_CHANGE:
+            if(m_currentMessage.size() >= 2)
+            {
+                // Channel, value
+                notifyChannelPressureChange(channel, m_currentMessage[1]);
+                m_buildingMessage = false;
+            }
+            break;
+
+        case PITCH_BEND_CHANGE:
+            if(m_currentMessage.size() >= 3)
+            {
+                // Pitch bend value is a 14-bit value.
+                // The first byte contains the low 7 bits, the second byte the high 7 bits.
+                uint16_t value(m_currentMessage[1] | (m_currentMessage[2] << 7));
+
+                // Channel, value
+                notifyPitchBendChange(channel, value);
+                m_buildingMessage = false;
+            }
+            break;
+
         default:
             // Unsupported status.
+            LOG_WARNING_PARAMS("Unsupported MIDI status %#02x on channel %2u, ignoring rest of message.", status, channel);
             m_buildingMessage = false;
             break;
         }

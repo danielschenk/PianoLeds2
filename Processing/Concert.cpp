@@ -331,3 +331,13 @@ void Concert::onControlChange(uint8_t channel, IMidiInterface::TControllerNumber
     };
     m_scheduler.schedule(taskFn);
 }
+
+void Concert::onChannelPressureChange(uint8_t channel, uint8_t value)
+{
+    // ignore
+}
+
+void Concert::onPitchBendChange(uint8_t channel, uint16_t value)
+{
+    // ignore
+}

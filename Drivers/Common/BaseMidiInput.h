@@ -75,7 +75,7 @@ private:
      * @param[in]   pitch       The pitch of the note.
      * @param[in]   velocity    The velocity of the note.
      */
-    virtual void notifyNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) const;
+    void notifyNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) const;
 
     /**
      * Notify observers about a control change.
@@ -84,7 +84,7 @@ private:
      * @param[in]   controller  The number of the controller.
      * @param[in]   value       The value of the controller.
      */
-    virtual void notifyControlChange(uint8_t channel, IMidiInput::TControllerNumber control, uint8_t value) const;
+    void notifyControlChange(uint8_t channel, IMidiInput::TControllerNumber control, uint8_t value) const;
 
     /**
      * Notify observers about a program change.
@@ -92,7 +92,23 @@ private:
      * @param[in]   channel     The channel the message was received on.
      * @param[in]   program     The program number.
      */
-    virtual void notifyProgramChange(uint8_t channel, uint8_t program) const;
+    void notifyProgramChange(uint8_t channel, uint8_t program) const;
+
+    /**
+     * Notify observers about a channel pressure (a.k.a. after-touch) change.
+     *
+     * @param[in]   channel     The channel the message was received on.
+     * @param[in]   value       The new channel pressure value.
+     */
+    void notifyChannelPressureChange(uint8_t channel, uint8_t value) const;
+
+    /**
+     * Notify observers about a pitch bend change.
+     *
+     * @param[in]   channel     The channel the message was received on.
+     * @param[in]   value       The new pitch bend value.
+     */
+    void notifyPitchBendChange(uint8_t channel, uint16_t value) const;
 
     /** Collection of observers. */
     std::list<IMidiInput::IObserver*> m_observers;

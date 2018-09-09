@@ -44,6 +44,9 @@ public:
         NOTE_ON = 0x90,
         CONTROL_CHANGE = 0xB0,
         PROGRAM_CHANGE = 0xC0,
+        /** Channel pressure is also known as after-touch. */
+        CHANNEL_PRESSURE_CHANGE = 0xD0,
+        PITCH_BEND_CHANGE = 0xE0,
     };
 
     /** Controller number type. */
@@ -58,6 +61,7 @@ public:
     static constexpr unsigned int c_maxNoteNumber = 255;
     static constexpr unsigned int c_numVelocities = 256;
     static constexpr unsigned int c_maxVelocity = 255;
+    static constexpr uint16_t     c_pitchBendCenter = 0x2000;
 
     /**
      * Destructor.
