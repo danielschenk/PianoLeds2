@@ -164,7 +164,7 @@ void loop()
 }
 
 
-// This function is called by the Arduino Serial driver
+// TODO This function is not called on ESP32... :-(
 void serialEvent2()
 {
     gs_midiTask->wake();

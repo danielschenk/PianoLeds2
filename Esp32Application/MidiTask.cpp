@@ -47,8 +47,10 @@ void MidiTask::wake()
 
 void MidiTask::run()
 {
-    // Wait for event forever.
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    // TODO workaround for lack of serialEvent implementation on ESP32.
+    // Wait for event for a maximum of 100 ms.
+    // This effectively is a polling implementation instead of an event-driven one.
+    ulTaskNotifyTake(pdTRUE, 100);
 
     // Process any data.
     m_midiInput.run();
