@@ -15,3 +15,14 @@ I'm an embedded software engineer, and like to make the most out of limited hard
 runs the previous version). However, my time to hobby around is also limited, and I prefer C++ for embedded now, because
 of the object-oriented nature of the language. There's enough cheap hardware around which has enough memory and is
 powerful enough to make use of these advantages.
+
+## How to build and run
+### The ESP32 application
+1. Go to the `Esp32Application` folder and copy or rename the file `BoardOverride_template.h` to `BoardOverride.h` and change any pin definitions in there if needed.
+1. Install PlatformIO.
+1. Execute one of the following:
+    1. `platformio run` to only build.
+    1. `platformio run --target upload` to build and upload on to the ESP32 module (don't forget to hold the IO0 button).
+
+### The unit tests and MidiInputMonitor test application
+This currently involves SCons, but I want to change it so that PlatformIO can be used for this too.

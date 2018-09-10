@@ -42,6 +42,8 @@
 #include "Processing/LinearRgbFunction.h"
 #include "ProcessingTask.h"
 
+#include "Board.h"
+
 #define LOGGING_COMPONENT "Esp32Application"
 
 static LoggingTask* gs_loggingTask(nullptr);
@@ -87,7 +89,7 @@ enum
 void setup()
 {
     // Initialize logging
-    Serial.begin(115200);
+    Serial.begin(115200, SERIAL_8N1, DEBUG_RX_PIN, DEBUG_TX_PIN);
     gs_loggingTask = new LoggingTask(Serial,
                                      c_defaultStackSize,
                                      PRIORITY_LOW);
@@ -95,8 +97,11 @@ void setup()
     LOG_INFO("MIDI-LED-Controller (MLC) (c) Daniel Schenk, 2017");
     LOG_INFO("initializing application...");
 
+    // Initialize run LED
+    pinMode(RUN_LED_PIN, OUTPUT);
+
     // Initialize MIDI, baud rate is 31.25k
-    Serial2.begin(31250);
+    Serial2.begin(31250, SERIAL_8N1, MIDI_RX_PIN, MIDI_TX_PIN);
 
     gs_midiInput = new ArduinoMidiInput(Serial2);
     gs_midiTask = new MidiTask(*gs_midiInput,
@@ -152,15 +157,11 @@ void setup()
 
 void loop()
 {
-    // TODO toggle a run LED instead?
-    LOG_INFO("still alive :-)");
-
-    std::string json;
-    gs_concert->convertToJson().dump(json);
-    LOG_INFO(json.c_str());
+    // Blink to indicate we're alive.
+    digitalWrite(RUN_LED_PIN, !digitalRead(RUN_LED_PIN));
 
     // Nothing to do, leave everything to the other tasks.
-    vTaskDelay(10000);
+    vTaskDelay(1000);
 }
 
 
