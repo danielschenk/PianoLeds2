@@ -45,14 +45,14 @@ public:
      * Constructor.
      *
      * @param stripSize Number of LEDs in the strip
-     * @param dataPin   Pin number where the data input of the strip is connected
-     * @param clockPin  Pin number where the clock input of the strip is connected
+     * @param dataPin   Pin number where the data input of the strip is connected, -1 for hardware SPI
+     * @param clockPin  Pin number where the clock input of the strip is connected, -1 for hardware SPI
      * @param stackSize Stack size in words
      * @param priority  Priority
      */
     LedTask(uint16_t stripSize,
-            uint16_t dataPin,
-            uint16_t clockPin,
+            int16_t dataPin,
+            int16_t clockPin,
             uint32_t stackSize,
             UBaseType_t priority);
 
@@ -70,7 +70,13 @@ private:
 
     static constexpr TickType_t c_autoRefreshInterval = 100;
 
+    /** Values stored upon last update. */
+    Processing::TRgbStrip m_pendingValues;
+
+    /** The LED strip driver. */
     Adafruit_WS2801 m_strip;
+
+    /** Mutex protecting the pending values. */
     mutable std::mutex m_mutex;
 };
 
