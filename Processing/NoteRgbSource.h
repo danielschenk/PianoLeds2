@@ -60,7 +60,8 @@ public:
      */
     virtual ~NoteRgbSource();
 
-    // Prevent implicit copy constructor and assignment operator.
+    // Prevent implicit constructors and assignment operator.
+    NoteRgbSource() = delete;
     NoteRgbSource(NoteRgbSource&) = delete;
     NoteRgbSource& operator=(NoteRgbSource&) = delete;
 

@@ -47,6 +47,11 @@ public:
      */
     ProcessingBlockFactory(IMidiInput& midiInput, const IRgbFunctionFactory& rgbFunctionFactory);
 
+    // Prevent implicit constructors and assignment operator
+    ProcessingBlockFactory() = delete;
+    ProcessingBlockFactory(const ProcessingBlockFactory&) = delete;
+    ProcessingBlockFactory& operator=(const ProcessingBlockFactory&) = delete;
+
     /**
      * Destructor.
      */
