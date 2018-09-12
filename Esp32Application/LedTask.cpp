@@ -78,8 +78,13 @@ void LedTask::run()
         // A strip update was received, update the colors in the driver.
         std::lock_guard<std::mutex> lock(m_mutex);
 
-        for(unsigned int ledNumber(0); ledNumber < m_strip.numPixels(); ++ledNumber)
+        for(unsigned int ledNumber(0); ledNumber < m_pendingValues.size(); ++ledNumber)
         {
+            if(ledNumber >= m_strip.numPixels())
+            {
+                break;
+            }
+
             auto color(m_pendingValues[ledNumber]);
             m_strip.setPixelColor(ledNumber, color.r, color.g, color.b);
         }
