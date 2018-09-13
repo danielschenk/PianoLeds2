@@ -41,6 +41,7 @@
 #include "Processing/NoteRgbSource.h"
 #include "Processing/LinearRgbFunction.h"
 #include "ProcessingTask.h"
+#include "LedTask.h"
 
 #include "Board.h"
 
@@ -56,6 +57,7 @@ static RgbFunctionFactory* gs_rgbFunctionFactory(nullptr);
 static ProcessingBlockFactory* gs_processingBlockFactory(nullptr);
 static Concert* gs_concert(nullptr);
 static ProcessingTask* gs_processingTask(nullptr);
+static LedTask* gs_ledTask(nullptr);
 
 static constexpr uint32_t c_defaultStackSize(4096);
 
@@ -151,6 +153,15 @@ void setup()
     gs_processingTask = new ProcessingTask(*gs_concert,
                                            c_defaultStackSize,
                                            PRIORITY_CRITICAL);
+
+    // Start LED output
+    // TODO determine strip size from persisted note-to-light-map.
+    gs_ledTask = new LedTask(12,
+                             LED_DATA_PIN,
+                             LED_CLOCK_PIN,
+                             c_defaultStackSize,
+                             PRIORITY_CRITICAL);
+    gs_concert->subscribe(*gs_ledTask);
 
     LOG_INFO("initialization done");
 }

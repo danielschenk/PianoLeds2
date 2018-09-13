@@ -49,5 +49,13 @@
 #define MIDI_TX_PIN         17
 #endif
 
+// TODO find out why hardware SPI hangs the Adafruit driver.
+#ifndef LED_DATA_PIN
+#define LED_DATA_PIN        13
+#endif
+
+#ifndef LED_CLOCK_PIN
+#define LED_CLOCK_PIN       14
+#endif
 
 #endif /* ESP32APPLICATION_BOARD_H_ */
