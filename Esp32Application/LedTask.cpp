@@ -29,14 +29,16 @@
 #include "LedTask.h"
 
 
-LedTask::LedTask(uint16_t stripSize,
+LedTask::LedTask(Concert& concert,
                  int16_t dataPin,
                  int16_t clockPin,
                  uint32_t stackSize,
                  UBaseType_t priority)
     : BaseTask()
     , m_pendingValues()
-    , m_strip(stripSize)
+    , m_strip(concert.getStripSize())
+    , m_mutex()
+    , m_concert(concert)
 {
     if((dataPin > -1) && (clockPin > -1))
     {
@@ -49,10 +51,13 @@ LedTask::LedTask(uint16_t stripSize,
     m_strip.begin();
 
     start("led", stackSize, priority);
+
+    m_concert.subscribe(*this);
 }
 
 LedTask::~LedTask()
 {
+    m_concert.unsubscribe(*this);
 }
 
 void LedTask::onStripUpdate(const Processing::TRgbStrip& strip)

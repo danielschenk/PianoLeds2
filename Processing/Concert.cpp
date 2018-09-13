@@ -158,6 +158,8 @@ void Concert::convertFromJson(const Json& converted)
     if(helper.getItemIfPresent(c_noteToLightMapJsonKey, convertedNoteToLightMap))
     {
         m_noteToLightMap = Processing::convert(convertedNoteToLightMap);
+        // Make sure all mapped lights fit into the strip
+        createMinimumAmountOfLights();
     }
 
     for(IPatch* patch : m_patches)
@@ -202,6 +204,35 @@ void Concert::setNoteToLightMap(Processing::TNoteToLightMap noteToLightMap)
     std::lock_guard<std::mutex> lock(m_mutex);
     
     m_noteToLightMap = noteToLightMap;
+
+    // Make sure all mapped lights fit into the strip
+    createMinimumAmountOfLights();
+}
+
+void Concert::createMinimumAmountOfLights()
+{
+    uint16_t highestLightIndex(0);
+    for(const auto& pair : m_noteToLightMap)
+    {
+        if(pair.second > highestLightIndex)
+        {
+            highestLightIndex = pair.second;
+        }
+    }
+
+    size_t minimumAmount(highestLightIndex + 1);
+    m_strip.reserve(minimumAmount);
+    for(unsigned int i(0); i < minimumAmount; ++i)
+    {
+        m_strip.push_back(Processing::TRgb());
+    }
+}
+
+size_t Concert::getStripSize() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    return m_strip.size();
 }
 
 uint8_t Concert::getProgramChangeChannel() const

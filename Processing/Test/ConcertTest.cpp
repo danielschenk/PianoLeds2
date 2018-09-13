@@ -145,6 +145,17 @@ TEST_F(ConcertTest, activateFirstPatch)
     m_concert->addPatch(mockPatch);
 }
 
+TEST_F(ConcertTest, updateStripSize)
+{
+    Processing::TNoteToLightMap map;
+    map[0] = 42;
+    map[1] = 6;
+    map[2] = 7;
+    m_concert->setNoteToLightMap(map);
+
+    EXPECT_EQ(43, m_concert->getStripSize());
+}
+
 TEST_F(ConcertTest, convertToJson)
 {
     // Set some non-default values
@@ -250,4 +261,10 @@ TEST_F(ConcertTest, convertFromJson)
     ASSERT_EQ(2, m_concert->size());
     EXPECT_EQ(name1, m_concert->getPatch(0)->getName());
     EXPECT_EQ(name2, m_concert->getPatch(1)->getName());
+
+    Processing::TNoteToLightMap expectedMap;
+    expectedMap[1] = 10;
+    expectedMap[2] = 20;
+    EXPECT_EQ(expectedMap, m_concert->getNoteToLightMap());
+    EXPECT_EQ(21, m_concert->getStripSize());
 }

@@ -143,6 +143,7 @@ public:
     void setListeningToProgramChange(bool listeningToProgramChange);
     Processing::TNoteToLightMap getNoteToLightMap() const;
     void setNoteToLightMap(Processing::TNoteToLightMap noteToLightMap);
+    size_t getStripSize() const;
     uint8_t getProgramChangeChannel() const;
     void setProgramChangeChannel(uint8_t programChangeChannel);
     uint16_t getCurrentBank() const;
@@ -187,6 +188,7 @@ private:
     typedef std::vector<IPatch*> TPatches;
 
     TPatchPosition addPatchInternal(IPatch* patch);
+    void createMinimumAmountOfLights();
 
     /** The note-to-light mapping. */
     Processing::TNoteToLightMap m_noteToLightMap;

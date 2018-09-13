@@ -44,13 +44,13 @@ public:
     /**
      * Constructor.
      *
-     * @param stripSize Number of LEDs in the strip
+     * @param concert   Concert instance to subscribe for LED updates and check strip size
      * @param dataPin   Pin number where the data input of the strip is connected, -1 for hardware SPI
      * @param clockPin  Pin number where the clock input of the strip is connected, -1 for hardware SPI
      * @param stackSize Stack size in words
      * @param priority  Priority
      */
-    LedTask(uint16_t stripSize,
+    LedTask(Concert& concert,
             int16_t dataPin,
             int16_t clockPin,
             uint32_t stackSize,
@@ -78,6 +78,8 @@ private:
 
     /** Mutex protecting the pending values. */
     mutable std::mutex m_mutex;
+
+    Concert& m_concert;
 };
 
 #endif /* ESP32APPLICATION_LEDTASK_H_ */

@@ -24,37 +24,34 @@
  * SOFTWARE.
  */
 
-#ifndef ESP32APPLICATION_BOARD_H_
-#define ESP32APPLICATION_BOARD_H_
+#ifndef PROCESSING_STRIPCHANGELOGGER_H_
+#define PROCESSING_STRIPCHANGELOGGER_H_
 
-#include "BoardOverride.h"
+#include <mutex>
 
-#ifndef RUN_LED_PIN
-#define RUN_LED_PIN         2
-#endif
+#include "Concert.h"
 
-#ifndef DEBUG_RX_PIN
-#define DEBUG_RX_PIN        3
-#endif
+/**
+ * Class which logs every strip update if it's different from the previous one.
+ */
+class StripChangeLogger : public Concert::IObserver
+{
+public:
+    explicit StripChangeLogger(Concert& concert);
 
-#ifndef DEBUG_TX_PIN
-#define DEBUG_TX_PIN        1
-#endif
+    StripChangeLogger() = delete;
+    StripChangeLogger(const StripChangeLogger&) = delete;
+    StripChangeLogger& operator=(const StripChangeLogger&) = delete;
 
-#ifndef MIDI_RX_PIN
-#define MIDI_RX_PIN         16
-#endif
+    virtual ~StripChangeLogger();
 
-#ifndef MIDI_TX_PIN
-#define MIDI_TX_PIN         17
-#endif
+    // Concert::IObserver implementation
+    void onStripUpdate(const Processing::TRgbStrip& strip) override;
 
-#ifndef LED_DATA_PIN
-#define LED_DATA_PIN        13
-#endif
+private:
+    Concert& m_concert;
+    Processing::TRgbStrip m_previous;
+    mutable std::mutex m_mutex;
+};
 
-#ifndef LED_CLOCK_PIN
-#define LED_CLOCK_PIN       14
-#endif
-
-#endif /* ESP32APPLICATION_BOARD_H_ */
+#endif /* PROCESSING_STRIPCHANGELOGGER_H_ */

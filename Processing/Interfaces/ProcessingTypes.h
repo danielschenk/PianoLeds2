@@ -86,7 +86,7 @@ TRgb rgbFromFloat(float initialR, float initialG, float initialB);
 typedef std::vector<TRgb> TRgbStrip;
 
 /** Type to map MIDI note numbers to lights. */
-typedef std::map<uint8_t, uint8_t> TNoteToLightMap;
+typedef std::map<uint8_t, uint16_t> TNoteToLightMap;
 
 Json convert(const TNoteToLightMap& source);
 TNoteToLightMap convert(const Json& source);

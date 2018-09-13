@@ -24,37 +24,54 @@
  * SOFTWARE.
  */
 
-#ifndef ESP32APPLICATION_BOARD_H_
-#define ESP32APPLICATION_BOARD_H_
+#include <string>
+#include <cstdio>
 
-#include "BoardOverride.h"
+#include "Common/Logging.h"
+#include "StripChangeLogger.h"
 
-#ifndef RUN_LED_PIN
-#define RUN_LED_PIN         2
-#endif
+#define LOGGING_COMPONENT "StripChangeLogger"
 
-#ifndef DEBUG_RX_PIN
-#define DEBUG_RX_PIN        3
-#endif
+StripChangeLogger::StripChangeLogger(Concert& concert)
+    : m_concert(concert)
+    , m_previous()
+{
+    m_concert.subscribe(*this);
+}
 
-#ifndef DEBUG_TX_PIN
-#define DEBUG_TX_PIN        1
-#endif
+StripChangeLogger::~StripChangeLogger()
+{
+    m_concert.unsubscribe(*this);
+}
 
-#ifndef MIDI_RX_PIN
-#define MIDI_RX_PIN         16
-#endif
+void StripChangeLogger::onStripUpdate(const Processing::TRgbStrip& strip)
+{
+    bool log(false);
 
-#ifndef MIDI_TX_PIN
-#define MIDI_TX_PIN         17
-#endif
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
 
-#ifndef LED_DATA_PIN
-#define LED_DATA_PIN        13
-#endif
+        if(strip != m_previous)
+        {
+            m_previous = strip;
+            log = true;
+        }
+    }
 
-#ifndef LED_CLOCK_PIN
-#define LED_CLOCK_PIN       14
-#endif
+    if(log)
+    {
+        std::string msg("Strip update:\r\n");
+        uint16_t ledNumber(0);
+        for(auto led : strip)
+        {
+            // Fits: nnn: rrr ggg bbb[CR][LF][NUL]
+            char buf[19];
+            snprintf(buf, sizeof(buf), "%3u: %3u %3u %3u\r\n",
+                     ledNumber, led.r, led.g, led.b);
+            msg.append(buf);
+            ++ledNumber;
+        }
 
-#endif /* ESP32APPLICATION_BOARD_H_ */
+        LOG_DEBUG_PARAMS("%s", msg.c_str());
+    }
+}
