@@ -50,34 +50,66 @@ TRgb::TRgb()
     b = 0;
 };
 
-bool TRgb::operator ==(const TRgb& other) const
+bool TRgb::operator==(const TRgb& other) const
 {
     return (other.r == r) &&
            (other.g == g) &&
            (other.b == b);
 }
 
-bool TRgb::operator !=(const TRgb& other) const
+bool TRgb::operator!=(const TRgb& other) const
 {
     return !(other == *this);
 }
 
-TRgb TRgb::operator *(float factor) const
+TRgb TRgb::operator*(float factor) const
 {
-    return {
-        (uint8_t)(factor * (float)r),
-        (uint8_t)(factor * (float)g),
-        (uint8_t)(factor * (float)b)
-    };
+    return factor * (*this);
 }
 
 TRgb operator*(float factor, const TRgb& color)
 {
+    float newR(factor * (float)color.r),
+          newG(factor * (float)color.g),
+          newB(factor * (float)color.b);
+
+    return rgbFromFloat(newR, newG, newB);
+}
+
+TRgb TRgb::operator+(const TRgb& other) const
+{
+    uint16_t newR(r + other.r), newG(g + other.g), newB(b + other.b);
+
     return {
-        (uint8_t)(factor * (float)color.r),
-        (uint8_t)(factor * (float)color.g),
-        (uint8_t)(factor * (float)color.b)
+        static_cast<uint8_t>(newR > UINT8_MAX ? UINT8_MAX : newR),
+        static_cast<uint8_t>(newG > UINT8_MAX ? UINT8_MAX : newG),
+        static_cast<uint8_t>(newB > UINT8_MAX ? UINT8_MAX : newB)
     };
+}
+
+TRgb TRgb::operator-(const TRgb& other) const
+{
+    int16_t newR(r - other.r), newG(g - other.g), newB(b - other.b);
+
+    return {
+        static_cast<uint8_t>(newR < 0 ? 0 : newR),
+        static_cast<uint8_t>(newG < 0 ? 0 : newG),
+        static_cast<uint8_t>(newB < 0 ? 0 : newB)
+    };
+}
+
+TRgb& TRgb::operator+=(const TRgb& other)
+{
+    *this = *this + other;
+
+    return *this;
+}
+
+TRgb& TRgb::operator-=(const TRgb& other)
+{
+    *this = *this - other;
+
+    return *this;
 }
 
 /**

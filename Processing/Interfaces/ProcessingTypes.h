@@ -59,13 +59,38 @@ struct TRgb
     /**
      * Compare with another @ref TRgb.
      */
-    bool operator ==(const TRgb& other) const;
-    bool operator !=(const TRgb& other) const;
+    bool operator==(const TRgb& other) const;
+    bool operator!=(const TRgb& other) const;
 
     /**
      * Multiply every color by a single factor.
      */
-    TRgb operator *(float factor) const;
+    TRgb operator*(float factor) const;
+
+    /**
+     * Add colors together.
+     */
+    TRgb operator+(const TRgb& other) const;
+
+    /**
+     * Subtract colors from each other.
+     */
+    TRgb operator-(const TRgb& other) const;
+
+    /**
+     * Assign colors.
+     */
+    TRgb& operator=(const TRgb& other) = default;
+
+    /**
+     * Add colors together and assign the result to this object.
+     */
+    TRgb& operator+=(const TRgb& other);
+
+    /**
+     * Subtract colors from each other and assign the result to this object.
+     */
+    TRgb& operator-=(const TRgb& other);
 
     uint8_t r;
     uint8_t g;
