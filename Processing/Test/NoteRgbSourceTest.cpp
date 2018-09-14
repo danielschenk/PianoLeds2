@@ -81,6 +81,16 @@ public:
         delete m_noteRgbSource;
     }
 
+    void resetStrip()
+    {
+        for(auto& color : m_strip)
+        {
+            color.r = 0;
+            color.g = 0;
+            color.b = 0;
+        }
+    }
+
     MockRgbFunctionFactory m_mockRgbFunctionFactory;
     NoteRgbSource* m_noteRgbSource;
     Processing::TRgbStrip m_strip;
@@ -92,17 +102,16 @@ public:
 
 TEST_F(NoteRgbSourceTest, noNotesSounding)
 {
-    // m_strip is initialized with zeroes
-    auto darkStrip = m_strip;
-
     m_strip[0] = {4, 5, 6};
     m_strip[6] = {7, 8, 9};
     m_strip[c_StripSize-1] = {11, 12, 13};
 
+    auto expectedStrip(m_strip);
+
     m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
-    // No notes sounding should cause darkness
-    ASSERT_EQ(darkStrip, m_strip);
+    // No notes sounding should leave strip untouched
+    ASSERT_EQ(expectedStrip, m_strip);
 }
 
 TEST_F(NoteRgbSourceTest, noteOn)
@@ -124,11 +133,10 @@ TEST_F(NoteRgbSourceTest, noteOn)
 TEST_F(NoteRgbSourceTest, deactivateDisablesAllNotes)
 {
     // (channel, number, velocity, on/off)
+    m_noteRgbSource->deactivate();
     m_observer->onNoteChange(0, 0, 1, true);
     m_observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
-    m_noteRgbSource->deactivate();
     m_noteRgbSource->execute(m_strip, m_noteToLightMap);
 
     EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
@@ -194,6 +202,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     m_observer->onNoteChange(0, 2, 1, false);
 
     // Both notes are still sounding
+    resetStrip();
     m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     EXPECT_EQ(reference, m_strip);
 
@@ -203,6 +212,7 @@ TEST_F(NoteRgbSourceTest, usePedal)
     // Notes are not sounding anymore
     reference[0] = {0, 0, 0};
     reference[2] = {0, 0, 0};
+    resetStrip();
     m_noteRgbSource->execute(m_strip, m_noteToLightMap);
     EXPECT_EQ(reference, m_strip);
 }

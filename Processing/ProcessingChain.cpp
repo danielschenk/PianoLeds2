@@ -142,6 +142,14 @@ void ProcessingChain::execute(Processing::TRgbStrip& strip, const Processing::TN
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
+    // Start clean
+    for(auto& color : strip)
+    {
+        color.r = 0;
+        color.g = 0;
+        color.b = 0;
+    }
+
     for(auto processingBlock : m_processingChain)
     {
         processingBlock->execute(strip, noteToLightMap);

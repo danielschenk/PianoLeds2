@@ -59,14 +59,14 @@ public:
 
 TEST_F(ProcessingChainTest, empty)
 {
-    auto reference = Processing::TRgbStrip(c_stripSize);
-    reference[0] = { 1, 0, 0 };
-    reference[1] = { 0, 1, 0 };
-    reference[2] = { 0, 0, 1 };
-    m_strip = reference;
+    auto testStrip = Processing::TRgbStrip(c_stripSize);
+    testStrip[0] = { 1, 0, 0 };
+    testStrip[1] = { 0, 1, 0 };
+    testStrip[2] = { 0, 0, 1 };
 
-    m_processingChain.execute(m_strip, Processing::TNoteToLightMap());
-    EXPECT_EQ(reference, m_strip);
+    m_processingChain.execute(testStrip, Processing::TNoteToLightMap());
+    // m_strip is still zero
+    EXPECT_EQ(m_strip, testStrip);
 }
 
 TEST_F(ProcessingChainTest, insertOne)
