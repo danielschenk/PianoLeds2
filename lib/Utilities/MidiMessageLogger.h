@@ -24,62 +24,46 @@
  * SOFTWARE.
  */
 
-#ifndef ESP32APPLICATION_LOGGINGTASK_H_
-#define ESP32APPLICATION_LOGGINGTASK_H_
+#ifndef COMMON_UTILITIES_MIDIMESSAGELOGGER_H_
+#define COMMON_UTILITIES_MIDIMESSAGELOGGER_H_
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/queue.h>
+#include "IMidiInput.h"
 
-#include "ILoggingTarget.h"
-#include "BaseTask.h"
-
-class Stream;
+class IMidiInput;
 
 /**
- * The logging task.
+ * Class which logs a description of incoming MIDI messages.
  */
-class LoggingTask
-    : public ILoggingTarget
-    , public BaseTask
+class MidiMessageLogger
+    : public IMidiInput::IObserver
 {
 public:
     /**
      * Constructor.
      *
-     * @param serial    The Arduino Serial instance to use
-     * @param stackSize Stack size in words
-     * @param priority  Priority
+     * @param midiInput The MIDI input to use
      */
-    LoggingTask(Stream& serial,
-                uint32_t stackSize,
-                UBaseType_t priority);
+    explicit MidiMessageLogger(IMidiInput& midiInput);
 
     /**
      * Destructor.
      */
-    virtual ~LoggingTask();
+    virtual ~MidiMessageLogger();
 
-    // Prevent implicit constructors and assignment operator
-    LoggingTask() = delete;
-    LoggingTask(const LoggingTask&) = delete;
-    LoggingTask& operator=(const LoggingTask&) = delete;
+    // Prevent implicit constructors and assignment
+    MidiMessageLogger() = delete;
+    MidiMessageLogger(const MidiMessageLogger&) = delete;
+    MidiMessageLogger& operator=(const MidiMessageLogger&) = delete;
 
-    // ILoggingTarget implementation
-    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
+    // IMidiInput::IObserver implementation
+    virtual void onNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on);
+    virtual void onProgramChange(uint8_t channel, uint8_t program);
+    virtual void onControlChange(uint8_t channel, IMidiInterface::TControllerNumber controller, uint8_t value);
+    virtual void onChannelPressureChange(uint8_t channel, uint8_t value);
+    virtual void onPitchBendChange(uint8_t channel, uint16_t value);
 
 private:
-    struct QueueEntry
-    {
-        uint64_t time;
-        Logging::TLogLevel level;
-        std::string* component;
-        std::string* message;
-    };
-
-    virtual void run();
-
-    Stream& m_serial;
-    QueueHandle_t m_queue;
+    IMidiInput& m_midiInput;
 };
 
-#endif /* ESP32APPLICATION_LOGGINGTASK_H_ */
+#endif /* COMMON_UTILITIES_MIDIMESSAGELOGGER_H_ */

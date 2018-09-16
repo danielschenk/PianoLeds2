@@ -24,62 +24,48 @@
  * SOFTWARE.
  */
 
-#ifndef ESP32APPLICATION_LOGGINGTASK_H_
-#define ESP32APPLICATION_LOGGINGTASK_H_
+#ifndef DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_
+#define DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/queue.h>
-
-#include "ILoggingTarget.h"
-#include "BaseTask.h"
+#include "BaseMidiInput.h"
 
 class Stream;
 
 /**
- * The logging task.
+ * MIDI input implementation which uses Arduino Serial.
  */
-class LoggingTask
-    : public ILoggingTarget
-    , public BaseTask
+class ArduinoMidiInput
+    : public BaseMidiInput
 {
 public:
     /**
      * Constructor.
      *
-     * @param serial    The Arduino Serial instance to use
-     * @param stackSize Stack size in words
-     * @param priority  Priority
+     * @param serial   The Arduino serial port driver to use.
      */
-    LoggingTask(Stream& serial,
-                uint32_t stackSize,
-                UBaseType_t priority);
+    explicit ArduinoMidiInput(Stream& serial);
 
     /**
      * Destructor.
      */
-    virtual ~LoggingTask();
+    virtual ~ArduinoMidiInput() = default;
 
-    // Prevent implicit constructors and assignment operator
-    LoggingTask() = delete;
-    LoggingTask(const LoggingTask&) = delete;
-    LoggingTask& operator=(const LoggingTask&) = delete;
+    // Prevent implicit default constructors and assignment operator.
+    ArduinoMidiInput() = delete;
+    ArduinoMidiInput(const ArduinoMidiInput&) = delete;
+    ArduinoMidiInput& operator=(const ArduinoMidiInput&) = delete;
 
-    // ILoggingTarget implementation
-    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
+    /**
+     * Run the serial driver and process available data.
+     */
+    void run();
+
+    // IMidiInterface implementation
+    virtual unsigned int getPortCount() const;
+    virtual void openPort(int number);
 
 private:
-    struct QueueEntry
-    {
-        uint64_t time;
-        Logging::TLogLevel level;
-        std::string* component;
-        std::string* message;
-    };
-
-    virtual void run();
-
     Stream& m_serial;
-    QueueHandle_t m_queue;
 };
 
-#endif /* ESP32APPLICATION_LOGGINGTASK_H_ */
+#endif /* DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_ */

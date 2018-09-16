@@ -27,7 +27,7 @@
 #include <cstdio>
 #include <Stream.h>
 
-#include "Common/LoggingEntryPoint.h"
+#include "LoggingEntryPoint.h"
 #include "LoggingTask.h"
 
 LoggingTask::LoggingTask(Stream& serial,

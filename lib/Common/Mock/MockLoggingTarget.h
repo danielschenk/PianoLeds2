@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,25 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ * 
+ * @brief Mock logging target.
  */
 
-#include "Concert.h"
-#include "ProcessingTask.h"
+#ifndef COMMON_MOCK_MOCKLOGGINGTARGET_H_
+#define COMMON_MOCK_MOCKLOGGINGTARGET_H_
 
-ProcessingTask::ProcessingTask(Concert& concert,
-                               uint32_t stackSize,
-                               UBaseType_t priority)
-    : BaseTask()
-    , m_concert(concert)
-    , m_lastWakeTime(xTaskGetTickCount())
+#include <gmock/gmock.h>
+
+#include "../ILoggingTarget.h"
+
+class MockLoggingTarget
+    : public ILoggingTarget
 {
-    start("processing", stackSize, priority);
-}
+public:
+    // ILoggingTarget implementation
+    MOCK_METHOD4(logMessage, void(uint64_t time, Logging::TLogLevel level, std::string component, std::string message));
+};
 
-ProcessingTask::~ProcessingTask()
-{
-}
 
-void ProcessingTask::run()
-{
-    // Wait for the next cycle.
-    vTaskDelayUntil(&m_lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
 
-    m_concert.execute();
-}
+#endif /* COMMON_MOCK_MOCKLOGGINGTARGET_H_ */

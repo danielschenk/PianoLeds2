@@ -24,27 +24,54 @@
  * SOFTWARE.
  */
 
-#include "Concert.h"
-#include "ProcessingTask.h"
+#include <string>
+#include <cstdio>
 
-ProcessingTask::ProcessingTask(Concert& concert,
-                               uint32_t stackSize,
-                               UBaseType_t priority)
-    : BaseTask()
-    , m_concert(concert)
-    , m_lastWakeTime(xTaskGetTickCount())
+#include "Logging.h"
+#include "StripChangeLogger.h"
+
+#define LOGGING_COMPONENT "StripChangeLogger"
+
+StripChangeLogger::StripChangeLogger(Concert& concert)
+    : m_concert(concert)
+    , m_previous()
 {
-    start("processing", stackSize, priority);
+    m_concert.subscribe(*this);
 }
 
-ProcessingTask::~ProcessingTask()
+StripChangeLogger::~StripChangeLogger()
 {
+    m_concert.unsubscribe(*this);
 }
 
-void ProcessingTask::run()
+void StripChangeLogger::onStripUpdate(const Processing::TRgbStrip& strip)
 {
-    // Wait for the next cycle.
-    vTaskDelayUntil(&m_lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
+    bool log(false);
 
-    m_concert.execute();
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if(strip != m_previous)
+        {
+            m_previous = strip;
+            log = true;
+        }
+    }
+
+    if(log)
+    {
+        std::string msg("Strip update:\r\n");
+        uint16_t ledNumber(0);
+        for(auto led : strip)
+        {
+            // Fits: nnn: rrr ggg bbb[CR][LF][NUL]
+            char buf[19];
+            snprintf(buf, sizeof(buf), "%3u: %3u %3u %3u\r\n",
+                     ledNumber, led.r, led.g, led.b);
+            msg.append(buf);
+            ++ledNumber;
+        }
+
+        LOG_DEBUG_PARAMS("%s", msg.c_str());
+    }
 }

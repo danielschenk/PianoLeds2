@@ -1,0 +1,7 @@
+{
+    "name": "DriversCommon",
+    "build": {
+        "srcFilter": "+<*> -<Test/>",
+        "flags": "-IInterfaces"
+    }
+}

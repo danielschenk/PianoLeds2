@@ -24,62 +24,31 @@
  * SOFTWARE.
  */
 
-#ifndef ESP32APPLICATION_LOGGINGTASK_H_
-#define ESP32APPLICATION_LOGGINGTASK_H_
-
-#include <freertos/FreeRTOS.h>
-#include <freertos/queue.h>
+#ifndef COMMON_UTILITIES_STDLOGGER_H_
+#define COMMON_UTILITIES_STDLOGGER_H_
 
 #include "ILoggingTarget.h"
-#include "BaseTask.h"
-
-class Stream;
+#include "LoggingEntryPoint.h"
 
 /**
- * The logging task.
+ * Logging target which logs to std::cout
  */
-class LoggingTask
+class StdLogger
     : public ILoggingTarget
-    , public BaseTask
 {
 public:
     /**
      * Constructor.
-     *
-     * @param serial    The Arduino Serial instance to use
-     * @param stackSize Stack size in words
-     * @param priority  Priority
      */
-    LoggingTask(Stream& serial,
-                uint32_t stackSize,
-                UBaseType_t priority);
+    StdLogger();
 
     /**
      * Destructor.
      */
-    virtual ~LoggingTask();
-
-    // Prevent implicit constructors and assignment operator
-    LoggingTask() = delete;
-    LoggingTask(const LoggingTask&) = delete;
-    LoggingTask& operator=(const LoggingTask&) = delete;
+    virtual ~StdLogger();
 
     // ILoggingTarget implementation
     virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
-
-private:
-    struct QueueEntry
-    {
-        uint64_t time;
-        Logging::TLogLevel level;
-        std::string* component;
-        std::string* message;
-    };
-
-    virtual void run();
-
-    Stream& m_serial;
-    QueueHandle_t m_queue;
 };
 
-#endif /* ESP32APPLICATION_LOGGINGTASK_H_ */
+#endif /* COMMON_UTILITIES_STDLOGGER_H_ */

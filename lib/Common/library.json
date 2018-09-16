@@ -1,0 +1,7 @@
+{
+    "name": "Common",
+    "build": {
+        "srcFilter": "+<*> -<Test/>",
+        "flags": "-IInterfaces -IUtilities"
+    }
+}

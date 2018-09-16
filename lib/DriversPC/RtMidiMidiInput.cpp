@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,27 +24,48 @@
  * SOFTWARE.
  */
 
-#include "Concert.h"
-#include "ProcessingTask.h"
+#include <cstdio>
+#include <cassert>
+#include <RtMidi.h>
 
-ProcessingTask::ProcessingTask(Concert& concert,
-                               uint32_t stackSize,
-                               UBaseType_t priority)
-    : BaseTask()
-    , m_concert(concert)
-    , m_lastWakeTime(xTaskGetTickCount())
+#include "RtMidiMidiInput.h"
+
+RtMidiMidiInput::RtMidiMidiInput()
+    : m_rtMidiIn(new RtMidiIn())
 {
-    start("processing", stackSize, priority);
+    assert(m_rtMidiIn != nullptr);
+    m_rtMidiIn->setCallback(&RtMidiCommonCallback, (void*)this);
 }
 
-ProcessingTask::~ProcessingTask()
+RtMidiMidiInput::~RtMidiMidiInput()
 {
+    delete m_rtMidiIn;
 }
 
-void ProcessingTask::run()
+unsigned int RtMidiMidiInput::getPortCount() const
 {
-    // Wait for the next cycle.
-    vTaskDelayUntil(&m_lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
+    return m_rtMidiIn->getPortCount();
+}
 
-    m_concert.execute();
+void RtMidiMidiInput::openPort(int number)
+{
+    m_rtMidiIn->openPort(number);
+}
+
+void RtMidiMidiInput::RtMidiCommonCallback(double deltatime, std::vector<unsigned char> *message, void *userData)
+{
+    // userData tells us the instance to call the specific callback on
+    RtMidiMidiInput* midiInput = static_cast<RtMidiMidiInput*>(userData);
+    if(midiInput != nullptr)
+    {
+        midiInput->RtMidiCallback(deltatime, message);
+    }
+}
+
+void RtMidiMidiInput::RtMidiCallback(double deltatime, std::vector<unsigned char> *message)
+{
+    for(auto byte : *message)
+    {
+        processMidiByte(byte);
+    }
 }

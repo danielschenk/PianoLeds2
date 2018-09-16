@@ -31,7 +31,7 @@
 #include <Adafruit_WS2801.h>
 
 #include "BaseTask.h"
-#include "Processing/Concert.h"
+#include "Concert.h"
 
 /**
  * Task which performs the output to the LED strip.

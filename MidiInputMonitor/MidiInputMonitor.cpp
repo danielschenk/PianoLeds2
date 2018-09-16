@@ -30,9 +30,9 @@
 #include <cstdio>
 #include <cassert>
 
-#include "Drivers/PC/RtMidiMidiInput.h"
-#include "Common/Utilities/MidiMessageLogger.h"
-#include "Common/Utilities/StdLogger.h"
+#include "RtMidiMidiInput.h"
+#include "MidiMessageLogger.h"
+#include "StdLogger.h"
 
 int main()
 {

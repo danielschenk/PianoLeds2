@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,35 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-#include "Concert.h"
-#include "ProcessingTask.h"
+#include <Json11Helper.h>
 
-ProcessingTask::ProcessingTask(Concert& concert,
-                               uint32_t stackSize,
-                               UBaseType_t priority)
-    : BaseTask()
-    , m_concert(concert)
-    , m_lastWakeTime(xTaskGetTickCount())
+#include "RgbFunctionFactory.h"
+#include "LinearRgbFunction.h"
+#include "IJsonConvertible.h"
+#include "IRgbFunction.h"
+
+IRgbFunction* RgbFunctionFactory::createRgbFunction(const Json& converted) const
 {
-    start("processing", stackSize, priority);
-}
+    IRgbFunction* rgbFunction = nullptr;
 
-ProcessingTask::~ProcessingTask()
-{
-}
+    Json11Helper helper(__PRETTY_FUNCTION__, converted);
 
-void ProcessingTask::run()
-{
-    // Wait for the next cycle.
-    vTaskDelayUntil(&m_lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
+    std::string objectType;
+    if(helper.getItemIfPresent(IJsonConvertible::c_objectTypeKey, objectType))
+    {
+        if(objectType == IRgbFunction::c_jsonTypeNameLinearRgbFunction)
+        {
+            rgbFunction = new LinearRgbFunction();
+        }
 
-    m_concert.execute();
+        if(rgbFunction != nullptr)
+        {
+            rgbFunction->convertFromJson(converted);
+        }
+    }
+
+    return rgbFunction;
 }

@@ -28,8 +28,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include "Drivers/Arduino/ArduinoMidiInput.h"
 #include "MidiTask.h"
+#include "ArduinoMidiInput.h"
 
 MidiTask::MidiTask(ArduinoMidiInput& midiInput,
                    uint32_t stackSize,

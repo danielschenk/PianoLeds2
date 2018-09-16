@@ -3,7 +3,7 @@
  *
  * MIT License
  * 
- * @copyright (c) 2018 Daniel Schenk <danielschenk@users.noreply.github.com>
+ * @copyright (c) 2017 Daniel Schenk <danielschenk@users.noreply.github.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,38 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ * @brief Factory for RGB functions.
  */
 
-#include "Concert.h"
-#include "ProcessingTask.h"
+#ifndef PROCESSING_RGBFUNCTIONFACTORY_H_
+#define PROCESSING_RGBFUNCTIONFACTORY_H_
 
-ProcessingTask::ProcessingTask(Concert& concert,
-                               uint32_t stackSize,
-                               UBaseType_t priority)
-    : BaseTask()
-    , m_concert(concert)
-    , m_lastWakeTime(xTaskGetTickCount())
+#include "IRgbFunctionFactory.h"
+
+/**
+ * Factory for RGB functions.
+ */
+class RgbFunctionFactory
+    : public IRgbFunctionFactory
 {
-    start("processing", stackSize, priority);
-}
+public:
+    /**
+     * Constructor.
+     */
+    RgbFunctionFactory() = default;
 
-ProcessingTask::~ProcessingTask()
-{
-}
+    // Prevent implicit copy constructor and assignment operator
+    RgbFunctionFactory(const RgbFunctionFactory&) = delete;
+    RgbFunctionFactory& operator=(const RgbFunctionFactory&) = delete;
 
-void ProcessingTask::run()
-{
-    // Wait for the next cycle.
-    vTaskDelayUntil(&m_lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
+    /**
+     * Destructor.
+     */
+    virtual ~RgbFunctionFactory() = default;
 
-    m_concert.execute();
-}
+    // IRgbFunctionFactory implementation
+    virtual IRgbFunction* createRgbFunction(const Json& converted) const;
+};
+
+#endif /* PROCESSING_RGBFUNCTIONFACTORY_H_ */

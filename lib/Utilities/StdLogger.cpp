@@ -24,27 +24,44 @@
  * SOFTWARE.
  */
 
-#include "Concert.h"
-#include "ProcessingTask.h"
+#include <iostream>
 
-ProcessingTask::ProcessingTask(Concert& concert,
-                               uint32_t stackSize,
-                               UBaseType_t priority)
-    : BaseTask()
-    , m_concert(concert)
-    , m_lastWakeTime(xTaskGetTickCount())
+#include "LoggingEntryPoint.h"
+#include "StdLogger.h"
+
+
+StdLogger::StdLogger()
 {
-    start("processing", stackSize, priority);
+    LoggingEntryPoint::subscribe(*this);
 }
 
-ProcessingTask::~ProcessingTask()
+StdLogger::~StdLogger()
 {
+    LoggingEntryPoint::unsubscribe(*this);
 }
 
-void ProcessingTask::run()
+void StdLogger::logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message)
 {
-    // Wait for the next cycle.
-    vTaskDelayUntil(&m_lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
+    const char* levelString;
+    switch(level)
+    {
+    case Logging::LogLevel_Debug:
+        levelString = "Debug";
+        break;
 
-    m_concert.execute();
+    case Logging::LogLevel_Info:
+        levelString = "Info";
+        break;
+
+    case Logging::LogLevel_Warning:
+        levelString = "Warning";
+        break;
+
+    case Logging::LogLevel_Error:
+    default:
+        levelString = "Error";
+        break;
+    }
+
+    std::cout << time << " " << levelString << "(" << component << "):" << message << "\r\n";
 }
