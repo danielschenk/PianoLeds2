@@ -1,6 +1,3 @@
-[submodule "ExternalComponents/rtmidi"]
-	path = ExternalComponents/rtmidi
-	url = https://github.com/thestk/rtmidi.git
 [submodule "ExternalComponents/googletest"]
 	path = ExternalComponents/googletest
 	url = https://github.com/google/googletest.git
