@@ -24,5 +24,12 @@ powerful enough to make use of these advantages.
     1. `platformio run` to only build.
     1. `platformio run --target upload` to build and upload on to the ESP32 module (don't forget to hold the IO0 button).
 
-### The unit tests and MidiInputMonitor test application
-This currently involves SCons, but I want to change it so that PlatformIO can be used for this too.
+### The unit tests
+Execute one of the following:
+- `platformio run -e tests` to build and run all unit tests.
+- `platformio run -e tests --target [TestName]` to build and run only that test suite (e.g. _ProcessingChainTest_). 
+- `platformio run -e tests --target memcheck` to build and run all unit tests under valgrind (currently doesn't work correctly).
+
+### The MidiInputMonitor (little test application for BaseMidiInput, to run on PC)
+This currently only supports Mac.
+Execute `platformio run -e pc` to build and `.pioenvs/pc/program` to run.

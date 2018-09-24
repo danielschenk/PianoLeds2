@@ -31,7 +31,7 @@
 
 #include <gmock/gmock.h>
 
-#include "../ILoggingTarget.h"
+#include "ILoggingTarget.h"
 
 class MockLoggingTarget
     : public ILoggingTarget

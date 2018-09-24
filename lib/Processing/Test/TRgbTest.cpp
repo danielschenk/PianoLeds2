@@ -26,7 +26,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../ProcessingTypes.h"
+#include "ProcessingTypes.h"
 
 using namespace Processing;
 

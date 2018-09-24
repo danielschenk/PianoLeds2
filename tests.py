@@ -23,26 +23,42 @@
 # SOFTWARE.
 
 import os
-import components
 
-join = os.path.join
+Import('env')
 
-env = Environment()
+# I did not find a way yet to make SCons' AddOption / GetOption work with PlatformIO.
+# However, PlatformIO allows passing custom targets.
+# Therefore I use this little hack to add the ability to run valgrind optionally.
+def _build_nothing(target, source, env):
+    pass
+dummy = env.Command('foo', 'lib/readme.txt', _build_nothing)
+Alias('memcheck', dummy)
 
-# Install the components module
-components.install(env)
+prefix = ''
+suffix = ''
 
-if ARGUMENTS.get('VERBOSE') != '1':
-    env['CCCOMSTR'] = 'Compiling $TARGET'
-    env['CXXCOMSTR'] = 'Compiling $TARGET'
-    env['LINKCOMSTR'] = 'Linking $TARGET'
+if 'memcheck' in COMMAND_LINE_TARGETS:
+    prefix += 'valgrind --leak-check=yes '
 
 # Propagate the 'TERM' environment variable from the OS, so tools can decide if they should colorize output
 env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
 
-SConscript('PC.scons', exports={'base_env': env}, variant_dir=Dir('Build/PC'), duplicate=False)
-SConscript('Test.scons', exports={'base_env': env}, variant_dir=Dir('Build/Test'), duplicate=False)
+# Build separate program for every test case.
+# PIOBUILDFILES contains the SCons node for every built object file as determined by platformio.ini
+output_dir = 'build/test/'
+test_results = []
+for node in env['PIOBUILDFILES']:
+    test_name = os.path.basename(str(node[0])).rsplit('.')[0]
+    test_program = env.Program(output_dir + test_name, node)
 
-pc = env.Alias('pc', 'Build/PC')
-test = env.Alias('test', 'Build/Test')
-env.Default(pc)
+    test_result = env.Command(output_dir + test_name + 'Result.xml', test_program, '{}./$SOURCE --gtest_output=xml:$TARGET{}'.format(prefix, suffix))
+    env.AlwaysBuild(test_result)
+    Alias(test_name, test_result)
+    test_results += test_result
+
+# Make sure that when only 'memcheck' is specified, all tests are still run
+if 'memcheck' in COMMAND_LINE_TARGETS and (len(COMMAND_LINE_TARGETS) == 1):
+    Alias('memcheck', test_results)
+
+Alias('all', test_results)
+Default('all')

@@ -33,8 +33,8 @@
 #include <Mock/LoggingTest.h>
 
 #include "ProcessingBlockContainerTest.h"
-#include "../ProcessingChain.h"
-#include "../ProcessingTypes.h"
+#include "ProcessingChain.h"
+#include "ProcessingTypes.h"
 
 #define LOGGING_COMPONENT "ProcessingChain"
 

@@ -1,6 +1,0 @@
-[submodule "ExternalComponents/googletest"]
-	path = ExternalComponents/googletest
-	url = https://github.com/google/googletest.git
-[submodule "ExternalComponents/tools"]
-	path = ExternalComponents/tools
-	url = https://github.com/danielschenk/tools.git
