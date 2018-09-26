@@ -48,18 +48,7 @@
 
 #define LOGGING_COMPONENT "Esp32Application"
 
-static LoggingTask* gs_loggingTask(nullptr);
-
-static ArduinoMidiInput* gs_midiInput(nullptr);
-static MidiMessageLogger* gs_midiMessageLogger(nullptr);
 static MidiTask* gs_midiTask(nullptr);
-
-static RgbFunctionFactory* gs_rgbFunctionFactory(nullptr);
-static ProcessingBlockFactory* gs_processingBlockFactory(nullptr);
-static Concert* gs_concert(nullptr);
-static ProcessingTask* gs_processingTask(nullptr);
-static LedTask* gs_ledTask(nullptr);
-static StripChangeLogger* gs_stripChangeLogger(nullptr);
 
 static constexpr uint32_t c_defaultStackSize(4096);
 
@@ -94,9 +83,9 @@ void setup()
 {
     // Initialize logging
     Serial.begin(115200, SERIAL_8N1, DEBUG_RX_PIN, DEBUG_TX_PIN);
-    gs_loggingTask = new LoggingTask(Serial,
-                                     c_defaultStackSize,
-                                     PRIORITY_LOW);
+    new LoggingTask(Serial,
+                    c_defaultStackSize,
+                    PRIORITY_LOW);
 
     LOG_INFO("MIDI-LED-Controller (MLC) (c) Daniel Schenk, 2017");
     LOG_INFO("initializing application...");
@@ -107,16 +96,16 @@ void setup()
     // Initialize MIDI, baud rate is 31.25k
     Serial2.begin(31250, SERIAL_8N1, MIDI_RX_PIN, MIDI_TX_PIN);
 
-    gs_midiInput = new ArduinoMidiInput(Serial2);
-    gs_midiTask = new MidiTask(*gs_midiInput,
+    auto midiInput = new ArduinoMidiInput(Serial2);
+    gs_midiTask = new MidiTask(*midiInput,
                                c_defaultStackSize,
                                PRIORITY_CRITICAL);
 
     // Initialize printing of MIDI messages
-    gs_midiMessageLogger = new MidiMessageLogger(*gs_midiInput);
+    new MidiMessageLogger(*midiInput);
 
     // Initialize concert dependencies.
-    gs_rgbFunctionFactory = new RgbFunctionFactory;
+    auto rgbFunctionFactory = new RgbFunctionFactory;
 
     Processing::TNoteToLightMap noteToLightMap;
     uint8_t lightNumber = 0;
@@ -126,16 +115,16 @@ void setup()
         ++lightNumber;
     }
 
-    gs_processingBlockFactory = new ProcessingBlockFactory(*gs_midiInput,
-                                                           *gs_rgbFunctionFactory);
+    auto processingBlockFactory = new ProcessingBlockFactory(*midiInput,
+                                                             *rgbFunctionFactory);
 
-    gs_concert = new Concert(*gs_midiInput,
-                             *gs_processingBlockFactory);
+    auto concert = new Concert(*midiInput,
+                               *processingBlockFactory);
 
     // TODO read concert from storage
     // For now, add something to test with.
-    gs_concert->setNoteToLightMap(noteToLightMap);
-    IPatch* patch(gs_concert->getPatch(gs_concert->addPatch()));
+    concert->setNoteToLightMap(noteToLightMap);
+    IPatch* patch(concert->getPatch(concert->addPatch()));
     patch->setName("whiteOnBlue");
 
     // Add constant blue background
@@ -144,8 +133,8 @@ void setup()
     patch->getProcessingChain().insertBlock(src1);
 
     // Full white for any sounding key
-    NoteRgbSource* src2(new NoteRgbSource(*gs_midiInput,
-                                          *gs_rgbFunctionFactory));
+    NoteRgbSource* src2(new NoteRgbSource(*midiInput,
+                                          *rgbFunctionFactory));
     LinearRgbFunction* rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
     src2->setRgbFunction(rgbFunction);
     src2->setUsingPedal(true);
@@ -153,18 +142,18 @@ void setup()
     patch->activate();
 
     // Start processing
-    gs_processingTask = new ProcessingTask(*gs_concert,
-                                           c_defaultStackSize,
-                                           PRIORITY_CRITICAL);
+    new ProcessingTask(*concert,
+                       c_defaultStackSize,
+                       PRIORITY_CRITICAL);
 
     // Start LED output
-    gs_ledTask = new LedTask(*gs_concert,
-                             LED_DATA_PIN,
-                             LED_CLOCK_PIN,
-                             c_defaultStackSize,
-                             PRIORITY_CRITICAL);
+    new LedTask(*concert,
+                LED_DATA_PIN,
+                LED_CLOCK_PIN,
+                c_defaultStackSize,
+                PRIORITY_CRITICAL);
 
-    gs_stripChangeLogger = new StripChangeLogger(*gs_concert);
+    new StripChangeLogger(*concert);
 
     LOG_INFO("initialization done");
 }
