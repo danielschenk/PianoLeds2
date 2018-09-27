@@ -91,6 +91,8 @@ void setup()
 
     // Initialize run LED
     pinMode(RUN_LED_PIN, OUTPUT);
+    // LED off during initialization
+    digitalWrite(RUN_LED_PIN, 0);
 
     // Initialize MIDI, baud rate is 31.25k
     Serial2.begin(31250, SERIAL_8N1, MIDI_RX_PIN, MIDI_TX_PIN);
@@ -157,11 +159,20 @@ void setup()
 
 void loop()
 {
-    // Blink to indicate we're alive.
-    digitalWrite(RUN_LED_PIN, !digitalRead(RUN_LED_PIN));
+    static unsigned s_loopCount(0);
 
     // Nothing to do, leave everything to the other tasks.
     vTaskDelay(1000);
+
+    // Blink to indicate we're alive.
+    digitalWrite(RUN_LED_PIN, !digitalRead(RUN_LED_PIN));
+
+    if((s_loopCount % (5 * 60)) == 0)
+    {
+        LOG_INFO_PARAMS("free heap: %u", ESP.getFreeHeap());
+    }
+
+    ++s_loopCount;
 }
 
 
