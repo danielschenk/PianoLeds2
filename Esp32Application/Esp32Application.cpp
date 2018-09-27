@@ -42,7 +42,6 @@
 #include "LinearRgbFunction.h"
 #include "ProcessingTask.h"
 #include "LedTask.h"
-#include "StripChangeLogger.h"
 
 #include "Board.h"
 
@@ -152,8 +151,6 @@ void setup()
                 LED_CLOCK_PIN,
                 c_defaultStackSize,
                 PRIORITY_CRITICAL);
-
-    new StripChangeLogger(*concert);
 
     LOG_INFO("initialization done");
 }
