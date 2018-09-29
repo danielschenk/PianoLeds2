@@ -164,6 +164,29 @@ TEST_F(ConcertTest, activateFirstPatch)
     m_concert->addPatch(mockPatch);
 }
 
+TEST_F(ConcertTest, patchChangeOnProgramChange)
+{
+    auto mockPatch(new NiceMock<MockPatch>);
+    auto mockPatch2(new NiceMock<MockPatch>);
+    ON_CALL(*mockPatch2, getBank())
+        .WillByDefault(Return(0));
+    ON_CALL(*mockPatch2, getProgram())
+        .WillByDefault(Return(42));
+    ON_CALL(*mockPatch2, hasBankAndProgram())
+        .WillByDefault(Return(true));
+
+    m_concert->addPatch(mockPatch);
+    m_concert->addPatch(mockPatch2);
+
+    EXPECT_CALL(*mockPatch, deactivate());
+    EXPECT_CALL(*mockPatch2, activate());
+    EXPECT_CALL(*mockPatch2, execute(_, _));
+
+    m_concert->setListeningToProgramChange(true);
+    m_concert->onProgramChange(0, 42);
+    m_concert->execute();
+}
+
 TEST_F(ConcertTest, addPatch)
 {
     EXPECT_EQ(0, m_concert->addPatch());
