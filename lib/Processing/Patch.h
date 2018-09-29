@@ -30,6 +30,7 @@
 #define PROCESSING_PATCH_H_
 
 #include <string>
+#include <mutex>
 
 #include "IPatch.h"
 

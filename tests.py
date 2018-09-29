@@ -23,8 +23,16 @@
 # SOFTWARE.
 
 import os
+import platform
 
 Import('env')
+
+# Propagate the 'TERM' environment variable from the OS, so tools can decide if they should colorize output
+env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
+
+# Google test runner uses pthread on linux
+if 'linux' in platform.system().lower():
+    env.Append(LIBS=['pthread']) 
 
 # I did not find a way yet to make SCons' AddOption / GetOption work with PlatformIO.
 # However, PlatformIO allows passing custom targets.
@@ -39,9 +47,6 @@ suffix = ''
 
 if 'memcheck' in COMMAND_LINE_TARGETS:
     prefix += 'valgrind --leak-check=yes '
-
-# Propagate the 'TERM' environment variable from the OS, so tools can decide if they should colorize output
-env['ENV']['TERM'] = os.getenv('TERM', 'unknown')
 
 # Build separate program for every test case.
 # PIOBUILDFILES contains the SCons node for every built object file as determined by platformio.ini

@@ -25,6 +25,7 @@
  */
 
 #include <list>
+#include <cassert>
 
 #include "Json11Helper.h"
 #include "IProcessingBlockFactory.h"
