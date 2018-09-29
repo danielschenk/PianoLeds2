@@ -200,7 +200,7 @@ private:
     TPatches m_patches;
 
     /** The active patch. */
-    TPatches::iterator m_activePatch;
+    TPatchPosition m_activePatch;
 
     /** Whether program changes should be able to change the patch. */
     bool m_listeningToProgramChange;

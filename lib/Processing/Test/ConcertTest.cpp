@@ -33,6 +33,7 @@
 using testing::_;
 using testing::SaveArg;
 using testing::Return;
+using testing::ReturnNew;
 using testing::Expectation;
 using testing::NiceMock;
 using testing::SetArgReferee;
@@ -53,6 +54,9 @@ public:
         , m_mockProcessingBlockFactory()
     {
         m_concert = new Concert(m_mockMidiInput, m_mockProcessingBlockFactory);
+
+        ON_CALL(m_mockProcessingBlockFactory, createPatch())
+            .WillByDefault(ReturnNew<NiceMock<MockPatch>>());
     }
 
     virtual ~ConcertTest()
@@ -132,6 +136,21 @@ TEST_F(ConcertTest, execute)
     m_concert->execute();
 }
 
+TEST_F(ConcertTest, executeWithMultiplePatches)
+{
+    auto mockPatch(new NiceMock<MockPatch>);
+    m_concert->addPatch(mockPatch);
+
+    auto mockPatch2(new NiceMock<MockPatch>);
+    m_concert->addPatch(mockPatch2);
+
+    EXPECT_CALL(*mockPatch, execute(_, _));
+    EXPECT_CALL(*mockPatch2, execute(_, _))
+        .Times(0);
+
+    m_concert->execute();
+}
+
 TEST_F(ConcertTest, executeEmpty)
 {
     // Should not crash
@@ -140,9 +159,33 @@ TEST_F(ConcertTest, executeEmpty)
 
 TEST_F(ConcertTest, activateFirstPatch)
 {
-    MockPatch* mockPatch(new NiceMock<MockPatch>);
+    auto mockPatch(new NiceMock<MockPatch>);
     EXPECT_CALL(*mockPatch, activate());
     m_concert->addPatch(mockPatch);
+}
+
+TEST_F(ConcertTest, addPatch)
+{
+    EXPECT_EQ(0, m_concert->addPatch());
+    EXPECT_EQ(1, m_concert->addPatch());
+    EXPECT_EQ(2, m_concert->addPatch(new NiceMock<MockPatch>));
+}
+
+TEST_F(ConcertTest, getPatch)
+{
+    auto mockPatch(new NiceMock<MockPatch>);
+    ON_CALL(*mockPatch, getName())
+        .WillByDefault(Return("first"));
+
+    auto mockPatch2(new NiceMock<MockPatch>);
+    ON_CALL(*mockPatch2, getName())
+        .WillByDefault(Return("second"));
+
+    m_concert->addPatch(mockPatch);
+    m_concert->addPatch(mockPatch2);
+
+    EXPECT_EQ("first", m_concert->getPatch(0)->getName());
+    EXPECT_EQ("second", m_concert->getPatch(1)->getName());
 }
 
 TEST_F(ConcertTest, updateStripSize)

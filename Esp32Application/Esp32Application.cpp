@@ -110,7 +110,7 @@ void setup()
 
     Processing::TNoteToLightMap noteToLightMap;
     uint8_t lightNumber = 0;
-    for(uint8_t noteNumber = 60 /* middle C */; noteNumber < 72; ++noteNumber)
+    for(uint8_t noteNumber = 48 /* C below middle C */; noteNumber < 72; ++noteNumber)
     {
         noteToLightMap[noteNumber] = lightNumber;
         ++lightNumber;
@@ -127,20 +127,38 @@ void setup()
     concert->setNoteToLightMap(noteToLightMap);
     IPatch* patch(concert->getPatch(concert->addPatch()));
     patch->setName("whiteOnBlue");
+    patch->setBank(0);
+    patch->setProgram(12);
 
     // Add constant blue background
-    EqualRangeRgbSource* src1(new EqualRangeRgbSource);
-    src1->setColor(Processing::TRgb({0, 0, 255}));
+    auto src1(new EqualRangeRgbSource);
+    src1->setColor(Processing::TRgb({0, 0, 32}));
     patch->getProcessingChain().insertBlock(src1);
 
     // Full white for any sounding key
-    NoteRgbSource* src2(new NoteRgbSource(*midiInput,
-                                          *rgbFunctionFactory));
-    LinearRgbFunction* rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
+    auto src2(new NoteRgbSource(*midiInput,
+                                *rgbFunctionFactory));
+    auto rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
     src2->setRgbFunction(rgbFunction);
     src2->setUsingPedal(true);
     patch->getProcessingChain().insertBlock(src2);
     patch->activate();
+
+    // Add another patch
+    IPatch* patch2(concert->getPatch(concert->addPatch()));
+    auto src3(new NoteRgbSource(*midiInput,
+                                *rgbFunctionFactory));
+
+    // Sounding notes become blue, intensity is the velocity of the note multiplied by 2
+    src3->setRgbFunction(new LinearRgbFunction({0, 0}, {0, 0}, {2, 0}));
+    src3->setUsingPedal(true);
+
+    patch2->getProcessingChain().insertBlock(src3);
+    patch2->setName("blueNote");
+    patch2->setBank(0);
+    patch2->setProgram(11);
+
+    concert->setListeningToProgramChange(true);
 
     // Start processing
     new ProcessingTask(*concert,

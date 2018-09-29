@@ -32,11 +32,13 @@
 #include "Concert.h"
 #include "IPatch.h"
 
+#define LOGGING_COMPONENT "Concert"
+
 Concert::Concert(IMidiInput& midiInput, IProcessingBlockFactory& processingBlockFactory)
     : m_noteToLightMap()
     , m_strip()
     , m_patches()
-    , m_activePatch(m_patches.end())
+    , m_activePatch(c_invalidPatchPosition)
     , m_listeningToProgramChange(false)
     , m_programChangeChannel(0)
     , m_currentBank(0)
@@ -70,10 +72,7 @@ Concert::TPatchPosition Concert::addPatch()
     std::lock_guard<std::mutex> lock(m_mutex);
 
     IPatch* patch = m_processingBlockFactory.createPatch();
-    if(patch == nullptr)
-    {
-        return c_invalidPatchPosition;
-    }
+    assert(patch != nullptr);
 
     return addPatchInternal(patch);
 }
@@ -93,7 +92,7 @@ Concert::TPatchPosition Concert::addPatchInternal(IPatch* patch)
     {
         // First patch. Activate it.
         patch->activate();
-        m_activePatch = m_patches.begin();
+        m_activePatch = 0;
     }
 
     return m_patches.size() - 1;
@@ -269,9 +268,9 @@ void Concert::execute()
 
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    if(m_activePatch != m_patches.end())
+    if(m_activePatch != c_invalidPatchPosition)
     {
-        (*m_activePatch)->execute(m_strip, m_noteToLightMap);
+        m_patches.at(m_activePatch)->execute(m_strip, m_noteToLightMap);
 
         for(auto observer : m_observers)
         {
@@ -322,12 +321,15 @@ void Concert::onProgramChange(uint8_t channel, uint8_t program)
                     if(patch->getProgram() == program)
                     {
                         // Found a patch which matches the received program number and active bank.
-                        if(m_activePatch != m_patches.end())
+                        if(m_activePatch != c_invalidPatchPosition)
                         {
-                            (*m_activePatch)->deactivate();
+                            IPatch* activePatch(m_patches.at(m_activePatch));
+                            LOG_INFO_PARAMS("deactivating patch '%s'", activePatch->getName().c_str());
+                            activePatch->deactivate();
                         }
+                        LOG_INFO_PARAMS("activating patch '%s'", patch->getName().c_str());
                         patch->activate();
-                        m_activePatch = patchIt;
+                        m_activePatch = patchIt - m_patches.begin();
                     }
                 }
             }
