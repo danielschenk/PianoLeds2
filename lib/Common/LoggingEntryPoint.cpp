@@ -29,13 +29,16 @@
 #include <mutex>
 #include <cstdarg>
 #include <algorithm>
+#include <cassert>
 #include <stdio.h>
 
 #include "LoggingEntryPoint.h"
 #include "ILoggingTarget.h"
+#include "ITime.h"
 
 std::vector<ILoggingTarget*> LoggingEntryPoint::s_subscribers;
 std::mutex LoggingEntryPoint::s_mutex;
+const ITime* LoggingEntryPoint::s_time(nullptr);
 
 void LoggingEntryPoint::subscribe(ILoggingTarget& subscriber)
 {
@@ -61,8 +64,11 @@ void LoggingEntryPoint::unsubscribe(ILoggingTarget& subscriber)
     s_subscribers.erase(std::remove(s_subscribers.begin(), s_subscribers.end(), &subscriber), s_subscribers.end());
 }
 
-void LoggingEntryPoint::logMessage(uint64_t time, Logging::TLogLevel level, const char *component, const char *fmt, ...)
+void LoggingEntryPoint::logMessage(Logging::TLogLevel level, const char *component, const char *fmt, ...)
 {
+    assert(s_time != nullptr);
+    uint32_t time(s_time->getMilliseconds());
+
     std::lock_guard<std::mutex> lock(s_mutex);
     if(s_subscribers.size() > 0)
     {
@@ -82,4 +88,9 @@ void LoggingEntryPoint::logMessage(uint64_t time, Logging::TLogLevel level, cons
             }
         }
     }
+}
+
+void LoggingEntryPoint::setTime(const ITime* time)
+{
+    s_time = time;
 }

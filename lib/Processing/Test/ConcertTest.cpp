@@ -29,6 +29,8 @@
 #include "../Concert.h"
 #include "../Mock/MockProcessingBlockFactory.h"
 #include "../Mock/MockPatch.h"
+#include "Mock/MockTime.h"
+#include "LoggingEntryPoint.h"
 
 using testing::_;
 using testing::SaveArg;
@@ -52,7 +54,9 @@ public:
     ConcertTest()
         : MidiInputObserverTest()
         , m_mockProcessingBlockFactory()
+        , m_mockTime()
     {
+        LoggingEntryPoint::setTime(&m_mockTime);
         m_concert = new Concert(m_mockMidiInput, m_mockProcessingBlockFactory);
 
         ON_CALL(m_mockProcessingBlockFactory, createPatch())
@@ -75,6 +79,7 @@ public:
 
     // Required mocks
     NiceMock<MockProcessingBlockFactory> m_mockProcessingBlockFactory;
+    NiceMock<MockTime> m_mockTime;
 
     // Object under test
     Concert*  m_concert;

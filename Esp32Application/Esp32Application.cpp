@@ -44,6 +44,7 @@
 #include "LedTask.h"
 
 #include "Board.h"
+#include "FreeRtosTime.h"
 
 #define LOGGING_COMPONENT "Esp32Application"
 
@@ -80,7 +81,11 @@ enum
 
 void setup()
 {
+    // Initialize time
+    auto freeRtosTime = new FreeRtosTime;
+
     // Initialize logging
+    LoggingEntryPoint::setTime(freeRtosTime);
     Serial.begin(115200, SERIAL_8N1, DEBUG_RX_PIN, DEBUG_TX_PIN);
     new LoggingTask(Serial,
                     c_defaultStackSize,

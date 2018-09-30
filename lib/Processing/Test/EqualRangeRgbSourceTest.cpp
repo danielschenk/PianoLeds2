@@ -32,11 +32,23 @@
 
 #include "Json11Helper.h"
 #include "../EqualRangeRgbSource.h"
+#include "Mock/MockTime.h"
+#include "LoggingEntryPoint.h"
+
+using ::testing::NiceMock;
 
 class EqualRangeRgbSourceTest
     : public ::testing::Test
 {
 public:
+    EqualRangeRgbSourceTest()
+        : m_time()
+        , m_source()
+    {
+        LoggingEntryPoint::setTime(&m_time);
+    }
+
+    NiceMock<MockTime> m_time;
     EqualRangeRgbSource m_source;
 };
 

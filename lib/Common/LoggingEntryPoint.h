@@ -36,6 +36,7 @@
 #include "LoggingDefinitions.h"
 
 class ILoggingTarget;
+class ITime;
 
 /**
  * Static class which receives log events and distributes them to subscribers (logging implementations).
@@ -63,15 +64,19 @@ public:
     static void unsubscribe(ILoggingTarget& subscriber);
 
     /**
+     * Set the time provider.
+     */
+    static void setTime(const ITime* time);
+
+    /**
      * Log a message.
      *
-     * @param[in]   time        Timestamp of the log call.
      * @param[in]   level       Log level.
      * @param[in]   component   Originating component.
      * @param[in]   fmt         Format string of the log message.
      * @param[in]   ...         Arguments to use for string formatting.
      */
-    static void logMessage(uint64_t time, Logging::TLogLevel level, const char *component, const char *fmt, ...) __attribute__((format (printf, 4, 5)));
+    static void logMessage(Logging::TLogLevel level, const char *component, const char *fmt, ...) __attribute__((format (printf, 3, 4)));
 
     /** Max log message size, excluding file, line and level information. */
     static constexpr unsigned int c_maxMessageSize = 2048;
@@ -81,6 +86,8 @@ private:
 
     /** Mutex to protect the list of subscribers. */
     static std::mutex s_mutex;
+
+    static const ITime* s_time;
 };
 
 #endif /* COMMON_LOGGINGENTRYPOINT_H_ */
