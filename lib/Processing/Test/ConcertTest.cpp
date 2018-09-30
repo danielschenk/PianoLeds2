@@ -64,6 +64,12 @@ public:
         delete m_concert;
     }
 
+    void sendBankSelectSequence(uint8_t channel, uint16_t bank)
+    {
+        m_concert->onControlChange(channel, IMidiInterface::BANK_SELECT_LSB, bank & 0x7f);
+        m_concert->onControlChange(channel, IMidiInterface::BANK_SELECT_MSB, bank >> 7);
+    }
+
     // Should not be default and go beyond the byte range, to test LSB and MSB
     static const uint16_t c_testBankNumber;
 
@@ -74,7 +80,7 @@ public:
     Concert*  m_concert;
 };
 
-const uint16_t ConcertTest::c_testBankNumber = 300;
+const uint16_t ConcertTest::c_testBankNumber = 129;
 
 TEST_F(ConcertTest, bankSelect)
 {
@@ -84,9 +90,7 @@ TEST_F(ConcertTest, bankSelect)
     m_concert->setProgramChangeChannel(channel);
 
     // Simulate a bank select sequence
-    m_observer->onControlChange(channel, IMidiInterface::BANK_SELECT_LSB, c_testBankNumber & 0xff);
-    m_observer->onControlChange(channel, IMidiInterface::BANK_SELECT_MSB, c_testBankNumber >> 8);
-
+    sendBankSelectSequence(channel, c_testBankNumber);
     m_concert->execute();
 
     // Check stored bank
@@ -102,8 +106,7 @@ TEST_F(ConcertTest, bankSelectFromOtherChannelIgnored)
     m_concert->setProgramChangeChannel(channel);
 
     // Simulate a bank select sequence
-    m_observer->onControlChange(channel + 1, IMidiInterface::BANK_SELECT_LSB, (bank + 1) & 0xff);
-    m_observer->onControlChange(channel + 1, IMidiInterface::BANK_SELECT_MSB, (bank + 1) >> 8);
+    sendBankSelectSequence(channel + 1, bank + 1);
 
     m_concert->execute();
 
@@ -166,12 +169,14 @@ TEST_F(ConcertTest, activateFirstPatch)
 
 TEST_F(ConcertTest, patchChangeOnProgramChange)
 {
+    uint8_t program(42);
+
     auto mockPatch(new NiceMock<MockPatch>);
     auto mockPatch2(new NiceMock<MockPatch>);
     ON_CALL(*mockPatch2, getBank())
-        .WillByDefault(Return(0));
+        .WillByDefault(Return(c_testBankNumber));
     ON_CALL(*mockPatch2, getProgram())
-        .WillByDefault(Return(42));
+        .WillByDefault(Return(program));
     ON_CALL(*mockPatch2, hasBankAndProgram())
         .WillByDefault(Return(true));
 
@@ -182,8 +187,11 @@ TEST_F(ConcertTest, patchChangeOnProgramChange)
     EXPECT_CALL(*mockPatch2, activate());
     EXPECT_CALL(*mockPatch2, execute(_, _));
 
+    uint8_t channel(2);
     m_concert->setListeningToProgramChange(true);
-    m_concert->onProgramChange(0, 42);
+    m_concert->setProgramChangeChannel(channel);
+    sendBankSelectSequence(channel, c_testBankNumber);
+    m_concert->onProgramChange(channel, program);
     m_concert->execute();
 }
 
