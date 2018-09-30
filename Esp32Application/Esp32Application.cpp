@@ -111,7 +111,7 @@ void setup()
     new MidiMessageLogger(*midiInput);
 
     // Initialize concert dependencies.
-    auto rgbFunctionFactory = new RgbFunctionFactory;
+    auto rgbFunctionFactory = new RgbFunctionFactory(*freeRtosTime);
 
     Processing::TNoteToLightMap noteToLightMap;
     uint8_t lightNumber = 0;

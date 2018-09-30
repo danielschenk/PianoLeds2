@@ -32,6 +32,11 @@
 #include "IJsonConvertible.h"
 #include "IRgbFunction.h"
 
+RgbFunctionFactory::RgbFunctionFactory(ITime& time)
+    : m_time(time)
+{
+}
+
 IRgbFunction* RgbFunctionFactory::createRgbFunction(const Json& converted) const
 {
     IRgbFunction* rgbFunction = nullptr;
