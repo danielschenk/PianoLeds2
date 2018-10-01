@@ -34,6 +34,7 @@
 
 class IMidiInput;
 class IRgbFunctionFactory;
+class ITime;
 
 /**
  * Factory for processing blocks.
@@ -45,7 +46,9 @@ public:
     /**
      * Constructor.
      */
-    ProcessingBlockFactory(IMidiInput& midiInput, const IRgbFunctionFactory& rgbFunctionFactory);
+    ProcessingBlockFactory(IMidiInput& midiInput,
+                           const IRgbFunctionFactory& rgbFunctionFactory,
+                           const ITime& time);
 
     // Prevent implicit constructors and assignment operator
     ProcessingBlockFactory() = delete;
@@ -69,6 +72,9 @@ private:
 
     /** Reference to the RGB function factory to pass to new blocks. */
     const IRgbFunctionFactory& m_rgbFunctionFactory;
+
+    /** Time provider to pass to new blocks. */
+    const ITime& m_time;
 };
 
 #endif /* PROCESSING_PROCESSINGBLOCKFACTORY_H_ */

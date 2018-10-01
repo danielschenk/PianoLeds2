@@ -34,9 +34,11 @@
 #include "Patch.h"
 
 ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& midiInput,
-                                               const IRgbFunctionFactory& rgbFunctionFactory)
+                                               const IRgbFunctionFactory& rgbFunctionFactory,
+                                               const ITime& time)
     : m_midiInput(midiInput)
     , m_rgbFunctionFactory(rgbFunctionFactory)
+    , m_time(time)
 {
 }
 
@@ -59,7 +61,7 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& conv
         }
         else if(objectType == IProcessingBlock::c_typeNameNoteRgbSource)
         {
-            processingBlock = new NoteRgbSource(m_midiInput, m_rgbFunctionFactory);
+            processingBlock = new NoteRgbSource(m_midiInput, m_rgbFunctionFactory, m_time);
         }
         else if(objectType == IProcessingBlock::c_typeNameProcessingChain)
         {

@@ -33,10 +33,13 @@
 #include "IRgbFunctionFactory.h"
 #include "NoteRgbSource.h"
 #include "LinearRgbFunction.h"
+#include "ITime.h"
 
 #define LOGGING_COMPONENT "NoteRgbSource"
 
-NoteRgbSource::NoteRgbSource(IMidiInput& midiInput, const IRgbFunctionFactory& rgbFunctionFactory)
+NoteRgbSource::NoteRgbSource(IMidiInput& midiInput,
+                             const IRgbFunctionFactory& rgbFunctionFactory,
+                             const ITime& time)
     : m_mutex()
     , m_active()
     , m_usingPedal(true)
@@ -47,6 +50,7 @@ NoteRgbSource::NoteRgbSource(IMidiInput& midiInput, const IRgbFunctionFactory& r
     , m_noteState()
     , m_pedalPressed(false)
     , m_rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}))
+    , m_time(time)
 {
     m_midiInput.subscribe(*this);
 }
@@ -88,7 +92,7 @@ void NoteRgbSource::execute(Processing::TRgbStrip& strip, const Processing::TNot
         // first: note number, second: light number
         if(m_rgbFunction != nullptr && pair.second < strip.size())
         {
-            strip[pair.second] += m_rgbFunction->calculate(m_noteState[pair.first], 0 /* TODO pass actual time */);
+            strip[pair.second] += m_rgbFunction->calculate(m_noteState[pair.first], m_time.getMilliseconds());
         }
     }
 }
@@ -108,6 +112,7 @@ void NoteRgbSource::onNoteChange(uint8_t channel, uint8_t number, uint8_t veloci
             if(on)
             {
                 m_noteState[number].pressDownVelocity = velocity;
+                m_noteState[number].noteOnTimeStamp = m_time.getMilliseconds();
                 m_noteState[number].pressed = true;
                 m_noteState[number].sounding = true;
             }

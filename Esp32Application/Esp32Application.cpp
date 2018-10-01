@@ -40,6 +40,7 @@
 #include "EqualRangeRgbSource.h"
 #include "NoteRgbSource.h"
 #include "LinearRgbFunction.h"
+#include "PianoDecayRgbFunction.h"
 #include "ProcessingTask.h"
 #include "LedTask.h"
 
@@ -122,7 +123,8 @@ void setup()
     }
 
     auto processingBlockFactory = new ProcessingBlockFactory(*midiInput,
-                                                             *rgbFunctionFactory);
+                                                             *rgbFunctionFactory,
+                                                             *freeRtosTime);
 
     auto concert = new Concert(*midiInput,
                                *processingBlockFactory);
@@ -133,7 +135,7 @@ void setup()
     IPatch* patch(concert->getPatch(concert->addPatch()));
     patch->setName("whiteOnBlue");
     patch->setBank(0);
-    patch->setProgram(12);
+    patch->setProgram(6);
 
     // Add constant blue background
     auto src1(new EqualRangeRgbSource);
@@ -142,7 +144,8 @@ void setup()
 
     // Full white for any sounding key
     auto src2(new NoteRgbSource(*midiInput,
-                                *rgbFunctionFactory));
+                                *rgbFunctionFactory,
+                                *freeRtosTime));
     auto rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
     src2->setRgbFunction(rgbFunction);
     src2->setUsingPedal(true);
@@ -152,7 +155,8 @@ void setup()
     // Add another patch
     IPatch* patch2(concert->getPatch(concert->addPatch()));
     auto src3(new NoteRgbSource(*midiInput,
-                                *rgbFunctionFactory));
+                                *rgbFunctionFactory,
+                                *freeRtosTime));
 
     // Sounding notes become blue, intensity is the velocity of the note multiplied by 2
     src3->setRgbFunction(new LinearRgbFunction({0, 0}, {0, 0}, {2, 0}));
@@ -162,6 +166,27 @@ void setup()
     patch2->setName("blueNote");
     patch2->setBank(0);
     patch2->setProgram(11);
+
+    // Add another patch
+    IPatch* patch3(concert->getPatch(concert->addPatch()));
+
+    // Red background, white notes, mimic piano
+    auto src4(new EqualRangeRgbSource);
+    src4->setColor({32, 0, 0});
+    patch3->getProcessingChain().insertBlock(src4);
+
+    auto src5(new NoteRgbSource(*midiInput,
+                                *rgbFunctionFactory,
+                                *freeRtosTime));
+
+    auto fnc(new PianoDecayRgbFunction);
+    fnc->setColor({255, 255, 255});
+    src5->setRgbFunction(fnc);
+    src5->setUsingPedal(true);
+    patch3->getProcessingChain().insertBlock(src5);
+    patch3->setName("whitePianoNotes");
+    patch3->setBank(0);
+    patch3->setProgram(12);
 
     concert->setListeningToProgramChange(true);
 

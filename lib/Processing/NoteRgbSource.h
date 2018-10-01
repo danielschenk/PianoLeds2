@@ -38,6 +38,7 @@
 
 class IRgbFunction;
 class IRgbFunctionFactory;
+class ITime;
 
 /**
  * RGB source which generates RGB data based on note on/off events.
@@ -50,10 +51,14 @@ public:
     /**
      * Constructor.
      *
-     * @param   [in]    midiInput           Reference to the MIDI input.
-     * @param   [in]    rgbFunctionFactory  Reference to the RGB function factory.
+     * @param midiInput             MIDI input to subscribe to incoming notes.
+     * @param rgbFunctionFactory    The factory needed to construct the RGB function from JSON.
+     * @param time                  The time provider to get the execution time and pass it to the RGB function.
+     *
      */
-    NoteRgbSource(IMidiInput& midiDriver, const IRgbFunctionFactory& rgbFunctionFactory);
+    NoteRgbSource(IMidiInput& midiDriver,
+                  const IRgbFunctionFactory& rgbFunctionFactory,
+                  const ITime& time);
 
     /**
      * Destructor.
@@ -125,6 +130,9 @@ private:
 
     /** Pointer to the RGB function. */
     IRgbFunction* m_rgbFunction;
+
+    /** The time provider. */
+    const ITime& m_time;
 };
 
 #endif /* PROCESSING_NOTERGBSOURCE_H_ */

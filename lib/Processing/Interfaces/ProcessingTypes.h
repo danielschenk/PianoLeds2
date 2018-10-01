@@ -117,7 +117,7 @@ Json convert(const TNoteToLightMap& source);
 TNoteToLightMap convert(const Json& source);
 
 /** Type for actual time in milliseconds. */
-typedef uint64_t TTime;
+typedef uint32_t TTime;
 
 /** Type for actual note states. */
 struct TNoteState
