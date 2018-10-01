@@ -60,13 +60,13 @@ public:
     virtual ~LinearRgbFunction();
 
     // IRgbFunction implementation
-    Processing::TRgb calculate(const Processing::TNoteState& noteState) const override;
-    Json convertToJson() const override;
-    void convertFromJson(const Json& converted) override;
+    virtual Processing::TRgb calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const;
+    virtual Json convertToJson() const;
+    virtual void convertFromJson(const Json& converted);
 
 protected:
     // IRgbFunction implementation
-    std::string getObjectType() const override;
+    virtual std::string getObjectType() const;
 
 private:
     TLinearConstants m_redConstants;

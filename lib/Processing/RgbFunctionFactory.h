@@ -31,8 +31,6 @@
 
 #include "IRgbFunctionFactory.h"
 
-class ITime;
-
 /**
  * Factory for RGB functions.
  */
@@ -42,13 +40,10 @@ class RgbFunctionFactory
 public:
     /**
      * Constructor.
-     *
-     * @param time  Time provider to pass to created items
      */
-    explicit RgbFunctionFactory(ITime& time);
+    RgbFunctionFactory() = default;
 
-    // Prevent implicit (copy) constructor and assignment operator
-    RgbFunctionFactory() = delete;
+    // Prevent implicit copy constructor and assignment operator
     RgbFunctionFactory(const RgbFunctionFactory&) = delete;
     RgbFunctionFactory& operator=(const RgbFunctionFactory&) = delete;
 
@@ -59,9 +54,6 @@ public:
 
     // IRgbFunctionFactory implementation
     virtual IRgbFunction* createRgbFunction(const Json& converted) const;
-
-private:
-    ITime& m_time;
 };
 
 #endif /* PROCESSING_RGBFUNCTIONFACTORY_H_ */

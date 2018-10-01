@@ -40,7 +40,7 @@ LinearRgbFunction::~LinearRgbFunction()
 {
 }
 
-Processing::TRgb LinearRgbFunction::calculate(const Processing::TNoteState& noteState) const
+Processing::TRgb LinearRgbFunction::calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const
 {
     Processing::TRgb output;
 

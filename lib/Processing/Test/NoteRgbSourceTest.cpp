@@ -236,7 +236,7 @@ ACTION(ReturnBlueWhenNoteSoundingOtherwiseRed)
 TEST_F(NoteRgbSourceTest, otherRgbFunction)
 {
     MockRgbFunction* mockRgbFunction = new MockRgbFunction();
-    EXPECT_CALL(*mockRgbFunction, calculate(_))
+    EXPECT_CALL(*mockRgbFunction, calculate(_, _))
         .WillRepeatedly(ReturnBlueWhenNoteSoundingOtherwiseRed());
     m_noteRgbSource->setRgbFunction(mockRgbFunction);
 
@@ -303,9 +303,9 @@ TEST_F(NoteRgbSourceTest, deleteRgbFunction)
     MockRgbFunction* mock2 = new MockRgbFunction();
 
     // Need to set an action, to make Google Test throw an error in case of a leaked mock.
-    ON_CALL(*mock1, calculate(_))
+    ON_CALL(*mock1, calculate(_, _))
         .WillByDefault(Return(Processing::TRgb()));
-    ON_CALL(*mock2, calculate(_))
+    ON_CALL(*mock2, calculate(_, _))
         .WillByDefault(Return(Processing::TRgb()));
 
     m_noteRgbSource->setRgbFunction(mock1);
@@ -346,7 +346,7 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
 
     MockRgbFunction* mockRgbFunction = new MockRgbFunction();
     ASSERT_NE(nullptr, mockRgbFunction);
-    EXPECT_CALL(*mockRgbFunction, calculate(_))
+    EXPECT_CALL(*mockRgbFunction, calculate(_, _))
         .WillRepeatedly(Return(Processing::TRgb(1, 2, 3)));
 
     EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(Json(mockRgbFunctionJson)))

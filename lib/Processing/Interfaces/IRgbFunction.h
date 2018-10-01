@@ -52,10 +52,11 @@ public:
      * Calculate the output color based on the given note state and current time.
      *
      * @param[in]   noteState   The note state.
+     * @param[in]   currentTime The current time.
      *
      * @return  The output color.
      */
-    virtual Processing::TRgb calculate(const Processing::TNoteState& noteState) const = 0;
+    virtual Processing::TRgb calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const = 0;
 };
 
 #endif /* PROCESSING_IRGBFUNCTION_H_ */
