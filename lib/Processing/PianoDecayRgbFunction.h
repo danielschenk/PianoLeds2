@@ -69,7 +69,7 @@ private:
     static constexpr float c_fastDecayFactor = 0.5f;
 
     static constexpr uint32_t c_slowDecayEndTimeMs = 15000;
-    static constexpr uint32_t c_slowDecayFactor = 0.5f;
+    static constexpr float c_slowDecayFactor = 0.5f;
 
     Processing::TRgb m_color;
     mutable std::mutex m_mutex;
