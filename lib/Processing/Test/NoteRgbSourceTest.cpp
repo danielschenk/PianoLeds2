@@ -29,6 +29,7 @@
 #include <gtest/gtest.h>
 #include <Test/MidiInputObserverTest.h>
 #include <Mock/LoggingTest.h>
+#include <Mock/MockTime.h>
 
 #include "../NoteRgbSource.h"
 #include "../Mock/MockRgbFunction.h"
@@ -55,6 +56,7 @@ public:
         : LoggingTest()
         , MidiInputObserverTest()
         , m_mockRgbFunctionFactory()
+        , m_mockTime()
         , m_strip(c_StripSize)
         , m_exampleJson(R"(
              {
@@ -72,9 +74,10 @@ public:
             // Default: simple 1-to-1 mapping
             m_noteToLightMap[i] = i;
         }
-        m_noteRgbSource = new NoteRgbSource(m_mockMidiInput, m_mockRgbFunctionFactory);
+        m_noteRgbSource = new NoteRgbSource(m_mockMidiInput, m_mockRgbFunctionFactory,
+            m_mockTime);
         m_noteRgbSource->activate();
-    }
+   }
 
     virtual ~NoteRgbSourceTest()
     {
@@ -92,6 +95,7 @@ public:
     }
 
     MockRgbFunctionFactory m_mockRgbFunctionFactory;
+    MockTime m_mockTime;
     NoteRgbSource* m_noteRgbSource;
     Processing::TRgbStrip m_strip;
 
