@@ -26,24 +26,25 @@
  * @brief Unit test for NoteRgbSource.
  */
 
-#include <gtest/gtest.h>
-#include <Test/MidiInputObserverTest.h>
-#include <Mock/LoggingTest.h>
-#include <Mock/MockTime.h>
-
 #include "../NoteRgbSource.h"
 #include "../Mock/MockRgbFunction.h"
 #include "../Mock/MockRgbFunctionFactory.h"
+
+#include "gtest/gtest.h"
+#include "Test/MidiInputObserverTest.h"
+#include "Mock/LoggingTest.h"
+#include "Mock/MockTime.h"
+
 
 using ::testing::_;
 using ::testing::SaveArg;
 using ::testing::Return;
 using ::testing::HasSubstr;
 using ::testing::Each;
+using ::testing::InSequence;
+using ::testing::AnyNumber;
 
 #define LOGGING_COMPONENT "NoteRgbSource"
-
-#include <cstdint>
 
 class NoteRgbSourceTest
     : public LoggingTest
@@ -95,7 +96,7 @@ public:
     }
 
     MockRgbFunctionFactory m_mockRgbFunctionFactory;
-    MockTime m_mockTime;
+    NiceMock<MockTime> m_mockTime;
     NoteRgbSource* m_noteRgbSource;
     Processing::TRgbStrip m_strip;
 
@@ -263,6 +264,26 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
     reference[9] = {1, 0, 0};
 
     EXPECT_EQ(reference, m_strip);
+}
+
+TEST_F(NoteRgbSourceTest, timePassedToRgbFunction)
+{
+    EXPECT_CALL(m_mockTime, getMilliseconds())
+        .WillOnce(Return(42))
+        .WillOnce(Return(43))
+        .WillRepeatedly(Return(44));
+
+    MockRgbFunction* mockRgbFunction = new MockRgbFunction();
+    {
+        InSequence dummy;
+        EXPECT_CALL(*mockRgbFunction, calculate(_, 42));
+        EXPECT_CALL(*mockRgbFunction, calculate(_, 43));
+        EXPECT_CALL(*mockRgbFunction, calculate(_, 44))
+            .Times(AnyNumber());
+        m_noteRgbSource->setRgbFunction(mockRgbFunction);
+
+        m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+    }
 }
 
 TEST_F(NoteRgbSourceTest, otherNoteToLightMap)

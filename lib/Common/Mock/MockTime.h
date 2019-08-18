@@ -32,6 +32,7 @@
 
 class MockTime : public ITime
 {
+public:
     MOCK_CONST_METHOD0(getMilliseconds, uint32_t());
 };
 
