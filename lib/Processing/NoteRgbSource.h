@@ -29,12 +29,12 @@
 #ifndef PROCESSING_NOTERGBSOURCE_H_
 #define PROCESSING_NOTERGBSOURCE_H_
 
+#include "IMidiInput.h"
+#include "Scheduler.h"
+#include "IProcessingBlock.h"
+
 #include <mutex>
 #include <array>
-
-#include <IMidiInput.h>
-#include <Scheduler.h>
-#include "IProcessingBlock.h"
 
 class IRgbFunction;
 class IRgbFunctionFactory;
@@ -63,7 +63,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~NoteRgbSource();
+    ~NoteRgbSource() override;
 
     // Prevent implicit constructors and assignment operator.
     NoteRgbSource() = delete;
@@ -71,11 +71,11 @@ public:
     NoteRgbSource& operator=(NoteRgbSource&) = delete;
 
     // IProcessingBlock implementation.
-    virtual void activate();
-    virtual void deactivate();
-    virtual void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap);
-    virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& converted);
+    void activate() override;
+    void deactivate() override;
+    void execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap) override;
+    Json convertToJson() const override;
+    void convertFromJson(const Json& converted) override;
 
     uint8_t getChannel() const;
     void setChannel(uint8_t channel);
@@ -85,16 +85,16 @@ public:
     void setRgbFunction(IRgbFunction* rgbFunction);
 
     // IMidiInput::IObserver implementation
-    virtual void onNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on);
-    virtual void onControlChange(uint8_t channel, IMidiInput::TControllerNumber controller, uint8_t value);
-    virtual void onProgramChange(uint8_t channel, uint8_t program);
-    virtual void onChannelPressureChange(uint8_t channel, uint8_t value);
-    virtual void onPitchBendChange(uint8_t channel, uint16_t value);
+    void onNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on) override;
+    void onControlChange(uint8_t channel, IMidiInput::TControllerNumber controller, uint8_t value) override;
+    void onProgramChange(uint8_t channel, uint8_t program) override;
+    void onChannelPressureChange(uint8_t channel, uint8_t value) override;
+    void onPitchBendChange(uint8_t channel, uint16_t value) override;
 
 
 protected:
     // IProcessingBlock implementation
-    virtual std::string getObjectType() const;
+    std::string getObjectType() const override;
 
 private:
     static constexpr const char* c_usingPedalJsonKey    = "usingPedal";

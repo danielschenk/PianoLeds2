@@ -25,15 +25,15 @@
  * 
  */
 
-#include <functional>
-
-#include <Logging.h>
-#include <Json11Helper.h>
+#include "NoteRgbSource.h"
 
 #include "IRgbFunctionFactory.h"
-#include "NoteRgbSource.h"
-#include "LinearRgbFunction.h"
+#include "IRgbFunction.h"
 #include "ITime.h"
+#include "Json11Helper.h"
+#include "Logging.h"
+
+#include <functional>
 
 #define LOGGING_COMPONENT "NoteRgbSource"
 
@@ -49,7 +49,7 @@ NoteRgbSource::NoteRgbSource(IMidiInput& midiInput,
     , m_scheduler()
     , m_noteState()
     , m_pedalPressed(false)
-    , m_rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}))
+    , m_rgbFunction(nullptr)
     , m_time(time)
 {
     m_midiInput.subscribe(*this);

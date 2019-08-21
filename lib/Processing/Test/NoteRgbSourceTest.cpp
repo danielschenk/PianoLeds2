@@ -46,6 +46,20 @@ using ::testing::AnyNumber;
 
 #define LOGGING_COMPONENT "NoteRgbSource"
 
+/** Action definition for mock RGB function. */
+ACTION(ReturnFullWhiteWhenSounding)
+{
+    Processing::TRgb output;
+    if(arg0.sounding)
+    {
+        output.r = 0xff;
+        output.g = 0xff;
+        output.b = 0xff;
+    }
+
+    return output;
+}
+
 class NoteRgbSourceTest
     : public LoggingTest
     , public MidiInputObserverTest
@@ -78,9 +92,13 @@ public:
         m_noteRgbSource = new NoteRgbSource(m_mockMidiInput, m_mockRgbFunctionFactory,
             m_mockTime);
         m_noteRgbSource->activate();
+
+        auto* rgbFunction(new MockRgbFunction);
+        ON_CALL(*rgbFunction, calculate(_, _)).WillByDefault(ReturnFullWhiteWhenSounding());
+        m_noteRgbSource->setRgbFunction(rgbFunction);
    }
 
-    virtual ~NoteRgbSourceTest()
+    ~NoteRgbSourceTest() override
     {
         delete m_noteRgbSource;
     }
