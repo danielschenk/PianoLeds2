@@ -93,7 +93,7 @@ public:
             m_mockTime);
         m_noteRgbSource->activate();
 
-        auto* rgbFunction(new MockRgbFunction);
+        auto* rgbFunction(new NiceMock<MockRgbFunction>);
         ON_CALL(*rgbFunction, calculate(_, _)).WillByDefault(ReturnFullWhiteWhenSounding());
         m_noteRgbSource->setRgbFunction(rgbFunction);
    }
