@@ -44,24 +44,26 @@ Processing::TRgb PianoDecayRgbFunction::calculate(const Processing::TNoteState& 
 
     uint32_t soundingTime(currentTime - noteState.noteOnTimeStamp);
 
-    float divider, decayFactor, start;
-    if(soundingTime < c_fastDecayEndTimeMs)
+    float timeProgress, decayFactor, startIntensityFactor;
+    if(soundingTime < c_fastDecayDurationMs)
     {
-        divider = static_cast<float>(c_fastDecayEndTimeMs);
+        timeProgress = static_cast<float>(soundingTime) / static_cast<float>(c_fastDecayDurationMs);
         decayFactor = c_fastDecayFactor;
-        start = 1.0f;
+        startIntensityFactor = 1.0f;
     }
     else
     {
-        divider = static_cast<float>(c_slowDecayEndTimeMs);
+        // Note timeProgress starts again from 0 here, so 0 means at 1200ms from note press down time!
+        timeProgress = static_cast<float>(soundingTime - c_fastDecayDurationMs) / static_cast<float>(c_slowDecayDurationMs);
         decayFactor = c_slowDecayFactor;
-        start = 1.0f - c_fastDecayFactor;
+        // We start at the intensity factor where we left off in the first phase
+        startIntensityFactor = 1.0f - c_fastDecayFactor;
     }
 
-    float intensityFactor(start - (static_cast<float>(soundingTime) / divider) * decayFactor);
+    float intensityFactor(startIntensityFactor - (timeProgress * decayFactor));
 
     std::lock_guard<std::mutex> lock(m_mutex);
-    return (static_cast<float>(noteState.pressDownVelocity) / 255.0f) * intensityFactor * m_color;
+    return (static_cast<float>(noteState.pressDownVelocity) / 127.0f) * intensityFactor * m_color;
 }
 
 void PianoDecayRgbFunction::setColor(Processing::TRgb color)

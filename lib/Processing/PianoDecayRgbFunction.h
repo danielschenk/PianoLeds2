@@ -65,10 +65,10 @@ protected:
     std::string getObjectType() const override;
 
 private:
-    static constexpr uint32_t c_fastDecayEndTimeMs = 1200;
+    static constexpr uint32_t c_fastDecayDurationMs = 1200;
     static constexpr float c_fastDecayFactor = 0.5f;
 
-    static constexpr uint32_t c_slowDecayEndTimeMs = 15000;
+    static constexpr uint32_t c_slowDecayDurationMs = 13800;
     static constexpr float c_slowDecayFactor = 0.5f;
 
     Processing::TRgb m_color;
