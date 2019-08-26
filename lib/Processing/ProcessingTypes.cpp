@@ -26,21 +26,21 @@
  * @brief Processing type implementations.
  */
 
-#include <cstdint>
-#include <stdio.h>
-
-#include <Json11Helper.h>
-
 #include "ProcessingTypes.h"
+#include "Json11Helper.h"
+
+#include <cstdint>
+#include <cstdio>
+#include <iostream>
 
 namespace Processing
 {
 
-TRgb::TRgb(uint8_t initialR, uint8_t initialG, uint8_t initialB)
+TRgb::TRgb(uint8_t r, uint8_t g, uint8_t b)
 {
-    r = initialR;
-    g = initialG;
-    b = initialB;
+    this->r = r;
+    this->g = g;
+    this->b = b;
 };
 
 TRgb::TRgb()
@@ -110,6 +110,14 @@ TRgb& TRgb::operator-=(const TRgb& other)
     *this = *this - other;
 
     return *this;
+}
+
+std::ostream& operator<<(std::ostream& os, const TRgb& color)
+{
+    return os <<
+        "{.r = " << static_cast<unsigned int>(color.r) <<
+        ", .g = " << static_cast<unsigned int>(color.g) <<
+        ", .b = " << static_cast<unsigned int>(color.b) << "}";
 }
 
 /**

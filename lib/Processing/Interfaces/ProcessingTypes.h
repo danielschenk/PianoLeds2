@@ -29,12 +29,13 @@
 #ifndef PROCESSING_INTERFACES_PROCESSINGTYPES_H_
 #define PROCESSING_INTERFACES_PROCESSINGTYPES_H_
 
+#include "json11.hpp"
+using Json = json11::Json;
+
 #include <cstdint>
 #include <map>
 #include <vector>
 #include <string>
-#include <json11.hpp>
-using Json = json11::Json;
 
 namespace Processing
 {
@@ -45,11 +46,11 @@ struct TRgb
     /**
      * Constructor.
      *
-     * @param[in]   initialR    Initial red value.
-     * @param[in]   initialG    Initial green value.
-     * @param[in]   initialB    Initial blue value.
+     * @param[in]   r   Initial red value.
+     * @param[in]   g   Initial green value.
+     * @param[in]   b   Initial blue value.
      */
-    TRgb(uint8_t initialR, uint8_t initialG, uint8_t initialB);
+    TRgb(uint8_t r, uint8_t g, uint8_t b);
 
     /**
      * Default constructor, initializes values to 0.
@@ -91,6 +92,9 @@ struct TRgb
      * Subtract colors from each other and assign the result to this object.
      */
     TRgb& operator-=(const TRgb& other);
+
+    // Implements custom value printing for Google Test
+    friend std::ostream& operator<<(std::ostream& os, const TRgb& color);
 
     uint8_t r;
     uint8_t g;
