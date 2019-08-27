@@ -25,12 +25,13 @@
  *
  */
 
-#include <Json11Helper.h>
-
 #include "RgbFunctionFactory.h"
+#include "PianoDecayRgbFunction.h"
 #include "LinearRgbFunction.h"
 #include "IJsonConvertible.h"
 #include "IRgbFunction.h"
+
+#include "Json11Helper.h"
 
 IRgbFunction* RgbFunctionFactory::createRgbFunction(const Json& converted) const
 {
@@ -43,9 +44,13 @@ IRgbFunction* RgbFunctionFactory::createRgbFunction(const Json& converted) const
     {
         if(objectType == IRgbFunction::c_jsonTypeNameLinearRgbFunction)
         {
-            rgbFunction = new LinearRgbFunction();
+            rgbFunction = new LinearRgbFunction;
         }
-
+        else if(objectType == IRgbFunction::c_jsonTypeNamePianoDecayRgbFunction)
+        {
+            rgbFunction = new PianoDecayRgbFunction;
+        }
+        
         if(rgbFunction != nullptr)
         {
             rgbFunction->convertFromJson(converted);
