@@ -111,6 +111,12 @@ TRgb operator*(float factor, const TRgb& color);
  */
 TRgb rgbFromFloat(float initialR, float initialG, float initialB);
 
+struct TLinearConstants
+{
+    float factor;
+    float offset;
+};
+
 /** Type for RGB strip data. */
 typedef std::vector<TRgb> TRgbStrip;
 

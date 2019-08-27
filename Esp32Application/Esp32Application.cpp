@@ -146,7 +146,11 @@ void setup()
     auto src2(new NoteRgbSource(*midiInput,
                                 *rgbFunctionFactory,
                                 *freeRtosTime));
-    auto rgbFunction(new LinearRgbFunction({255, 0}, {255, 0}, {255, 0}));
+    auto rgbFunction(new LinearRgbFunction);
+    const Processing::TLinearConstants fullWhite({255, 0});
+    rgbFunction->setRedConstants(fullWhite);
+    rgbFunction->setGreenConstants(fullWhite);
+    rgbFunction->setBlueConstants(fullWhite);
     src2->setRgbFunction(rgbFunction);
     src2->setUsingPedal(true);
     patch->getProcessingChain().insertBlock(src2);
@@ -159,7 +163,10 @@ void setup()
                                 *freeRtosTime));
 
     // Sounding notes become blue, intensity is the velocity of the note multiplied by 2
-    src3->setRgbFunction(new LinearRgbFunction({0, 0}, {0, 0}, {2, 0}));
+    rgbFunction = new LinearRgbFunction;
+    rgbFunction->setBlueConstants({2, 0});
+    src3->setRgbFunction(rgbFunction);
+
     src3->setUsingPedal(true);
 
     patch2->getProcessingChain().insertBlock(src3);
@@ -180,7 +187,6 @@ void setup()
                                 *freeRtosTime));
 
     auto fnc(new PianoDecayRgbFunction);
-    fnc->setColor({255, 255, 255});
     src5->setRgbFunction(fnc);
     src5->setUsingPedal(true);
     patch3->getProcessingChain().insertBlock(src5);

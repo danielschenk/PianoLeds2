@@ -25,20 +25,8 @@
  *
  */
 
-#include <Json11Helper.h>
-
 #include "LinearRgbFunction.h"
-
-LinearRgbFunction::LinearRgbFunction(TLinearConstants redConstants, TLinearConstants greenConstants, TLinearConstants blueConstants)
-    : m_redConstants(redConstants)
-    , m_greenConstants(greenConstants)
-    , m_blueConstants(blueConstants)
-{
-}
-
-LinearRgbFunction::~LinearRgbFunction()
-{
-}
+#include "Json11Helper.h"
 
 Processing::TRgb LinearRgbFunction::calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const
 {
@@ -54,6 +42,36 @@ Processing::TRgb LinearRgbFunction::calculate(const Processing::TNoteState& note
     }
 
     return output;
+}
+
+void LinearRgbFunction::setRedConstants(Processing::TLinearConstants redConstants)
+{
+    m_redConstants = redConstants;
+}
+
+void LinearRgbFunction::setGreenConstants(Processing::TLinearConstants greenConstants)
+{
+    m_greenConstants = greenConstants;
+}
+
+void LinearRgbFunction::setBlueConstants(Processing::TLinearConstants blueConstants)
+{
+    m_blueConstants = blueConstants;
+}
+
+Processing::TLinearConstants LinearRgbFunction::getRedConstants() const
+{
+    return m_redConstants;
+}
+
+Processing::TLinearConstants LinearRgbFunction::getGreenConstants() const
+{
+    return m_greenConstants;
+}
+
+Processing::TLinearConstants LinearRgbFunction::getBlueConstants() const
+{
+    return m_blueConstants;
 }
 
 Json LinearRgbFunction::convertToJson() const

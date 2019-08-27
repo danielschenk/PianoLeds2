@@ -27,38 +27,27 @@
 #ifndef LIB_PROCESSING_PIANODECAYRGBFUNCTION_H_
 #define LIB_PROCESSING_PIANODECAYRGBFUNCTION_H_
 
-#include <stdint.h>
-#include <mutex>
+#include "LinearRgbFunction.h"
 
-#include "IRgbFunction.h"
-#include "ProcessingTypes.h"
+#include <stdint.h>
 
 /**
  * RGB function which slowly dims sounding notes to visually mimic the sound of piano strings.
  */
-class PianoDecayRgbFunction : public IRgbFunction
+class PianoDecayRgbFunction : public LinearRgbFunction
 {
 public:
     /**
      * Constructor.
      */
-    PianoDecayRgbFunction();
+    PianoDecayRgbFunction() = default;
 
     // Prevent implicit constructor and assigment operator
     PianoDecayRgbFunction(const PianoDecayRgbFunction&) = delete;
     PianoDecayRgbFunction& operator=(const PianoDecayRgbFunction&) = delete;
 
-    /**
-     * Destructor.
-     */
-    virtual ~PianoDecayRgbFunction() = default;
-
-    void setColor(Processing::TRgb color);
-
     // IRgbFunction implementation
     Processing::TRgb calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const override;
-    Json convertToJson() const override;
-    void convertFromJson(const Json& converted) override;
 
 protected:
     // IRgbFunction implementation
@@ -70,9 +59,6 @@ private:
 
     static constexpr uint32_t c_slowDecayDurationMs = 13800;
     static constexpr float c_slowDecayFactor = 0.5f;
-
-    Processing::TRgb m_color;
-    mutable std::mutex m_mutex;
 };
 
 #endif /* LIB_PROCESSING_PIANODECAYRGBFUNCTION_H_ */

@@ -28,7 +28,7 @@
 
 #include <vector>
 
-class PianoDecayRgbFunctionTest : public testing::TestWithParam<uint8_t>
+class PianoDecayRgbFunctionTest : public testing::Test
 {
 public:
     struct TTruthTableEntry
@@ -42,18 +42,11 @@ public:
     {
     }
 
-    ~PianoDecayRgbFunctionTest() override = default;
-
     // Unit under test
     PianoDecayRgbFunction m_function;
 };
 
-INSTANTIATE_TEST_CASE_P(Velocities,
-                        PianoDecayRgbFunctionTest,
-                        testing::Range(static_cast<uint8_t>(0), static_cast<uint8_t>(127),
-                                static_cast<uint8_t>(10)));
-
-TEST_P(PianoDecayRgbFunctionTest, decay)
+TEST_F(PianoDecayRgbFunctionTest, decay)
 {
     std::vector<TTruthTableEntry> truthTable = {
             {0, {200, 100, 100}},
@@ -65,18 +58,18 @@ TEST_P(PianoDecayRgbFunctionTest, decay)
 
     const Processing::TNoteState noteState = {
             .noteOnTimeStamp = 0,
-            .pressDownVelocity = GetParam(),
+            .pressDownVelocity = 100,
             .pressed = true,
             .sounding = true,
     };
-    const float velocityFactor(static_cast<float>(noteState.pressDownVelocity) / 127.0f);
 
-    const Processing::TRgb color = {200, 100, 100};
-    m_function.setColor(color);
+    m_function.setRedConstants({2, 0});
+    m_function.setGreenConstants({1, 0});
+    m_function.setBlueConstants({1, 0});
 
     for(const auto& entry : truthTable)
     {
-        ASSERT_EQ(entry.result * velocityFactor, m_function.calculate(noteState, entry.time))
+        EXPECT_EQ(entry.result, m_function.calculate(noteState, entry.time))
             << "(time " << entry.time << ")";
     }
 }
@@ -90,6 +83,5 @@ TEST_F(PianoDecayRgbFunctionTest, notSounding)
             .sounding = false,
     };
 
-    m_function.setColor(Processing::TRgb(255, 255, 255));
-    ASSERT_EQ(Processing::TRgb(0, 0, 0), m_function.calculate(noteState, 42));
+    EXPECT_EQ(Processing::TRgb(0, 0, 0), m_function.calculate(noteState, 42));
 }

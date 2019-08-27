@@ -40,13 +40,7 @@ class IRgbFunction
 {
 public:
     static constexpr const char* c_jsonTypeNameLinearRgbFunction = "LinearRgbFunction";
-
-    /**
-     * Destructor.
-     */
-    virtual ~IRgbFunction()
-    {
-    };
+    static constexpr const char* c_jsonTypeNamePianoDecayRgbFunction = "PianoDecayRgbFunction";
 
     /**
      * Calculate the output color based on the given note state and current time.

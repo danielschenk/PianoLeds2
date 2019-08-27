@@ -30,6 +30,7 @@
 #define PROCESSING_LINEARRGBFUNCTION_H_
 
 #include "IRgbFunction.h"
+#include "ProcessingTypes.h"
 
 /**
  * Function which describes a time invariant linear relation between note state and RGB output.
@@ -38,40 +39,37 @@ class LinearRgbFunction
     : public IRgbFunction
 {
 public:
-    struct TLinearConstants
-    {
-        float factor;
-        float offset;
-    };
-
     /**
      * Constructor.
      */
     LinearRgbFunction() = default;
 
-    /**
-     * Constructor.
-     */
-    LinearRgbFunction(TLinearConstants redConstants, TLinearConstants greenConstants, TLinearConstants blueConstants);
+    void setRedConstants(Processing::TLinearConstants redConstants);
+    void setGreenConstants(Processing::TLinearConstants greenConstants);
+    void setBlueConstants(Processing::TLinearConstants blueConstants);
 
-    /**
-     * Destructor.
-     */
-    virtual ~LinearRgbFunction();
+    Processing::TLinearConstants getRedConstants() const;
+    Processing::TLinearConstants getGreenConstants() const;
+    Processing::TLinearConstants getBlueConstants() const;
 
     // IRgbFunction implementation
-    virtual Processing::TRgb calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const;
-    virtual Json convertToJson() const;
-    virtual void convertFromJson(const Json& converted);
+    Processing::TRgb calculate(const Processing::TNoteState& noteState, Processing::TTime currentTime) const override;
+    Json convertToJson() const override;
+    void convertFromJson(const Json& converted) override;
 
 protected:
     // IRgbFunction implementation
-    virtual std::string getObjectType() const;
+    std::string getObjectType() const override;
 
 private:
-    TLinearConstants m_redConstants;
-    TLinearConstants m_greenConstants;
-    TLinearConstants m_blueConstants;
+    /**
+     * The constants.
+     * The defaults are chosen with the maximum MIDI velocity in mind (127), which will result in a value of
+     * 255 (maximum LED value for most drivers).
+     */
+    Processing::TLinearConstants m_redConstants = {2, 1};
+    Processing::TLinearConstants m_greenConstants = {2, 1};
+    Processing::TLinearConstants m_blueConstants = {2, 1};
 
     static constexpr const char* c_rFactorJsonKey = "rFactor";
     static constexpr const char* c_gFactorJsonKey = "gFactor";

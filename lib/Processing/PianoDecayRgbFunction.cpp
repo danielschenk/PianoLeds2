@@ -28,18 +28,13 @@
 
 #include "PianoDecayRgbFunction.h"
 
-PianoDecayRgbFunction::PianoDecayRgbFunction()
-    : m_color()
-    , m_mutex()
-{
-}
-
 Processing::TRgb PianoDecayRgbFunction::calculate(const Processing::TNoteState& noteState,
                                                   Processing::TTime currentTime) const
 {
-    if(!noteState.sounding)
+    auto startColor(LinearRgbFunction::calculate(noteState, currentTime));
+    if(startColor == Processing::TRgb{0, 0, 0})
     {
-        return Processing::TRgb({0, 0, 0});
+        return startColor;
     }
 
     uint32_t soundingTime(currentTime - noteState.noteOnTimeStamp);
@@ -61,30 +56,10 @@ Processing::TRgb PianoDecayRgbFunction::calculate(const Processing::TNoteState& 
     }
 
     float intensityFactor(startIntensityFactor - (timeProgress * decayFactor));
-
-    std::lock_guard<std::mutex> lock(m_mutex);
-    return (static_cast<float>(noteState.pressDownVelocity) / 127.0f) * intensityFactor * m_color;
-}
-
-void PianoDecayRgbFunction::setColor(Processing::TRgb color)
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_color = color;
-}
-
-Json PianoDecayRgbFunction::convertToJson() const
-{
-    // TODO
-    return Json::object();
-}
-
-void PianoDecayRgbFunction::convertFromJson(const Json& converted)
-{
-    // TODO
+    return startColor * intensityFactor;
 }
 
 std::string PianoDecayRgbFunction::getObjectType() const
 {
-    // TODO
-    return "";
+    return IRgbFunction::c_jsonTypeNamePianoDecayRgbFunction;
 }
