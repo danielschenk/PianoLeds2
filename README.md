@@ -1,4 +1,4 @@
-# mlc2
+# PianoLeds2
 This is the code of the second generation controller for my MIDI based keyboard LED strip, which makes different LEDs
 shine based on the notes I play. It is currently work in progress.
 
