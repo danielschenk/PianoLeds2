@@ -80,3 +80,16 @@ TEST_P(PianoDecayRgbFunctionTest, decay)
             << "(time " << entry.time << ")";
     }
 }
+
+TEST_F(PianoDecayRgbFunctionTest, notSounding)
+{
+    const Processing::TNoteState noteState = {
+            .noteOnTimeStamp = 0,
+            .pressDownVelocity = 127,
+            .pressed = false,
+            .sounding = false,
+    };
+
+    m_function.setColor(Processing::TRgb(255, 255, 255));
+    ASSERT_EQ(Processing::TRgb(0, 0, 0), m_function.calculate(noteState, 42));
+}
