@@ -85,3 +85,36 @@ TEST_F(PianoDecayRgbFunctionTest, notSounding)
 
     EXPECT_EQ(Processing::TRgb(0, 0, 0), m_function.calculate(noteState, 42));
 }
+
+TEST_F(PianoDecayRgbFunctionTest, convertToJson)
+{
+    m_function.setRedConstants({42, 43});
+    m_function.setGreenConstants({44, 45});
+    m_function.setBlueConstants({46, 47});
+
+    auto converted = m_function.convertToJson().object_items();
+    EXPECT_STREQ("PianoDecayRgbFunction", converted.at("objectType").string_value().c_str());
+    EXPECT_EQ(42, converted.at("rFactor").number_value());
+    EXPECT_EQ(43, converted.at("rOffset").number_value());
+    EXPECT_EQ(44, converted.at("gFactor").number_value());
+    EXPECT_EQ(45, converted.at("gOffset").number_value());
+    EXPECT_EQ(46, converted.at("bFactor").number_value());
+    EXPECT_EQ(47, converted.at("bOffset").number_value());
+}
+
+TEST_F(PianoDecayRgbFunctionTest, convertFromJson)
+{
+    Json::object j;
+    j["rFactor"] = 42;
+    j["rOffset"] = 43;
+    j["gFactor"] = 44;
+    j["gOffset"] = 45;
+    j["bFactor"] = 46;
+    j["bOffset"] = 47;
+
+    m_function.convertFromJson(j);
+
+    EXPECT_EQ(Processing::TLinearConstants({42, 43}), m_function.getRedConstants());
+    EXPECT_EQ(Processing::TLinearConstants({44, 45}), m_function.getGreenConstants());
+    EXPECT_EQ(Processing::TLinearConstants({46, 47}), m_function.getBlueConstants());
+}

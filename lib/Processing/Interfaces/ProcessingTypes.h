@@ -115,6 +115,12 @@ struct TLinearConstants
 {
     float factor;
     float offset;
+
+    /**
+     * Compare with another @ref TLinearConstants.
+     */
+    bool operator==(const TLinearConstants& other) const;
+    bool operator!=(const TLinearConstants& other) const;
 };
 
 /** Type for RGB strip data. */

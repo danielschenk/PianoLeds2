@@ -135,6 +135,16 @@ TRgb rgbFromFloat(float initialR, float initialG, float initialB)
     return TRgb((uint8_t)initialR, (uint8_t)initialG, (uint8_t)initialB);
 }
 
+bool TLinearConstants::operator==(const TLinearConstants &other) const
+{
+    return (factor == other.factor) && (offset == other.offset);
+}
+
+bool TLinearConstants::operator!=(const TLinearConstants &other) const
+{
+    return !(other == *this);
+}
+
 Json convert(const TNoteToLightMap& source)
 {
     Json::object converted;
