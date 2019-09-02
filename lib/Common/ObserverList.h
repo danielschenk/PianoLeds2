@@ -61,9 +61,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~ObserverList()
-    {
-    }
+    virtual ~ObserverList() = default;
 
     /**
      * Subscribe for events.
@@ -74,7 +72,7 @@ public:
     {
         // Check for a free slot in the vector first
         bool foundSlot = false;
-        TSubscriptionToken token;
+        TSubscriptionToken token(-1);
         for(auto it = m_subscriptions.begin(); it < m_subscriptions.end(); ++it)
         {
             if(*it == nullptr)

@@ -26,7 +26,7 @@
  * @brief Unit test for the ObserverList template.
  */
 
-#include <Common/ObserverList.h>
+#include "../ObserverList.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
