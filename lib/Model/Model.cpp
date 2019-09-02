@@ -28,14 +28,14 @@
 
 #include <utility>
 
-unsigned int Model::subscribe(Model::TUpdateCallback callback)
+Model::UpdateObserverList::TSubscriptionToken Model::subscribe(Model::TUpdateCallback callback)
 {
     std::lock_guard<std::mutex> lock(m_observersMutex);
 
     return m_observers.subscribe(std::move(callback));
 }
 
-void Model::unsubscribe(unsigned int token)
+void Model::unsubscribe(UpdateObserverList::TSubscriptionToken token)
 {
     std::lock_guard<std::mutex> lock(m_observersMutex);
 
