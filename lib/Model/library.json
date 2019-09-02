@@ -1,0 +1,7 @@
+{
+    "name": "Model",
+    "build": {
+        "srcFilter": "+<*> -<Test/>",
+        "flags": "-IInterfaces"
+    }
+}

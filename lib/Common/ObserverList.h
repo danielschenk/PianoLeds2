@@ -108,9 +108,9 @@ public:
     }
 
     /**
-     * Notify all subscribers.
+     * Notify all observers.
      */
-    void notifySubscribers(CallbackArgs... args) const
+    void notifyObservers(CallbackArgs... args) const
     {
         for(const auto& it : m_subscriptions)
         {

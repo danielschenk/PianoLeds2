@@ -63,7 +63,7 @@ TEST_F(ObserverListTest, subscribeOne)
     EXPECT_CALL(observer, callback(_, _))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, subscribeTwo)
@@ -78,7 +78,7 @@ TEST_F(ObserverListTest, subscribeTwo)
     EXPECT_CALL(observer2, callback(_, _))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeFirst)
@@ -96,7 +96,7 @@ TEST_F(ObserverListTest, unsubscribeFirst)
     EXPECT_CALL(observer3, callback(_, _))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeMiddle)
@@ -114,7 +114,7 @@ TEST_F(ObserverListTest, unsubscribeMiddle)
     EXPECT_CALL(observer3, callback(_, _))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeLast)
@@ -132,7 +132,7 @@ TEST_F(ObserverListTest, unsubscribeLast)
     EXPECT_CALL(observer2, callback(_, _))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, arguments)
@@ -147,7 +147,7 @@ TEST_F(ObserverListTest, arguments)
     EXPECT_CALL(observer2, callback(42, nullptr))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 
     int aNumber = 42;
     EXPECT_CALL(observer1, callback(69, &aNumber))
@@ -155,7 +155,7 @@ TEST_F(ObserverListTest, arguments)
     EXPECT_CALL(observer2, callback(69, &aNumber))
             .Times(1);
 
-    m_observerList.notifySubscribers(69, &aNumber);
+    m_observerList.notifyObservers(69, &aNumber);
 }
 
 TEST_F(ObserverListTest, subscribeAfterUnsubscribe)
@@ -177,7 +177,7 @@ TEST_F(ObserverListTest, subscribeAfterUnsubscribe)
     EXPECT_CALL(observer4, callback(_, _))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeInvalidToken)
@@ -211,5 +211,5 @@ TEST_F(ObserverListTest, unsubscribeInvalidToken)
     EXPECT_CALL(observer3, callback(_, _))
             .Times(1);
 
-    m_observerList.notifySubscribers(42, nullptr);
+    m_observerList.notifyObservers(42, nullptr);
 }
