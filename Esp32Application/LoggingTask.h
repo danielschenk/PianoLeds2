@@ -57,7 +57,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~LoggingTask();
+    ~LoggingTask() override;
 
     // Prevent implicit constructors and assignment operator
     LoggingTask() = delete;
@@ -65,7 +65,7 @@ public:
     LoggingTask& operator=(const LoggingTask&) = delete;
 
     // ILoggingTarget implementation
-    virtual void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message);
+    void logMessage(uint64_t time, Logging::TLogLevel level, std::string component, std::string message) override;
 
 private:
     struct QueueEntry
@@ -76,7 +76,7 @@ private:
         std::string* message;
     };
 
-    virtual void run();
+    void run() override;
 
     Stream& m_serial;
     QueueHandle_t m_queue;

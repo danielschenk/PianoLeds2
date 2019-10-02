@@ -33,7 +33,7 @@
 
 class SystemSettingsModel;
 
-class NetworkTask: BaseTask
+class NetworkTask: public BaseTask
 {
 public:
     /**

@@ -34,8 +34,7 @@ class ArduinoMidiInput;
 /**
  * FreeRTOS task processing incoming MIDI bytes.
  */
-class MidiTask
-    : public BaseTask
+class MidiTask: public BaseTask
 {
 public:
     /**
@@ -52,7 +51,7 @@ public:
     /**
      * Destructor.
      */
-    virtual ~MidiTask() = default;
+    ~MidiTask() override = default;
 
     // Prevent implicit default constructors and assignment operator.
     MidiTask() = delete;
@@ -65,7 +64,7 @@ public:
     void wake();
 
 private:
-    virtual void run();
+    void run() override;
 
     ArduinoMidiInput& m_midiInput;
 };

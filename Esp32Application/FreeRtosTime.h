@@ -36,7 +36,7 @@ class FreeRtosTime : public ITime
 {
 public:
     FreeRtosTime() = default;
-    virtual ~FreeRtosTime() = default;
+    ~FreeRtosTime() override = default;
 
     // ITime implementation
     uint32_t getMilliseconds() const override;

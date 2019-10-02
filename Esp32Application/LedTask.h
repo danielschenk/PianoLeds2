@@ -59,14 +59,14 @@ public:
     /**
      * Destructor.
      */
-    virtual ~LedTask();
+    ~LedTask() override;
 
     // Concert::IObserver implementation
-    virtual void onStripUpdate(const Processing::TRgbStrip& strip);
+    void onStripUpdate(const Processing::TRgbStrip& strip) override;
 
 private:
     // BaseTask implementation
-    virtual void run();
+    void run() override;
 
     static constexpr TickType_t c_autoRefreshInterval = 100;
 

@@ -52,11 +52,11 @@ public:
     /**
      * Destructor.
      */
-    virtual ~ProcessingTask();
+    ~ProcessingTask() override;
 
 protected:
     // BaseTask implementation
-    virtual void run();
+    void run() override;
 
 private:
     static constexpr uint32_t c_runIntervalMs = 10;
