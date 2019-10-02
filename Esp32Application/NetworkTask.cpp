@@ -24,39 +24,43 @@
  * SOFTWARE.
  */
 
-#ifndef SYSTEMSETTINGSMODEL_H
-#define SYSTEMSETTINGSMODEL_H
+#include "NetworkTask.h"
+#include "SystemSettingsModel.h"
 
-#include "Model.h"
+#include <WiFi.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
-class SystemSettingsModel: public Model
+NetworkTask::NetworkTask(const SystemSettingsModel &systemSettingsModel,
+                         uint32_t stackSize,
+                         UBaseType_t priority)
+    : BaseTask()
+    , m_systemSettingsModel(systemSettingsModel)
 {
-public:
-    /**
-     * Constructor
-     */
-    SystemSettingsModel() = default;
+    m_systemSettingsModelSubscription = m_systemSettingsModel.subscribe(
+            [this](){
+                xTaskNotifyGive(getTaskHandle());
+    });
 
-    // Prevent implicit copy constructor & assignment operator
-    SystemSettingsModel(const SystemSettingsModel&) = delete;
-    SystemSettingsModel& operator=(const SystemSettingsModel&) = delete;
+    start("network", stackSize, priority);
+}
 
-    std::string getWifiAPSsid() const;
-    void setWifiAPSsid(std::string wifiStationSsid);
-    std::string getWifiAPPassword() const;
-    void setWifiAPPassword(std::string wifiStationPassword);
+NetworkTask::~NetworkTask()
+{
+    m_systemSettingsModel.unsubscribe(m_systemSettingsModelSubscription);
+}
 
-private:
-    /**
-     * Name of the WiFi network when in AP mode
-     */
-    std::string m_wifiAPSsid = "PianoLeds";
+void NetworkTask::run()
+{
+    // TODO scan & try connect to known network before enabling AP
 
-    /**
-     * Password of the WiFi network when in AP mode
-     */
-    std::string m_wifiAPPassword = "LedsFlashSomeNotes";
-};
+    std::string apSsid(m_systemSettingsModel.getWifiAPSsid());
+    if(!apSsid.empty())
+    {
+        WiFi.softAPConfig({192, 168, 1, 1}, {192, 168, 1, 1}, {255, 255, 255, 0});
+        WiFi.softAP(apSsid.c_str(), m_systemSettingsModel.getWifiAPPassword().c_str());
+    }
 
-
-#endif //SYSTEMSETTINGSMODEL_H
+    // Wait for event
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+}

@@ -39,30 +39,30 @@ public:
 
 TEST_F(SystemSettingsModelTest, defaults)
 {
-    EXPECT_EQ("PianoLeds", m_model.getWifiStationSsid());
-    EXPECT_EQ("LedsFlashSomeNotes", m_model.getWifiStationPassword());
+    EXPECT_EQ("PianoLeds", m_model.getWifiAPSsid());
+    EXPECT_EQ("LedsFlashSomeNotes", m_model.getWifiAPPassword());
 }
 
-TEST_F(SystemSettingsModelTest, wifiStationSsid)
+TEST_F(SystemSettingsModelTest, wifiAPSsid)
 {
     bool observerCalled = false;
     m_model.subscribe([&](){observerCalled = true;});
 
     std::string val("foo");
-    m_model.setWifiStationSsid(val);
-    EXPECT_EQ(val, m_model.getWifiStationSsid());
+    m_model.setWifiAPSsid(val);
+    EXPECT_EQ(val, m_model.getWifiAPSsid());
 
     EXPECT_TRUE(observerCalled);
 }
 
-TEST_F(SystemSettingsModelTest, wifiStationPassword)
+TEST_F(SystemSettingsModelTest, wifiAPPassword)
 {
     bool observerCalled = false;
     m_model.subscribe([&](){observerCalled = true;});
 
     std::string val("foo");
-    m_model.setWifiStationPassword(val);
-    EXPECT_EQ(val, m_model.getWifiStationPassword());
+    m_model.setWifiAPPassword(val);
+    EXPECT_EQ(val, m_model.getWifiAPPassword());
 
     EXPECT_TRUE(observerCalled);
 }

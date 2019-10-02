@@ -60,14 +60,14 @@ public:
      * @param callback  The callback to call on a model update
      * @return          The token which can be used to unsubscribe
      */
-    UpdateObserverList::TSubscriptionToken subscribe(TUpdateCallback callback);
+    UpdateObserverList::TSubscriptionToken subscribe(TUpdateCallback callback) const;
 
     /**
      * Unsubscribe from model updates.
      *
      * @param token     The token received for the subscription
      */
-    void unsubscribe(UpdateObserverList::TSubscriptionToken token);
+    void unsubscribe(UpdateObserverList::TSubscriptionToken token) const;
 
 protected:
     /**
@@ -109,7 +109,7 @@ private:
     /**
      * List of observers
      */
-    UpdateObserverList m_observers;
+    mutable UpdateObserverList m_observers;
 
     /**
      * Mutex guarding the observers

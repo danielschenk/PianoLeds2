@@ -26,22 +26,22 @@
 
 #include "SystemSettingsModel.h"
 
-std::string SystemSettingsModel::getWifiStationSsid() const
+std::string SystemSettingsModel::getWifiAPSsid() const
 {
-    return get(m_wifiStationSsid);
+    return get(m_wifiAPSsid);
 }
 
-void SystemSettingsModel::setWifiStationSsid(std::string wifiStationSsid)
+void SystemSettingsModel::setWifiAPSsid(std::string wifiStationSsid)
 {
-    set(m_wifiStationSsid, wifiStationSsid);
+    set(m_wifiAPSsid, wifiStationSsid);
 }
 
-std::string SystemSettingsModel::getWifiStationPassword() const
+std::string SystemSettingsModel::getWifiAPPassword() const
 {
-    return get(m_wifiStationPassword);
+    return get(m_wifiAPPassword);
 }
 
-void SystemSettingsModel::setWifiStationPassword(std::string wifiStationPassword)
+void SystemSettingsModel::setWifiAPPassword(std::string wifiStationPassword)
 {
-    set(m_wifiStationPassword, wifiStationPassword);
+    set(m_wifiAPPassword, wifiStationPassword);
 }

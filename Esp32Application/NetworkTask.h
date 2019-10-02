@@ -24,39 +24,46 @@
  * SOFTWARE.
  */
 
-#ifndef SYSTEMSETTINGSMODEL_H
-#define SYSTEMSETTINGSMODEL_H
+#ifndef NETWORKTASK_H
+#define NETWORKTASK_H
 
-#include "Model.h"
+#include "BaseTask.h"
+#include <WiFi.h>
+#include <freertos/FreeRTOS.h>
 
-class SystemSettingsModel: public Model
+class SystemSettingsModel;
+
+class NetworkTask: BaseTask
 {
 public:
     /**
-     * Constructor
+     * Constructor.
+     *
+     * @param systemSettingsModel   The system settings model to get WiFi settings from
+     * @param stackSize             The stack size to use for the task, in words
+     * @param priority              The priority to use for the task
      */
-    SystemSettingsModel() = default;
+    NetworkTask(const SystemSettingsModel& systemSettingsModel,
+                uint32_t stackSize,
+                UBaseType_t priority);
 
-    // Prevent implicit copy constructor & assignment operator
-    SystemSettingsModel(const SystemSettingsModel&) = delete;
-    SystemSettingsModel& operator=(const SystemSettingsModel&) = delete;
+    /**
+     * Destructor.
+     */
+    ~NetworkTask() override;
 
-    std::string getWifiAPSsid() const;
-    void setWifiAPSsid(std::string wifiStationSsid);
-    std::string getWifiAPPassword() const;
-    void setWifiAPPassword(std::string wifiStationPassword);
+    // Prevent default constructor, copy constructor and assignment operator
+    NetworkTask() = delete;
+    NetworkTask(const NetworkTask&) = delete;
+    NetworkTask& operator=(const NetworkTask&) = delete;
 
 private:
-    /**
-     * Name of the WiFi network when in AP mode
-     */
-    std::string m_wifiAPSsid = "PianoLeds";
+    // BaseTask implementation
+    void run() override;
 
-    /**
-     * Password of the WiFi network when in AP mode
-     */
-    std::string m_wifiAPPassword = "LedsFlashSomeNotes";
+    const SystemSettingsModel& m_systemSettingsModel;
+    unsigned int m_systemSettingsModelSubscription;
 };
 
 
-#endif //SYSTEMSETTINGSMODEL_H
+#endif //NETWORKTASK_H

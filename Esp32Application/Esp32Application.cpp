@@ -43,6 +43,8 @@
 #include "PianoDecayRgbFunction.h"
 #include "ProcessingTask.h"
 #include "LedTask.h"
+#include "SystemSettingsModel.h"
+#include "NetworkTask.h"
 
 #include "Board.h"
 #include "FreeRtosTime.h"
@@ -207,6 +209,13 @@ void setup()
                 LED_CLOCK_PIN,
                 c_defaultStackSize,
                 PRIORITY_CRITICAL);
+
+
+    // Start network
+    auto systemSettingsModel(new SystemSettingsModel);
+    new NetworkTask(*systemSettingsModel,
+                    c_defaultStackSize,
+                    PRIORITY_LOW);
 
     LOG_INFO("initialization done");
 }
