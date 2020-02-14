@@ -35,9 +35,9 @@ NetworkTask::NetworkTask(const SystemSettingsModel &systemSettingsModel,
                          uint32_t stackSize,
                          UBaseType_t priority)
     : BaseTask()
-    , m_systemSettingsModel(systemSettingsModel)
+    , systemSettingsModel(systemSettingsModel)
 {
-    m_systemSettingsModelSubscription = m_systemSettingsModel.subscribe(
+    systemSettingsModelSubscription = systemSettingsModel.subscribe(
             [this](){
                 xTaskNotifyGive(getTaskHandle());
     });
@@ -47,18 +47,18 @@ NetworkTask::NetworkTask(const SystemSettingsModel &systemSettingsModel,
 
 NetworkTask::~NetworkTask()
 {
-    m_systemSettingsModel.unsubscribe(m_systemSettingsModelSubscription);
+    systemSettingsModel.unsubscribe(systemSettingsModelSubscription);
 }
 
 void NetworkTask::run()
 {
     // TODO scan & try connect to known network before enabling AP
 
-    std::string apSsid(m_systemSettingsModel.getWifiAPSsid());
+    std::string apSsid(systemSettingsModel.getWifiAPSsid());
     if(!apSsid.empty())
     {
         WiFi.softAPConfig({192, 168, 1, 1}, {192, 168, 1, 1}, {255, 255, 255, 0});
-        WiFi.softAP(apSsid.c_str(), m_systemSettingsModel.getWifiAPPassword().c_str());
+        WiFi.softAP(apSsid.c_str(), systemSettingsModel.getWifiAPPassword().c_str());
     }
 
     // Wait for event

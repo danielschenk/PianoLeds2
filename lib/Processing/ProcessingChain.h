@@ -75,16 +75,16 @@ private:
     static constexpr const char* c_processingChainJsonKey = "processingChain";
 
     /** Mutex to protect the members. */
-    mutable std::mutex m_mutex;
+    mutable std::mutex mutex;
 
     /** Reference to the processing block factory. */
-    const IProcessingBlockFactory& m_processingBlockFactory;
+    const IProcessingBlockFactory& processingBlockFactory;
 
     /** Whether all blocks in the chain are active or not. */
-    bool m_active;
+    bool active;
 
     /** The processing chain. Using a vector for optimal traversal. */
-    std::vector<IProcessingBlock*> m_processingChain;
+    std::vector<IProcessingBlock*> processingChain;
 
     void deleteProcessingBlocks();
 

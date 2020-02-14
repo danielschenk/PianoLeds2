@@ -27,8 +27,8 @@
 #include "Scheduler.h"
 
 Scheduler::Scheduler()
-    : m_queue()
-    , m_mutex()
+    : queue()
+    , mutex()
 {
 }
 
@@ -38,21 +38,21 @@ Scheduler::~Scheduler()
 
 void Scheduler::schedule(Scheduler::TTask task)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    m_queue.push(task);
+    queue.push(task);
 }
 
 bool Scheduler::executeOne()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    if(!m_queue.empty())
+    if(!queue.empty())
     {
         // Call the task at the front of the queue
-        m_queue.front()();
+        queue.front()();
         // Remove it
-        m_queue.pop();
+        queue.pop();
         return true;
     }
     else
@@ -63,15 +63,15 @@ bool Scheduler::executeOne()
 
 bool Scheduler::executeAll()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     bool executed = false;
-    while(!m_queue.empty())
+    while(!queue.empty())
     {
         // Call the task at the front of the queue
-        m_queue.front()();
+        queue.front()();
         // Remove it
-        m_queue.pop();
+        queue.pop();
         executed = true;
     }
 

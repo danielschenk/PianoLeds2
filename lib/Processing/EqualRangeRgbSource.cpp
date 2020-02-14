@@ -25,19 +25,8 @@
  *
  */
 
-#include <Json11Helper.h>
-
 #include "EqualRangeRgbSource.h"
-
-EqualRangeRgbSource::EqualRangeRgbSource()
-    : m_mutex()
-    , m_color()
-{
-}
-
-EqualRangeRgbSource::~EqualRangeRgbSource()
-{
-}
+#include "Json11Helper.h"
 
 void EqualRangeRgbSource::activate()
 {
@@ -49,51 +38,51 @@ void EqualRangeRgbSource::deactivate()
 
 void EqualRangeRgbSource::execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     for(auto& it : strip)
     {
-        it.r = m_color.r;
-        it.g = m_color.g;
-        it.b = m_color.b;
+        it.r = color.r;
+        it.g = color.g;
+        it.b = color.b;
     }
 }
 
 Processing::TRgb EqualRangeRgbSource::getColor() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    return m_color;
+    return color;
 }
 
 void EqualRangeRgbSource::setColor(Processing::TRgb color)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    m_color = color;
+    this->color = color;
 }
 
 Json EqualRangeRgbSource::convertToJson() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     Json::object json;
     json[IJsonConvertible::c_objectTypeKey] = getObjectType();
-    json[c_rJsonKey] = m_color.r;
-    json[c_gJsonKey] = m_color.g;
-    json[c_bJsonKey] = m_color.b;
+    json[c_rJsonKey] = color.r;
+    json[c_gJsonKey] = color.g;
+    json[c_bJsonKey] = color.b;
 
     return Json(json);
 }
 
 void EqualRangeRgbSource::convertFromJson(const Json& converted)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     Json11Helper helper(__PRETTY_FUNCTION__, converted);
-    helper.getItemIfPresent(c_rJsonKey, m_color.r);
-    helper.getItemIfPresent(c_gJsonKey, m_color.g);
-    helper.getItemIfPresent(c_bJsonKey, m_color.b);
+    helper.getItemIfPresent(c_rJsonKey, color.r);
+    helper.getItemIfPresent(c_gJsonKey, color.g);
+    helper.getItemIfPresent(c_bJsonKey, color.b);
 }
 
 std::string EqualRangeRgbSource::getObjectType() const

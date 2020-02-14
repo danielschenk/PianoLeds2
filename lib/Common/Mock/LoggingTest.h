@@ -43,21 +43,21 @@ class LoggingTest
 {
 public:
     LoggingTest()
-        : m_mockLoggingTarget()
+        : mockLoggingTarget()
     {
         // Info and debug logs are OK
-        EXPECT_CALL(m_mockLoggingTarget, logMessage(_, AnyOf(Logging::LogLevel_Info, Logging::LogLevel_Debug), _, _))
+        EXPECT_CALL(mockLoggingTarget, logMessage(_, AnyOf(Logging::LogLevel_Info, Logging::LogLevel_Debug), _, _))
             .Times(AnyNumber());
 
-        LoggingEntryPoint::subscribe(m_mockLoggingTarget);
+        LoggingEntryPoint::subscribe(mockLoggingTarget);
     }
 
     virtual ~LoggingTest()
     {
-        LoggingEntryPoint::unsubscribe(m_mockLoggingTarget);
+        LoggingEntryPoint::unsubscribe(mockLoggingTarget);
     }
 
-    MockLoggingTarget m_mockLoggingTarget;
+    MockLoggingTarget mockLoggingTarget;
 };
 
 

@@ -95,24 +95,24 @@ private:
     static constexpr const char* c_processingChainJsonKey   = "processingChain";
 
     /** Mutex to protect the members. */
-    mutable std::mutex m_mutex;
+    mutable std::mutex mutex;
 
     /** Whether this patch is bound to a bank and program number. */
-    bool m_hasBankAndProgram;
+    bool bankAndProgramSet = false;
 
     /** The bank number bound to this patch. */
-    uint8_t m_bank;
+    uint8_t bank = 0;
 
     /** The program number bound to this patch. */
-    uint8_t m_program;
+    uint8_t program = 0;
 
     /** The name of the patch. */
-    std::string m_name;
+    std::string name = "Untitled Patch";
 
     /** The processing chain. */
-    IProcessingChain* m_processingChain;
+    IProcessingChain* processingChain;
 
-    const IProcessingBlockFactory& m_processingBlockFactory;
+    const IProcessingBlockFactory& processingBlockFactory;
 };
 
 #endif /* PROCESSING_PATCH_H_ */

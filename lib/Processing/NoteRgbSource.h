@@ -60,13 +60,8 @@ public:
                   const IRgbFunctionFactory& rgbFunctionFactory,
                   const ITime& time);
 
-    /**
-     * Destructor.
-     */
     ~NoteRgbSource() override;
 
-    // Prevent implicit constructors and assignment operator.
-    NoteRgbSource() = delete;
     NoteRgbSource(NoteRgbSource&) = delete;
     NoteRgbSource& operator=(NoteRgbSource&) = delete;
 
@@ -101,38 +96,17 @@ private:
     static constexpr const char* c_channelJsonKey       = "channel";
     static constexpr const char* c_rgbFunctionJsonKey   = "rgbFunction";
 
-    /** Mutex to protect the members. */
-    mutable std::mutex m_mutex;
-
-    /** Whether this block is active. */
-    bool m_active;
-
-    /** Indicates whether pedal should be used. */
-    bool m_usingPedal;
-
-    /** Reference to the RGB function factory. */
-    const IRgbFunctionFactory& m_rgbFunctionFactory;
-
-    /** Reference to the MIDI input. */
-    IMidiInput& m_midiInput;
-
-    /** MIDI channel to listen to. */
-    uint8_t m_channel;
-
-    /** Scheduler to decouple callbacks. */
-    Scheduler m_scheduler;
-
-    /** Actual note states. */
-    std::array<Processing::TNoteState, IMidiInterface::c_numNotes> m_noteState;
-
-    /** Actual pedal pressed state. */
-    bool m_pedalPressed;
-
-    /** Pointer to the RGB function. */
-    IRgbFunction* m_rgbFunction;
-
-    /** The time provider. */
-    const ITime& m_time;
+    mutable std::mutex mutex;
+    bool active = false;
+    bool usingPedal = true;
+    const IRgbFunctionFactory& rgbFunctionFactory;
+    IMidiInput& midiInput;
+    uint8_t channel = 0;
+    Scheduler scheduler;
+    std::array<Processing::TNoteState, IMidiInterface::c_numNotes> noteStates;
+    bool pedalPressed;
+    IRgbFunction* rgbFunction;
+    const ITime& time;
 };
 
 #endif /* PROCESSING_NOTERGBSOURCE_H_ */

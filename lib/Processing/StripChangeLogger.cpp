@@ -33,15 +33,15 @@
 #define LOGGING_COMPONENT "StripChangeLogger"
 
 StripChangeLogger::StripChangeLogger(Concert& concert)
-    : m_concert(concert)
-    , m_previous()
+    : concert(concert)
+    , previous()
 {
-    m_concert.subscribe(*this);
+    concert.subscribe(*this);
 }
 
 StripChangeLogger::~StripChangeLogger()
 {
-    m_concert.unsubscribe(*this);
+    concert.unsubscribe(*this);
 }
 
 void StripChangeLogger::onStripUpdate(const Processing::TRgbStrip& strip)
@@ -49,11 +49,11 @@ void StripChangeLogger::onStripUpdate(const Processing::TRgbStrip& strip)
     bool log(false);
 
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock(mutex);
 
-        if(strip != m_previous)
+        if(strip != previous)
         {
-            m_previous = strip;
+            previous = strip;
             log = true;
         }
     }

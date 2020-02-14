@@ -37,12 +37,8 @@
 class PianoDecayRgbFunction : public LinearRgbFunction
 {
 public:
-    /**
-     * Constructor.
-     */
     PianoDecayRgbFunction() = default;
 
-    // Prevent implicit constructor and assigment operator
     PianoDecayRgbFunction(const PianoDecayRgbFunction&) = delete;
     PianoDecayRgbFunction& operator=(const PianoDecayRgbFunction&) = delete;
 

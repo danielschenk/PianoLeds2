@@ -68,13 +68,13 @@ public:
 
 private:
     /** Reference to the MIDI input to pass to new blocks. */
-    IMidiInput& m_midiInput;
+    IMidiInput& midiInput;
 
     /** Reference to the RGB function factory to pass to new blocks. */
-    const IRgbFunctionFactory& m_rgbFunctionFactory;
+    const IRgbFunctionFactory& rgbFunctionFactory;
 
     /** Time provider to pass to new blocks. */
-    const ITime& m_time;
+    const ITime& time;
 };
 
 #endif /* PROCESSING_PROCESSINGBLOCKFACTORY_H_ */

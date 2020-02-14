@@ -60,8 +60,8 @@ protected:
 
 private:
     static constexpr uint32_t c_runIntervalMs = 10;
-    Concert& m_concert;
-    TickType_t m_lastWakeTime;
+    Concert& concert;
+    TickType_t lastWakeTime;
 };
 
 #endif /* BUILD_PROCESSINGTASK_H_ */

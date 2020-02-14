@@ -30,15 +30,15 @@
 
 
 ArduinoMidiInput::ArduinoMidiInput(Stream& serial)
-    : m_serial(serial)
+    : serial(serial)
 {
 }
 
 void ArduinoMidiInput::run()
 {
-    while(m_serial.available())
+    while(serial.available())
     {
-        processMidiByte(static_cast<uint8_t>(m_serial.read()));
+        processMidiByte(static_cast<uint8_t>(serial.read()));
     }
 }
 

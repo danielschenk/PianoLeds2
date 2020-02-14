@@ -77,10 +77,10 @@ public:
 
 private:
     /** The queue of tasks. */
-    std::queue<TTask> m_queue;
+    std::queue<TTask> queue;
 
     /** The mutex to protect the queue. */
-    std::mutex m_mutex;
+    std::mutex mutex;
 };
 
 #endif /* COMMON_SCHEDULER_H_ */

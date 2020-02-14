@@ -49,9 +49,9 @@ public:
     void onStripUpdate(const Processing::TRgbStrip& strip) override;
 
 private:
-    Concert& m_concert;
-    Processing::TRgbStrip m_previous;
-    mutable std::mutex m_mutex;
+    Concert& concert;
+    Processing::TRgbStrip previous;
+    mutable std::mutex mutex;
 };
 
 #endif /* PROCESSING_STRIPCHANGELOGGER_H_ */

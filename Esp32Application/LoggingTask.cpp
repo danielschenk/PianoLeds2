@@ -34,9 +34,9 @@ LoggingTask::LoggingTask(Stream& serial,
                          uint32_t stackSize,
                          UBaseType_t priority)
     : BaseTask()
-    , m_serial(serial)
+    , serial(serial)
 {
-    m_queue = xQueueCreate(10, sizeof(QueueEntry));
+    queue = xQueueCreate(10, sizeof(QueueEntry));
     start("logging", stackSize, priority);
     LoggingEntryPoint::subscribe(*this);
 }
@@ -44,7 +44,7 @@ LoggingTask::LoggingTask(Stream& serial,
 LoggingTask::~LoggingTask()
 {
     LoggingEntryPoint::unsubscribe(*this);
-    vQueueDelete(m_queue);
+    vQueueDelete(queue);
 }
 
 void LoggingTask::logMessage(uint64_t time,
@@ -58,7 +58,7 @@ void LoggingTask::logMessage(uint64_t time,
     entry.component = new std::string(component);
     entry.message = new std::string(message);
 
-    xQueueSend(m_queue, &entry, portMAX_DELAY);
+    xQueueSend(queue, &entry, portMAX_DELAY);
 }
 
 void LoggingTask::run()
@@ -66,7 +66,7 @@ void LoggingTask::run()
     QueueEntry entry;
 
     // Wait for item forever
-    while(xQueueReceive(m_queue, &entry, portMAX_DELAY) == pdTRUE)
+    while(xQueueReceive(queue, &entry, portMAX_DELAY) == pdTRUE)
     {
         // Some extra for component and level information
         char buf[LoggingEntryPoint::c_maxMessageSize + 100];
@@ -101,6 +101,6 @@ void LoggingTask::run()
         delete entry.component;
         delete entry.message;
 
-        m_serial.print(buf);
+        serial.print(buf);
     }
 }

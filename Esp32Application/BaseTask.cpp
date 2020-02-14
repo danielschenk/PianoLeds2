@@ -26,41 +26,35 @@
 
 #include "BaseTask.h"
 
-BaseTask::BaseTask()
-    : m_taskHandle(NULL)
-    , m_terminate(0)
-{
-}
-
 BaseTask::~BaseTask()
 {
-    assert(m_taskHandle == NULL);
+    assert(taskHandle == NULL);
 }
 
 void BaseTask::start(const char* name,
                      uint32_t stackSize,
                      UBaseType_t priority)
 {
-    assert(m_taskHandle == NULL);
+    assert(taskHandle == NULL);
 
     xTaskCreate(&BaseTask::taskFunction,
                 name,
                 stackSize,
                 this,
                 priority,
-                &m_taskHandle);
+                &taskHandle);
 
-    assert(m_taskHandle != NULL);
+    assert(taskHandle != NULL);
 }
 
 void BaseTask::terminate()
 {
-    m_terminate = 1;
+    terminating = true;
 }
 
 TaskHandle_t BaseTask::getTaskHandle() const
 {
-    return m_taskHandle;
+    return taskHandle;
 }
 
 void BaseTask::taskFunction(void* pvParameters)
@@ -68,11 +62,11 @@ void BaseTask::taskFunction(void* pvParameters)
     // pvPameters points to the instance
     BaseTask* instance(static_cast<BaseTask*>(pvParameters));
 
-    while(instance->m_terminate == 0)
+    while(!instance->terminating)
     {
         instance->run();
     }
 
-    vTaskDelete(instance->m_taskHandle);
-    instance->m_taskHandle = NULL;
+    vTaskDelete(instance->taskHandle);
+    instance->taskHandle = NULL;
 }

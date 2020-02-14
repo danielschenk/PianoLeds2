@@ -31,25 +31,25 @@
 #include "RtMidiMidiInput.h"
 
 RtMidiMidiInput::RtMidiMidiInput()
-    : m_rtMidiIn(new RtMidiIn())
+    : rtMidiIn(new RtMidiIn())
 {
-    assert(m_rtMidiIn != nullptr);
-    m_rtMidiIn->setCallback(&RtMidiCommonCallback, (void*)this);
+    assert(rtMidiIn != nullptr);
+    rtMidiIn->setCallback(&RtMidiCommonCallback, (void*)this);
 }
 
 RtMidiMidiInput::~RtMidiMidiInput()
 {
-    delete m_rtMidiIn;
+    delete rtMidiIn;
 }
 
 unsigned int RtMidiMidiInput::getPortCount() const
 {
-    return m_rtMidiIn->getPortCount();
+    return rtMidiIn->getPortCount();
 }
 
 void RtMidiMidiInput::openPort(int number)
 {
-    m_rtMidiIn->openPort(number);
+    rtMidiIn->openPort(number);
 }
 
 void RtMidiMidiInput::RtMidiCommonCallback(double deltatime, std::vector<unsigned char> *message, void *userData)

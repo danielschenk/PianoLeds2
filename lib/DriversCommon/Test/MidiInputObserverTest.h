@@ -45,18 +45,18 @@ class MidiInputObserverTest
 {
 public:
     MidiInputObserverTest()
-        : m_mockMidiInput()
-        , m_observer(nullptr)
+        : mockMidiInput()
+        , observer(nullptr)
     {
         // Capture observer so we can simulate events
-        ON_CALL(m_mockMidiInput, subscribe(_))
-            .WillByDefault(StoreArg0Address(&m_observer));
+        ON_CALL(mockMidiInput, subscribe(_))
+            .WillByDefault(StoreArg0Address(&observer));
     }
 
     virtual ~MidiInputObserverTest() = default;
 
-    NiceMock<MockMidiInput> m_mockMidiInput;
-    IMidiInput::IObserver* m_observer;
+    NiceMock<MockMidiInput> mockMidiInput;
+    IMidiInput::IObserver* observer;
 };
 
 

@@ -31,14 +31,14 @@
 #define LOGGING_COMPONENT "MidiMessageLogger"
 
 MidiMessageLogger::MidiMessageLogger(IMidiInput& midiInput)
-    : m_midiInput(midiInput)
+    : midiInput(midiInput)
 {
-    m_midiInput.subscribe(*this);
+    midiInput.subscribe(*this);
 }
 
 MidiMessageLogger::~MidiMessageLogger()
 {
-    m_midiInput.unsubscribe(*this);
+    midiInput.unsubscribe(*this);
 }
 
 void MidiMessageLogger::onNoteChange(uint8_t channel, uint8_t pitch, uint8_t velocity, bool on)

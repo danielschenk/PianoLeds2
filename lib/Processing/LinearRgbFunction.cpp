@@ -35,9 +35,9 @@ Processing::TRgb LinearRgbFunction::calculate(const Processing::TNoteState& note
     if(noteState.sounding)
     {
         output = Processing::rgbFromFloat(
-            m_redConstants.factor * noteState.pressDownVelocity + m_redConstants.offset,
-            m_greenConstants.factor * noteState.pressDownVelocity + m_greenConstants.offset,
-            m_blueConstants.factor * noteState.pressDownVelocity + m_blueConstants.offset
+            redConstants.factor * noteState.pressDownVelocity + redConstants.offset,
+            greenConstants.factor * noteState.pressDownVelocity + greenConstants.offset,
+            blueConstants.factor * noteState.pressDownVelocity + blueConstants.offset
         );
     }
 
@@ -46,44 +46,44 @@ Processing::TRgb LinearRgbFunction::calculate(const Processing::TNoteState& note
 
 void LinearRgbFunction::setRedConstants(Processing::TLinearConstants redConstants)
 {
-    m_redConstants = redConstants;
+    this->redConstants = redConstants;
 }
 
 void LinearRgbFunction::setGreenConstants(Processing::TLinearConstants greenConstants)
 {
-    m_greenConstants = greenConstants;
+    this->greenConstants = greenConstants;
 }
 
 void LinearRgbFunction::setBlueConstants(Processing::TLinearConstants blueConstants)
 {
-    m_blueConstants = blueConstants;
+    this->blueConstants = blueConstants;
 }
 
 Processing::TLinearConstants LinearRgbFunction::getRedConstants() const
 {
-    return m_redConstants;
+    return redConstants;
 }
 
 Processing::TLinearConstants LinearRgbFunction::getGreenConstants() const
 {
-    return m_greenConstants;
+    return greenConstants;
 }
 
 Processing::TLinearConstants LinearRgbFunction::getBlueConstants() const
 {
-    return m_blueConstants;
+    return blueConstants;
 }
 
 Json LinearRgbFunction::convertToJson() const
 {
     Json::object json;
     json[IJsonConvertible::c_objectTypeKey] = getObjectType();
-    json[c_rFactorJsonKey] = m_redConstants.factor;
-    json[c_gFactorJsonKey] = m_greenConstants.factor;
-    json[c_bFactorJsonKey] = m_blueConstants.factor;
-    json[c_rOffsetJsonKey] = m_redConstants.offset;
-    json[c_gOffsetJsonKey] = m_greenConstants.offset;
-    json[c_bOffsetJsonKey] = m_blueConstants.offset;
+    json[c_rFactorJsonKey] = redConstants.factor;
+    json[c_gFactorJsonKey] = greenConstants.factor;
+    json[c_bFactorJsonKey] = blueConstants.factor;
+    json[c_rOffsetJsonKey] = redConstants.offset;
+    json[c_gOffsetJsonKey] = greenConstants.offset;
+    json[c_bOffsetJsonKey] = blueConstants.offset;
 
     return Json(json);
 }
@@ -91,12 +91,12 @@ Json LinearRgbFunction::convertToJson() const
 void LinearRgbFunction::convertFromJson(const Json& converted)
 {
     Json11Helper helper(__PRETTY_FUNCTION__, converted);
-    helper.getItemIfPresent(c_rFactorJsonKey, m_redConstants.factor);
-    helper.getItemIfPresent(c_rOffsetJsonKey, m_redConstants.offset);
-    helper.getItemIfPresent(c_gFactorJsonKey, m_greenConstants.factor);
-    helper.getItemIfPresent(c_gOffsetJsonKey, m_greenConstants.offset);
-    helper.getItemIfPresent(c_bFactorJsonKey, m_blueConstants.factor);
-    helper.getItemIfPresent(c_bOffsetJsonKey, m_blueConstants.offset);
+    helper.getItemIfPresent(c_rFactorJsonKey, redConstants.factor);
+    helper.getItemIfPresent(c_rOffsetJsonKey, redConstants.offset);
+    helper.getItemIfPresent(c_gFactorJsonKey, greenConstants.factor);
+    helper.getItemIfPresent(c_gOffsetJsonKey, greenConstants.offset);
+    helper.getItemIfPresent(c_bFactorJsonKey, blueConstants.factor);
+    helper.getItemIfPresent(c_bOffsetJsonKey, blueConstants.offset);
 }
 
 std::string LinearRgbFunction::getObjectType() const

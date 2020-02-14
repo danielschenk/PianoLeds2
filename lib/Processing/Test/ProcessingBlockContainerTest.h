@@ -78,28 +78,28 @@ public:
 
     ProcessingBlockContainerTest()
         : LoggingTest()
-        , m_redSource(new TMockBlock())
-        , m_greenSource(new TMockBlock())
-        , m_valueDoubler(new TMockBlock())
-        , m_strip(c_stripSize)
-        , m_processingBlockFactory()
+        , redSource(new TMockBlock())
+        , greenSource(new TMockBlock())
+        , valueDoubler(new TMockBlock())
+        , strip(c_stripSize)
+        , processingBlockFactory()
     {
-        ON_CALL(*m_redSource, execute(_, _))
+        ON_CALL(*redSource, execute(_, _))
             .WillByDefault(Invoke(addRed));
-        ON_CALL(*m_greenSource, execute(_, _))
+        ON_CALL(*greenSource, execute(_, _))
             .WillByDefault(Invoke(addGreen));
-        ON_CALL(*m_valueDoubler, execute(_, _))
+        ON_CALL(*valueDoubler, execute(_, _))
             .WillByDefault(Invoke(doubleValue));
     }
 
     virtual ~ProcessingBlockContainerTest()
     {
-        delete m_redSource;
-        m_redSource = nullptr;
-        delete m_greenSource;
-        m_greenSource = nullptr;
-        delete m_valueDoubler;
-        m_valueDoubler = nullptr;
+        delete redSource;
+        redSource = nullptr;
+        delete greenSource;
+        greenSource = nullptr;
+        delete valueDoubler;
+        valueDoubler = nullptr;
     }
 
     Json createMockBlockJson(unsigned int id)
@@ -111,13 +111,13 @@ public:
     }
 
     // These have to be manually allocated, as the container under test takes ownership and will try to delete it's children.
-    TMockBlock* m_redSource;
-    TMockBlock* m_greenSource;
-    TMockBlock* m_valueDoubler;
+    TMockBlock* redSource;
+    TMockBlock* greenSource;
+    TMockBlock* valueDoubler;
 
-    Processing::TRgbStrip m_strip;
+    Processing::TRgbStrip strip;
 
-    MockProcessingBlockFactory m_processingBlockFactory;
+    MockProcessingBlockFactory processingBlockFactory;
 };
 
 

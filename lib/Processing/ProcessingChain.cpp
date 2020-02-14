@@ -36,10 +36,10 @@
 #define LOGGING_COMPONENT "ProcessingChain"
 
 ProcessingChain::ProcessingChain(const IProcessingBlockFactory& processingBlockFactory)
-    : m_mutex()
-    , m_processingBlockFactory(processingBlockFactory)
-    , m_active()
-    , m_processingChain()
+    : mutex()
+    , processingBlockFactory(processingBlockFactory)
+    , active()
+    , processingChain()
 {
 }
 
@@ -50,34 +50,34 @@ ProcessingChain::~ProcessingChain()
 
 void ProcessingChain::insertBlock(IProcessingBlock* block, unsigned int index)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    if(index > m_processingChain.size())
+    if(index > processingChain.size())
     {
-        index = m_processingChain.size();
+        index = processingChain.size();
     }
 
-    m_processingChain.insert(m_processingChain.begin() + index, block);
-    m_active ? block->activate() : block->deactivate();
+    processingChain.insert(processingChain.begin() + index, block);
+    active ? block->activate() : block->deactivate();
 }
 
 void ProcessingChain::insertBlock(IProcessingBlock* block)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    m_processingChain.insert(m_processingChain.end(), block);
-    m_active ? block->activate() : block->deactivate();
+    processingChain.insert(processingChain.end(), block);
+    active ? block->activate() : block->deactivate();
 }
 
 Json ProcessingChain::convertToJson() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     Json::object converted;
     converted[IProcessingBlock::c_objectTypeKey] = getObjectType();
 
     Json::array convertedChain;
-    for(auto processingBlock : m_processingChain)
+    for(auto processingBlock : processingChain)
     {
         convertedChain.push_back(processingBlock->convertToJson());
     }
@@ -88,7 +88,7 @@ Json ProcessingChain::convertToJson() const
 
 void ProcessingChain::convertFromJson(const Json& converted)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     deleteProcessingBlocks();
 
@@ -98,7 +98,7 @@ void ProcessingChain::convertFromJson(const Json& converted)
     {
         for(auto convertedBlock : convertedChain)
         {
-            m_processingChain.push_back(m_processingBlockFactory.createProcessingBlock(convertedBlock));
+            processingChain.push_back(processingBlockFactory.createProcessingBlock(convertedBlock));
         }
     }
     else
@@ -116,31 +116,31 @@ std::string ProcessingChain::getObjectType() const
 
 void ProcessingChain::activate()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    for(auto processingBlock : m_processingChain)
+    for(auto processingBlock : processingChain)
     {
         processingBlock->activate();
     }
 
-    m_active = true;
+    active = true;
 }
 
 void ProcessingChain::deactivate()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    for(auto processingBlock : m_processingChain)
+    for(auto processingBlock : processingChain)
     {
         processingBlock->deactivate();
     }
 
-    m_active = false;
+    active = false;
 }
 
 void ProcessingChain::execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     // Start clean
     for(auto& color : strip)
@@ -150,7 +150,7 @@ void ProcessingChain::execute(Processing::TRgbStrip& strip, const Processing::TN
         color.b = 0;
     }
 
-    for(auto processingBlock : m_processingChain)
+    for(auto processingBlock : processingChain)
     {
         processingBlock->execute(strip, noteToLightMap);
     }
@@ -158,25 +158,25 @@ void ProcessingChain::execute(Processing::TRgbStrip& strip, const Processing::TN
 
 void ProcessingChain::deleteProcessingBlocks()
 {
-    for(auto processingBlock : m_processingChain)
+    for(auto processingBlock : processingChain)
     {
         delete processingBlock;
     }
-    m_processingChain.clear();
+    processingChain.clear();
 }
 
 void ProcessingChain::updateAllBlockStates()
 {
-    if(m_active)
+    if(active)
     {
-        for(auto processingBlock : m_processingChain)
+        for(auto processingBlock : processingChain)
         {
             processingBlock->activate();
         }
     }
     else
     {
-        for(auto processingBlock : m_processingChain)
+        for(auto processingBlock : processingChain)
         {
             processingBlock->deactivate();
         }

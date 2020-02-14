@@ -40,28 +40,13 @@ template<class... CallbackArgs>
 class ObserverList
 {
 public:
-    /** Type for callback functions. */
     typedef std::function<void(CallbackArgs... args)> TCallbackFunction;
-
-    /** Type for subscription tokens. */
     typedef unsigned int TSubscriptionToken;
 
-    // Prevent implicit copy constructor and assignment operator.
+    ObserverList() = default;
+
     ObserverList(const ObserverList&) = delete;
     ObserverList& operator=(const ObserverList&) = delete;
-
-    /**
-     * Constructor.
-     */
-    ObserverList()
-            : m_subscriptions()
-    {
-    }
-
-    /**
-     * Destructor.
-     */
-    virtual ~ObserverList() = default;
 
     /**
      * Subscribe for events.
@@ -73,13 +58,13 @@ public:
         // Check for a free slot in the vector first
         bool foundSlot = false;
         TSubscriptionToken token(-1);
-        for(auto it = m_subscriptions.begin(); it < m_subscriptions.end(); ++it)
+        for(auto it = subscriptions.begin(); it < subscriptions.end(); ++it)
         {
             if(*it == nullptr)
             {
                 *it = callback;
                 foundSlot = true;
-                token = std::distance(m_subscriptions.begin(), it);
+                token = std::distance(subscriptions.begin(), it);
                 break;
             }
         }
@@ -87,7 +72,7 @@ public:
         if(!foundSlot)
         {
             // No empty slot found, extend vector
-            token = m_subscriptions.insert(m_subscriptions.cend(), callback) - m_subscriptions.cbegin();
+            token = subscriptions.insert(subscriptions.cend(), callback) - subscriptions.cbegin();
         }
 
         return token;
@@ -100,10 +85,10 @@ public:
      */
     void unsubscribe(TSubscriptionToken token)
     {
-        if(token < m_subscriptions.size())
+        if(token < subscriptions.size())
         {
             // Invalidate entry instead of removing it. This keeps previously handed out tokens valid.
-            m_subscriptions[token] = nullptr;
+            subscriptions[token] = nullptr;
         }
     }
 
@@ -112,7 +97,7 @@ public:
      */
     void notifyObservers(CallbackArgs... args) const
     {
-        for(const auto& it : m_subscriptions)
+        for(const auto& it : subscriptions)
         {
             if(it != nullptr)
             {
@@ -123,7 +108,7 @@ public:
 
 private:
     /** The collection of subscriptions. Using a vector for optimal traversal. */
-    std::vector<TCallbackFunction> m_subscriptions;
+    std::vector<TCallbackFunction> subscriptions;
 };
 
 #endif /* COMMON_OBSERVERLIST_H_ */

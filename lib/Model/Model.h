@@ -80,7 +80,7 @@ protected:
     void set(T& member, T value)
     {
         {
-            std::lock_guard<std::mutex> lock(m_mutex);
+            std::lock_guard<std::mutex> lock(mutex);
             member = value;
         }
 
@@ -96,7 +96,7 @@ protected:
     template<typename T>
     T get(const T& member) const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock(mutex);
         return member;
     }
 
@@ -109,17 +109,17 @@ private:
     /**
      * List of observers
      */
-    mutable UpdateObserverList m_observers;
+    mutable UpdateObserverList observers;
 
     /**
      * Mutex guarding the observers
      */
-    mutable std::mutex m_observersMutex;
+    mutable std::mutex observersMutex;
 
     /**
      * Mutex guarding the data
      */
-     mutable std::mutex m_mutex;
+     mutable std::mutex mutex;
 };
 
 

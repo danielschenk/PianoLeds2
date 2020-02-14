@@ -50,12 +50,12 @@ private:
     /**
      * Name of the WiFi network when in AP mode
      */
-    std::string m_wifiAPSsid = "PianoLeds";
+    std::string wifiAPSsid = "PianoLeds";
 
     /**
      * Password of the WiFi network when in AP mode
      */
-    std::string m_wifiAPPassword = "LedsFlashSomeNotes";
+    std::string wifiAPPassword = "LedsFlashSomeNotes";
 };
 
 

@@ -71,15 +71,15 @@ private:
     static constexpr TickType_t c_autoRefreshInterval = 100;
 
     /** Values stored upon last update. */
-    Processing::TRgbStrip m_pendingValues;
+    Processing::TRgbStrip pendingValues;
 
     /** The LED strip driver. */
-    Adafruit_WS2801 m_strip;
+    Adafruit_WS2801 strip;
 
     /** Mutex protecting the pending values. */
-    mutable std::mutex m_mutex;
+    mutable std::mutex mutex;
 
-    Concert& m_concert;
+    Concert& concert;
 };
 
 #endif /* ESP32APPLICATION_LEDTASK_H_ */

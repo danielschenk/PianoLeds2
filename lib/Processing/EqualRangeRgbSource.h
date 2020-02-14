@@ -30,6 +30,7 @@
 #define PROCESSING_EQUALRANGERGBSOURCE_H_
 
 #include "IProcessingBlock.h"
+#include <mutex>
 
 /**
  * RGB source which generates an equal range of colors.
@@ -38,17 +39,8 @@ class EqualRangeRgbSource
     : public IProcessingBlock
 {
 public:
-    /**
-     * Constructor.
-     */
-    EqualRangeRgbSource();
+    EqualRangeRgbSource() = default;
 
-    /**
-     * Destructor.
-     */
-    virtual ~EqualRangeRgbSource();
-
-    // Prevent implicit copy constructor and assignment operator.
     EqualRangeRgbSource(EqualRangeRgbSource&) = delete;
     EqualRangeRgbSource& operator=(EqualRangeRgbSource&) = delete;
 
@@ -78,11 +70,10 @@ private:
     static constexpr const char* c_gJsonKey = "g";
     static constexpr const char* c_bJsonKey = "b";
 
-    /** Mutex to protect the members. */
-    mutable std::mutex m_mutex;
+    mutable std::mutex mutex;
 
     /** Output color. */
-    Processing::TRgb m_color;
+    Processing::TRgb color;
 };
 
 #endif /* PROCESSING_EQUALRANGERGBSOURCE_H_ */

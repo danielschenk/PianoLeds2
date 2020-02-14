@@ -30,68 +30,62 @@
 #include "IProcessingBlockFactory.h"
 
 Patch::Patch(const IProcessingBlockFactory& processingBlockFactory)
-    : IPatch()
-    , m_mutex()
-    , m_hasBankAndProgram(false)
-    , m_bank(0)
-    , m_program(0)
-    , m_name("Untitled Patch")
-    , m_processingChain(processingBlockFactory.createProcessingChain())
-    , m_processingBlockFactory(processingBlockFactory)
+    : processingChain(processingBlockFactory.createProcessingChain())
+    , processingBlockFactory(processingBlockFactory)
 {
 }
 
 Patch::~Patch()
 {
-    delete m_processingChain;
+    delete processingChain;
 }
 
 IProcessingChain& Patch::getProcessingChain() const
 {
-    return *m_processingChain;
+    return *processingChain;
 }
 
 Json Patch::convertToJson() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     Json::object converted;
     converted[IJsonConvertible::c_objectTypeKey] = getObjectType();
 
     // Add items specific for Patch
-    converted[c_hasBankAndProgramJsonKey] = m_hasBankAndProgram;
-    converted[c_bankJsonKey] = m_bank;
-    converted[c_programJsonKey] = m_program;
-    converted[c_nameJsonKey] = m_name;
+    converted[c_hasBankAndProgramJsonKey] = bankAndProgramSet;
+    converted[c_bankJsonKey] = bank;
+    converted[c_programJsonKey] = program;
+    converted[c_nameJsonKey] = name;
 
     // Add processing chain
-    converted[c_processingChainJsonKey] = m_processingChain->convertToJson();
+    converted[c_processingChainJsonKey] = processingChain->convertToJson();
 
     return converted;
 }
 
 void Patch::convertFromJson(const Json& converted)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     // Get items specific for Patch
     Json11Helper helper(__PRETTY_FUNCTION__, converted);
-    helper.getItemIfPresent(c_hasBankAndProgramJsonKey, m_hasBankAndProgram);
-    helper.getItemIfPresent(c_programJsonKey, m_program);
-    helper.getItemIfPresent(c_bankJsonKey, m_bank);
-    helper.getItemIfPresent(c_nameJsonKey, m_name);
+    helper.getItemIfPresent(c_hasBankAndProgramJsonKey, bankAndProgramSet);
+    helper.getItemIfPresent(c_programJsonKey, program);
+    helper.getItemIfPresent(c_bankJsonKey, bank);
+    helper.getItemIfPresent(c_nameJsonKey, name);
     
     // Get processing chain
     Json::object convertedProcessingChain;
     if(helper.getItemIfPresent(c_processingChainJsonKey, convertedProcessingChain))
     {
-        m_processingChain->convertFromJson(convertedProcessingChain);
+        processingChain->convertFromJson(convertedProcessingChain);
     }
     else
     {
         // Reset to default.
-        delete m_processingChain;
-        m_processingChain = m_processingBlockFactory.createProcessingChain();
+        delete processingChain;
+        processingChain = processingBlockFactory.createProcessingChain();
     }
 }
 
@@ -102,72 +96,72 @@ std::string Patch::getObjectType() const
 
 void Patch::activate()
 {
-    m_processingChain->activate();
+    processingChain->activate();
 }
 
 void Patch::deactivate()
 {
-    m_processingChain->deactivate();
+    processingChain->deactivate();
 }
 
 void Patch::execute(Processing::TRgbStrip& strip, const Processing::TNoteToLightMap& noteToLightMap)
 {
-    m_processingChain->execute(strip, noteToLightMap);
+    processingChain->execute(strip, noteToLightMap);
 }
 
 uint8_t Patch::getBank() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    return m_bank;
+    return bank;
 }
 
 void Patch::setBank(uint8_t bank)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    m_bank = bank;
+    this->bank = bank;
 }
 
 bool Patch::hasBankAndProgram() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    return m_hasBankAndProgram;
+    return bankAndProgramSet;
 }
 
 uint8_t Patch::getProgram() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    return m_program;
+    return program;
 }
 
 void Patch::clearBankAndProgram()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    m_hasBankAndProgram = false;
+    bankAndProgramSet = false;
 }
 
 void Patch::setProgram(uint8_t program)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    m_program = program;
-    m_hasBankAndProgram = true;
+    this->program = program;
+    bankAndProgramSet = true;
 }
 
 std::string Patch::getName() const
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    return m_name;
+    return name;
 }
 
 void Patch::setName(const std::string name)
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
-    m_name = name;
+    this->name = name;
 }

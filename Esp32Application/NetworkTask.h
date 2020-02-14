@@ -61,8 +61,8 @@ private:
     // BaseTask implementation
     void run() override;
 
-    const SystemSettingsModel& m_systemSettingsModel;
-    unsigned int m_systemSettingsModelSubscription;
+    const SystemSettingsModel& systemSettingsModel;
+    unsigned int systemSettingsModelSubscription;
 };
 
 

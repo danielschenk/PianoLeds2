@@ -59,15 +59,15 @@ public:
     template<typename T>
     bool getItemIfPresent(std::string key, T& target) const
     {
-        if(!m_json[key].is_null())
+        if(!json[key].is_null())
         {
             return getItem(key, target);
         }
         else
         {
-            if(m_logMissingKeys)
+            if(logMissingKeys)
             {
-                LOG_ERROR_PARAMS("%s: Missing JSON key '%s'", m_user.c_str(), key.c_str());
+                LOG_ERROR_PARAMS("%s: Missing JSON key '%s'", user.c_str(), key.c_str());
             }
             return false;
         }
@@ -81,7 +81,7 @@ private:
     template <typename IntegerType>
     bool getInt(std::string key, IntegerType& target) const
     {
-        const auto& item = m_json[key];
+        const auto& item = json[key];
 
         if(item.is_number())
         {
@@ -90,7 +90,7 @@ private:
         }
         else
         {
-            LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a number", m_user.c_str(), key.c_str());
+            LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a number", user.c_str(), key.c_str());
             return false;
         }
     }
@@ -98,7 +98,7 @@ private:
     template <typename FloatType>
     bool getFloat(std::string key, FloatType& target) const
     {
-        const auto& item = m_json[key];
+        const auto& item = json[key];
 
         if(item.is_number())
         {
@@ -107,7 +107,7 @@ private:
         }
         else
         {
-            LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a number", m_user.c_str(), key.c_str());
+            LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a number", user.c_str(), key.c_str());
             return false;
         }
     }
@@ -122,9 +122,9 @@ private:
     bool getItem(std::string key, Json::object& target) const;
     bool getItem(std::string key, Json::array& target) const;
 
-    std::string     m_user;
-    const Json&     m_json;
-    bool            m_logMissingKeys;
+    std::string     user;
+    const Json&     json;
+    bool            logMissingKeys;
 };
 
 #undef LOGGING_COMPONENT

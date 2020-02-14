@@ -78,8 +78,8 @@ private:
 
     void run() override;
 
-    Stream& m_serial;
-    QueueHandle_t m_queue;
+    Stream& serial;
+    QueueHandle_t queue;
 };
 
 #endif /* ESP32APPLICATION_LOGGINGTASK_H_ */

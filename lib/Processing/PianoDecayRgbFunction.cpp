@@ -24,9 +24,8 @@
  * SOFTWARE.
  */
 
-#include <json11.hpp>
-
 #include "PianoDecayRgbFunction.h"
+#include <json11.hpp>
 
 Processing::TRgb PianoDecayRgbFunction::calculate(const Processing::TNoteState& noteState,
                                                   Processing::TTime currentTime) const

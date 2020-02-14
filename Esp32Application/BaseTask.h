@@ -29,6 +29,7 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <atomic>
 
 /**
  * Base class for a FreeRTOS task.
@@ -36,25 +37,15 @@
 class BaseTask
 {
 public:
-    // Prevent implicit constructors and assignment operator
     BaseTask(const BaseTask&) = delete;
     BaseTask& operator=(const BaseTask&) = delete;
 
-    /**
-     * Destructor.
-     */
     virtual ~BaseTask();
 
-    /**
-     * Tell the task to terminate.
-     */
     void terminate();
 
 protected:
-    /**
-     * Constructor.
-     */
-    BaseTask();
+    BaseTask() = default;
 
     /**
      * Create and start the task.
@@ -82,8 +73,8 @@ private:
      */
     static void taskFunction(void* pvParameters);
 
-    TaskHandle_t m_taskHandle;
-    BaseType_t m_terminate;
+    TaskHandle_t taskHandle = nullptr;
+    std::atomic<bool> terminating {false};
 };
 
 #endif /* ESP32APPLICATION_BASETASK_H_ */

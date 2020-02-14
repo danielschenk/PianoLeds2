@@ -52,102 +52,102 @@ class ObserverListTest
         : public ::testing::Test
 {
 public:
-    ObserverList<int, const void*> m_observerList;
+    ObserverList<int, const void*> observerList;
 };
 
 TEST_F(ObserverListTest, subscribeOne)
 {
     StrictMock<MockObserver> observer;
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer, std::placeholders::_1, std::placeholders::_2));
 
     EXPECT_CALL(observer, callback(_, _))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, subscribeTwo)
 {
     StrictMock<MockObserver> observer1, observer2;
 
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
 
     EXPECT_CALL(observer1, callback(_, _))
             .Times(1);
     EXPECT_CALL(observer2, callback(_, _))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeFirst)
 {
     StrictMock<MockObserver> observer1, observer2, observer3;
 
-    auto subscription1 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
+    auto subscription1 = observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
 
-    m_observerList.unsubscribe(subscription1);
+    observerList.unsubscribe(subscription1);
 
     EXPECT_CALL(observer2, callback(_, _))
             .Times(1);
     EXPECT_CALL(observer3, callback(_, _))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeMiddle)
 {
     StrictMock<MockObserver> observer1, observer2, observer3;
 
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
-    auto subscription2 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    auto subscription2 = observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
 
-    m_observerList.unsubscribe(subscription2);
+    observerList.unsubscribe(subscription2);
 
     EXPECT_CALL(observer1, callback(_, _))
             .Times(1);
     EXPECT_CALL(observer3, callback(_, _))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeLast)
 {
     StrictMock<MockObserver> observer1, observer2, observer3;
 
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
-    auto subscription3 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    auto subscription3 = observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
 
-    m_observerList.unsubscribe(subscription3);
+    observerList.unsubscribe(subscription3);
 
     EXPECT_CALL(observer1, callback(_, _))
             .Times(1);
     EXPECT_CALL(observer2, callback(_, _))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, arguments)
 {
     StrictMock<MockObserver> observer1, observer2;
 
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
 
     EXPECT_CALL(observer1, callback(42, nullptr))
             .Times(1);
     EXPECT_CALL(observer2, callback(42, nullptr))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 
     int aNumber = 42;
     EXPECT_CALL(observer1, callback(69, &aNumber))
@@ -155,20 +155,20 @@ TEST_F(ObserverListTest, arguments)
     EXPECT_CALL(observer2, callback(69, &aNumber))
             .Times(1);
 
-    m_observerList.notifyObservers(69, &aNumber);
+    observerList.notifyObservers(69, &aNumber);
 }
 
 TEST_F(ObserverListTest, subscribeAfterUnsubscribe)
 {
     StrictMock<MockObserver> observer1, observer2, observer3, observer4;
 
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
-    auto subscription2 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    auto subscription2 = observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
 
-    m_observerList.unsubscribe(subscription2);
+    observerList.unsubscribe(subscription2);
 
-    m_observerList.subscribe(std::bind(&MockObserver::callback, &observer4, std::placeholders::_1, std::placeholders::_2));
+    observerList.subscribe(std::bind(&MockObserver::callback, &observer4, std::placeholders::_1, std::placeholders::_2));
 
     EXPECT_CALL(observer1, callback(_, _))
             .Times(1);
@@ -177,16 +177,16 @@ TEST_F(ObserverListTest, subscribeAfterUnsubscribe)
     EXPECT_CALL(observer4, callback(_, _))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 }
 
 TEST_F(ObserverListTest, unsubscribeInvalidToken)
 {
     StrictMock<MockObserver> observer1, observer2, observer3;
 
-    auto subscription1 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
-    auto subscription2 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
-    auto subscription3 = m_observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
+    auto subscription1 = observerList.subscribe(std::bind(&MockObserver::callback, &observer1, std::placeholders::_1, std::placeholders::_2));
+    auto subscription2 = observerList.subscribe(std::bind(&MockObserver::callback, &observer2, std::placeholders::_1, std::placeholders::_2));
+    auto subscription3 = observerList.subscribe(std::bind(&MockObserver::callback, &observer3, std::placeholders::_1, std::placeholders::_2));
 
     // Don't assume anything about the way tokens are generated, make sure we find an unused one
     unsigned int invalidToken = 0;
@@ -202,7 +202,7 @@ TEST_F(ObserverListTest, unsubscribeInvalidToken)
     }
     ASSERT_EQ(true, found);
 
-    m_observerList.unsubscribe(invalidToken);
+    observerList.unsubscribe(invalidToken);
 
     EXPECT_CALL(observer1, callback(_, _))
             .Times(1);
@@ -211,5 +211,5 @@ TEST_F(ObserverListTest, unsubscribeInvalidToken)
     EXPECT_CALL(observer3, callback(_, _))
             .Times(1);
 
-    m_observerList.notifyObservers(42, nullptr);
+    observerList.notifyObservers(42, nullptr);
 }

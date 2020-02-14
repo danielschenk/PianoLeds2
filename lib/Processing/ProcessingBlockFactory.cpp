@@ -36,9 +36,9 @@
 ProcessingBlockFactory::ProcessingBlockFactory(IMidiInput& midiInput,
                                                const IRgbFunctionFactory& rgbFunctionFactory,
                                                const ITime& time)
-    : m_midiInput(midiInput)
-    , m_rgbFunctionFactory(rgbFunctionFactory)
-    , m_time(time)
+    : midiInput(midiInput)
+    , rgbFunctionFactory(rgbFunctionFactory)
+    , time(time)
 {
 }
 
@@ -61,7 +61,7 @@ IProcessingBlock* ProcessingBlockFactory::createProcessingBlock(const Json& conv
         }
         else if(objectType == IProcessingBlock::c_typeNameNoteRgbSource)
         {
-            processingBlock = new NoteRgbSource(m_midiInput, m_rgbFunctionFactory, m_time);
+            processingBlock = new NoteRgbSource(midiInput, rgbFunctionFactory, time);
         }
         else if(objectType == IProcessingBlock::c_typeNameProcessingChain)
         {

@@ -67,9 +67,9 @@ private:
      * The defaults are chosen with the maximum MIDI velocity in mind (127), which will result in a value of
      * 255 (maximum LED value for most drivers).
      */
-    Processing::TLinearConstants m_redConstants = {2, 1};
-    Processing::TLinearConstants m_greenConstants = {2, 1};
-    Processing::TLinearConstants m_blueConstants = {2, 1};
+    Processing::TLinearConstants redConstants = {2, 1};
+    Processing::TLinearConstants greenConstants = {2, 1};
+    Processing::TLinearConstants blueConstants = {2, 1};
 
     static constexpr const char* c_rFactorJsonKey = "rFactor";
     static constexpr const char* c_gFactorJsonKey = "gFactor";

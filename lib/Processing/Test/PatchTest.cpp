@@ -39,50 +39,50 @@ class PatchTest
 {
 public:
     PatchTest()
-        : m_processingBlockFactory()
-        , m_processingChain(new NiceMock<MockProcessingChain>)
+        : processingBlockFactory()
+        , processingChain(new NiceMock<MockProcessingChain>)
     {
-        ON_CALL(m_processingBlockFactory, createProcessingChain())
-            .WillByDefault(Return(m_processingChain));
+        ON_CALL(processingBlockFactory, createProcessingChain())
+            .WillByDefault(Return(processingChain));
 
-        m_patch = new Patch(m_processingBlockFactory);
+        patch = new Patch(processingBlockFactory);
     }
 
     virtual ~PatchTest()
     {
-        delete m_patch;
+        delete patch;
 
         // deleted by Patch
-        m_processingChain = nullptr;
+        processingChain = nullptr;
     }
 
-    NiceMock<MockProcessingBlockFactory> m_processingBlockFactory;
-    NiceMock<MockProcessingChain>* m_processingChain;
-    Patch* m_patch;
+    NiceMock<MockProcessingBlockFactory> processingBlockFactory;
+    NiceMock<MockProcessingChain>* processingChain;
+    Patch* patch;
 };
 
 TEST_F(PatchTest, defaults)
 {
-    EXPECT_EQ(0, m_patch->getBank());
-    EXPECT_EQ(0, m_patch->getProgram());
-    EXPECT_EQ(false, m_patch->hasBankAndProgram());
-    EXPECT_EQ("Untitled Patch", m_patch->getName());
+    EXPECT_EQ(0, patch->getBank());
+    EXPECT_EQ(0, patch->getProgram());
+    EXPECT_EQ(false, patch->hasBankAndProgram());
+    EXPECT_EQ("Untitled Patch", patch->getName());
 }
 
 TEST_F(PatchTest, convertToJson)
 {
     // Set some non-defaults
-    m_patch->setBank(42);
-    m_patch->setProgram(43);
-    m_patch->setName("Awesome patch");
+    patch->setBank(42);
+    patch->setProgram(43);
+    patch->setName("Awesome patch");
 
     Json::object mockChainJson;
     mockChainJson["objectType"] = "mockChain";
     mockChainJson["someProperty"] = 42;
-    EXPECT_CALL(*m_processingChain, convertToJson())
+    EXPECT_CALL(*processingChain, convertToJson())
         .WillOnce(Return(mockChainJson));
 
-    Json::object converted = m_patch->convertToJson().object_items();
+    Json::object converted = patch->convertToJson().object_items();
     EXPECT_EQ(42, converted.at("bank").number_value());
     EXPECT_EQ(43, converted.at("program").number_value());
     EXPECT_EQ(true, converted.at("hasBankAndProgram").bool_value());
@@ -105,25 +105,25 @@ TEST_F(PatchTest, convertFromJson)
     j["hasBankAndProgram"] = true;
     j["name"] = std::string("Awesome patch");
 
-    EXPECT_CALL(*m_processingChain, convertFromJson(Json(mockChainJson)));
-    m_patch->convertFromJson(Json(j));
+    EXPECT_CALL(*processingChain, convertFromJson(Json(mockChainJson)));
+    patch->convertFromJson(Json(j));
 
-    EXPECT_EQ(42, m_patch->getBank());
-    EXPECT_EQ(43, m_patch->getProgram());
-    EXPECT_EQ(true, m_patch->hasBankAndProgram());
-    EXPECT_EQ("Awesome patch", m_patch->getName());
+    EXPECT_EQ(42, patch->getBank());
+    EXPECT_EQ(43, patch->getProgram());
+    EXPECT_EQ(true, patch->hasBankAndProgram());
+    EXPECT_EQ("Awesome patch", patch->getName());
 }
 
 TEST_F(PatchTest, activate)
 {
-    EXPECT_CALL(*m_processingChain, activate());
-    m_patch->activate();
+    EXPECT_CALL(*processingChain, activate());
+    patch->activate();
 }
 
 TEST_F(PatchTest, deactivate)
 {
-    EXPECT_CALL(*m_processingChain, deactivate());
-    m_patch->deactivate();
+    EXPECT_CALL(*processingChain, deactivate());
+    patch->deactivate();
 }
 
 TEST_F(PatchTest, execute)
@@ -139,12 +139,12 @@ TEST_F(PatchTest, execute)
     Processing::TRgb valueAfterProcessing({1, 2, 3});
     ASSERT_NE(valueAfterProcessing, strip[0]);
 
-    EXPECT_CALL(*m_processingChain, execute(_, map))
+    EXPECT_CALL(*processingChain, execute(_, map))
         .WillOnce(Invoke([valueAfterProcessing](Processing::TRgbStrip& strip, const Processing::TNoteToLightMap&){
             strip[0] = valueAfterProcessing;
     }));
 
-    m_patch->execute(strip, map);
+    patch->execute(strip, map);
 
     EXPECT_EQ(valueAfterProcessing, strip[0]);
 }

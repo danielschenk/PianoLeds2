@@ -29,20 +29,20 @@
 #define LOGGING_COMPONENT "Json11Helper"
 
 Json11Helper::Json11Helper(std::string user, const Json& json, bool logMissingKeys)
-    : m_user(user)
-    , m_json(json)
-    , m_logMissingKeys(logMissingKeys)
+    : user(user)
+    , json(json)
+    , logMissingKeys(logMissingKeys)
 {
 }
 
 Json11Helper::Json11Helper(const char* user, const Json& json, bool logMissingKeys)
-    : m_user(user)
-    , m_json(json)
-    , m_logMissingKeys(logMissingKeys)
+    : user(user)
+    , json(json)
+    , logMissingKeys(logMissingKeys)
 {
-    if(!m_json.is_object())
+    if(!json.is_object())
     {
-        LOG_ERROR_PARAMS("%s: Passed object not a JSON object", m_user.c_str());
+        LOG_ERROR_PARAMS("%s: Passed object not a JSON object", this->user.c_str());
     }
 }
 
@@ -77,7 +77,7 @@ bool Json11Helper::getItem(std::string key, double& target) const
 
 bool Json11Helper::getItem(std::string key, bool& target) const
 {
-    const auto& item = m_json[key];
+    const auto& item = json[key];
 
     if(item.is_bool())
     {
@@ -86,14 +86,14 @@ bool Json11Helper::getItem(std::string key, bool& target) const
     }
     else
     {
-        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a boolean", m_user.c_str(), key.c_str());
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a boolean", user.c_str(), key.c_str());
         return false;
     }
 }
 
 bool Json11Helper::getItem(std::string key, std::string& target) const
 {
-    const auto& item = m_json[key];
+    const auto& item = json[key];
 
     if(item.is_string())
     {
@@ -102,14 +102,14 @@ bool Json11Helper::getItem(std::string key, std::string& target) const
     }
     else
     {
-        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a string", m_user.c_str(), key.c_str());
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not a string", user.c_str(), key.c_str());
         return false;
     }
 }
 
 bool Json11Helper::getItem(std::string key, Json::object& target) const
 {
-    const auto& item = m_json[key];
+    const auto& item = json[key];
 
     if(item.is_object())
     {
@@ -118,14 +118,14 @@ bool Json11Helper::getItem(std::string key, Json::object& target) const
     }
     else
     {
-        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not an object", m_user.c_str(), key.c_str());
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not an object", user.c_str(), key.c_str());
         return false;
     }
 }
 
 bool Json11Helper::getItem(std::string key, Json::array& target) const
 {
-    const auto& item = m_json[key];
+    const auto& item = json[key];
 
     if(item.is_array())
     {
@@ -134,7 +134,7 @@ bool Json11Helper::getItem(std::string key, Json::array& target) const
     }
     else
     {
-        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not an array", m_user.c_str(), key.c_str());
+        LOG_ERROR_PARAMS("%s: JSON value with key '%s' not an array", user.c_str(), key.c_str());
         return false;
     }
 }

@@ -111,16 +111,16 @@ private:
     void notifyPitchBendChange(uint8_t channel, uint16_t value) const;
 
     /** Collection of observers. */
-    std::list<IMidiInput::IObserver*> m_observers;
+    std::list<IMidiInput::IObserver*> observers;
 
     /** Whether incoming bytes are stored to build a message. */
-    bool m_buildingMessage;
+    bool buildingMessage;
 
     /** The message currently being built. */
-    std::vector<uint8_t> m_currentMessage;
+    std::vector<uint8_t> currentMessage;
 
     /** Mutex to protect the observers. */
-    mutable std::mutex m_observersMutex;
+    mutable std::mutex observersMutex;
 };
 
 #endif /* DRIVERS_COMMON_BASEMIDIINPUT_H_ */

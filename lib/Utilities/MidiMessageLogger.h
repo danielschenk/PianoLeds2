@@ -63,7 +63,7 @@ public:
     virtual void onPitchBendChange(uint8_t channel, uint16_t value);
 
 private:
-    IMidiInput& m_midiInput;
+    IMidiInput& midiInput;
 };
 
 #endif /* COMMON_UTILITIES_MIDIMESSAGELOGGER_H_ */

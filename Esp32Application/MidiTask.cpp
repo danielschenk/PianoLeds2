@@ -34,7 +34,7 @@ MidiTask::MidiTask(ArduinoMidiInput& midiInput,
                    uint32_t stackSize,
                    UBaseType_t priority)
     : BaseTask()
-    , m_midiInput(midiInput)
+    , midiInput(midiInput)
 {
     start("midi", stackSize, priority);
 }
@@ -52,5 +52,5 @@ void MidiTask::run()
     ulTaskNotifyTake(pdTRUE, 100);
 
     // Process any data.
-    m_midiInput.run();
+    midiInput.run();
 }

@@ -42,14 +42,14 @@ class EqualRangeRgbSourceTest
 {
 public:
     EqualRangeRgbSourceTest()
-        : m_time()
-        , m_source()
+        : time()
+        , source()
     {
-        LoggingEntryPoint::setTime(&m_time);
+        LoggingEntryPoint::setTime(&time);
     }
 
-    NiceMock<MockTime> m_time;
-    EqualRangeRgbSource m_source;
+    NiceMock<MockTime> time;
+    EqualRangeRgbSource source;
 };
 
 TEST_F(EqualRangeRgbSourceTest, executeDifferentColors)
@@ -59,8 +59,8 @@ TEST_F(EqualRangeRgbSourceTest, executeDifferentColors)
 
     for(const auto& colorIt : colors)
     {
-        m_source.setColor(colorIt);
-        m_source.execute(strip, Processing::TNoteToLightMap());
+        source.setColor(colorIt);
+        source.execute(strip, Processing::TNoteToLightMap());
         for(const auto& outputIt : strip)
         {
             EXPECT_EQ(outputIt, colorIt);
@@ -82,8 +82,8 @@ TEST_F(EqualRangeRgbSourceTest, convertFromJson)
         err,
         json11::STANDARD);
 
-    m_source.convertFromJson(j);
-    EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 20, 30}));
+    source.convertFromJson(j);
+    EXPECT_EQ(source.getColor(), Processing::TRgb({10, 20, 30}));
 }
 
 TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithWrongType)
@@ -100,8 +100,8 @@ TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithWrongType)
         err,
         json11::STANDARD);
 
-    m_source.convertFromJson(j);
-    EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 20, 30}));
+    source.convertFromJson(j);
+    EXPECT_EQ(source.getColor(), Processing::TRgb({10, 20, 30}));
 }
 
 TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithMissingColor)
@@ -117,15 +117,15 @@ TEST_F(EqualRangeRgbSourceTest, convertFromJsonWithMissingColor)
         err,
         json11::STANDARD);
 
-    m_source.convertFromJson(j);
-    EXPECT_EQ(m_source.getColor(), Processing::TRgb({10, 0, 30}));
+    source.convertFromJson(j);
+    EXPECT_EQ(source.getColor(), Processing::TRgb({10, 0, 30}));
 }
 
 TEST_F(EqualRangeRgbSourceTest, convertToJson)
 {
-    m_source.setColor(Processing::TRgb({40, 50, 60}));
+    source.setColor(Processing::TRgb({40, 50, 60}));
 
-    Json::object j = m_source.convertToJson().object_items();
+    Json::object j = source.convertToJson().object_items();
     EXPECT_EQ(4, j.size());
     EXPECT_EQ("EqualRangeRgbSource", j.at("objectType").string_value());
     EXPECT_EQ(40, j.at("r").number_value());

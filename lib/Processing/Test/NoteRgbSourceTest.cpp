@@ -68,12 +68,8 @@ public:
     static constexpr unsigned int c_StripSize = 10;
 
     NoteRgbSourceTest()
-        : LoggingTest()
-        , MidiInputObserverTest()
-        , m_mockRgbFunctionFactory()
-        , m_mockTime()
-        , m_strip(c_StripSize)
-        , m_exampleJson(R"(
+        : strip(c_StripSize)
+        , exampleJson(R"(
              {
                  "objectType": "NoteRgbSource",
                  "channel": 6,
@@ -87,25 +83,25 @@ public:
         for(int i = 0; i < c_StripSize; ++i)
         {
             // Default: simple 1-to-1 mapping
-            m_noteToLightMap[i] = i;
+            noteToLightMap[i] = i;
         }
-        m_noteRgbSource = new NoteRgbSource(m_mockMidiInput, m_mockRgbFunctionFactory,
-            m_mockTime);
-        m_noteRgbSource->activate();
+        noteRgbSource = new NoteRgbSource(mockMidiInput, mockRgbFunctionFactory,
+            mockTime);
+        noteRgbSource->activate();
 
         auto* rgbFunction(new NiceMock<MockRgbFunction>);
         ON_CALL(*rgbFunction, calculate(_, _)).WillByDefault(ReturnFullWhiteWhenSounding());
-        m_noteRgbSource->setRgbFunction(rgbFunction);
+        noteRgbSource->setRgbFunction(rgbFunction);
    }
 
     ~NoteRgbSourceTest() override
     {
-        delete m_noteRgbSource;
+        delete noteRgbSource;
     }
 
     void resetStrip()
     {
-        for(auto& color : m_strip)
+        for(auto& color : strip)
         {
             color.r = 0;
             color.g = 0;
@@ -113,131 +109,131 @@ public:
         }
     }
 
-    MockRgbFunctionFactory m_mockRgbFunctionFactory;
-    NiceMock<MockTime> m_mockTime;
-    NoteRgbSource* m_noteRgbSource;
-    Processing::TRgbStrip m_strip;
+    MockRgbFunctionFactory mockRgbFunctionFactory;
+    NiceMock<MockTime> mockTime;
+    NoteRgbSource* noteRgbSource;
+    Processing::TRgbStrip strip;
 
-    Processing::TNoteToLightMap m_noteToLightMap;
+    Processing::TNoteToLightMap noteToLightMap;
 
-    std::string m_exampleJson;
+    std::string exampleJson;
 };
 
 TEST_F(NoteRgbSourceTest, noNotesSounding)
 {
-    m_strip[0] = {4, 5, 6};
-    m_strip[6] = {7, 8, 9};
-    m_strip[c_StripSize-1] = {11, 12, 13};
+    strip[0] = {4, 5, 6};
+    strip[6] = {7, 8, 9};
+    strip[c_StripSize-1] = {11, 12, 13};
 
-    auto expectedStrip(m_strip);
+    auto expectedStrip(strip);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+    noteRgbSource->execute(strip, noteToLightMap);
 
     // No notes sounding should leave strip untouched
-    ASSERT_EQ(expectedStrip, m_strip);
+    ASSERT_EQ(expectedStrip, strip);
 }
 
 TEST_F(NoteRgbSourceTest, noteOn)
 {
     // (channel, number, velocity, on/off)
-    m_observer->onNoteChange(0, 0, 1, true);
-    m_observer->onNoteChange(0, 5, 6, true);
+    observer->onNoteChange(0, 0, 1, true);
+    observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+    noteRgbSource->execute(strip, noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
     reference[0] = {0xff, 0xff, 0xff};
     reference[5] = {0xff, 0xff, 0xff};
 
-    EXPECT_EQ(reference, m_strip);
+    EXPECT_EQ(reference, strip);
 }
 
 TEST_F(NoteRgbSourceTest, deactivateDisablesAllNotes)
 {
     // (channel, number, velocity, on/off)
-    m_noteRgbSource->deactivate();
-    m_observer->onNoteChange(0, 0, 1, true);
-    m_observer->onNoteChange(0, 5, 6, true);
+    noteRgbSource->deactivate();
+    observer->onNoteChange(0, 0, 1, true);
+    observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+    noteRgbSource->execute(strip, noteToLightMap);
 
-    EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
+    EXPECT_THAT(strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
 TEST_F(NoteRgbSourceTest, noteOff)
 {
     // (channel, number, velocity, on/off)
-    m_observer->onNoteChange(0, 0, 1, true);
-    m_observer->onNoteChange(0, 5, 6, true);
+    observer->onNoteChange(0, 0, 1, true);
+    observer->onNoteChange(0, 5, 6, true);
 
-    m_observer->onNoteChange(0, 0, 8, false);
+    observer->onNoteChange(0, 0, 8, false);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+    noteRgbSource->execute(strip, noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
     reference[5] = {0xff, 0xff, 0xff};
 
-    EXPECT_EQ(reference, m_strip);
+    EXPECT_EQ(reference, strip);
 }
 
 TEST_F(NoteRgbSourceTest, ignoreOtherChannel)
 {
-    m_observer->onNoteChange(1, 0, 1, true);
+    observer->onNoteChange(1, 0, 1, true);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
-    EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
+    noteRgbSource->execute(strip, noteToLightMap);
+    EXPECT_THAT(strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
 TEST_F(NoteRgbSourceTest, ignorePedal)
 {
-    m_noteRgbSource->setUsingPedal(false);
+    noteRgbSource->setUsingPedal(false);
 
-    m_observer->onNoteChange(0, 0, 1, true);
-    m_observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0xff);
-    m_observer->onNoteChange(0, 0, 1, false);
+    observer->onNoteChange(0, 0, 1, true);
+    observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0xff);
+    observer->onNoteChange(0, 0, 1, false);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
-    EXPECT_THAT(m_strip, Each(Processing::TRgb({0, 0, 0})));
+    noteRgbSource->execute(strip, noteToLightMap);
+    EXPECT_THAT(strip, Each(Processing::TRgb({0, 0, 0})));
 }
 
 TEST_F(NoteRgbSourceTest, usePedal)
 {
     // Press a key
     // (channel, number, velocity, on/off)
-    m_observer->onNoteChange(0, 0, 1, true);
+    observer->onNoteChange(0, 0, 1, true);
     // Press pedal
     // (channel, number, value)
-    m_observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0xff);
+    observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0xff);
     // Press another key
-    m_observer->onNoteChange(0, 2, 1, true);
+    observer->onNoteChange(0, 2, 1, true);
 
     auto reference = Processing::TRgbStrip(c_StripSize);
     // Both notes are still sounding
     reference[0] = {0xff, 0xff, 0xff};
     reference[2] = {0xff, 0xff, 0xff};
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
-    EXPECT_EQ(reference, m_strip);
+    noteRgbSource->execute(strip, noteToLightMap);
+    EXPECT_EQ(reference, strip);
 
     // Release keys
-    m_observer->onNoteChange(0, 0, 1, false);
-    m_observer->onNoteChange(0, 2, 1, false);
+    observer->onNoteChange(0, 0, 1, false);
+    observer->onNoteChange(0, 2, 1, false);
 
     // Both notes are still sounding
     resetStrip();
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
-    EXPECT_EQ(reference, m_strip);
+    noteRgbSource->execute(strip, noteToLightMap);
+    EXPECT_EQ(reference, strip);
 
     // Release pedal
-    m_observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0);
+    observer->onControlChange(0, IMidiInterface::DAMPER_PEDAL, 0);
 
     // Notes are not sounding anymore
     reference[0] = {0, 0, 0};
     reference[2] = {0, 0, 0};
     resetStrip();
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
-    EXPECT_EQ(reference, m_strip);
+    noteRgbSource->execute(strip, noteToLightMap);
+    EXPECT_EQ(reference, strip);
 }
 
 /** Action definition for mock RGB function. */
@@ -261,13 +257,13 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
     MockRgbFunction* mockRgbFunction = new MockRgbFunction();
     EXPECT_CALL(*mockRgbFunction, calculate(_, _))
         .WillRepeatedly(ReturnBlueWhenNoteSoundingOtherwiseRed());
-    m_noteRgbSource->setRgbFunction(mockRgbFunction);
+    noteRgbSource->setRgbFunction(mockRgbFunction);
 
     // (channel, number, velocity, on/off)
-    m_observer->onNoteChange(0, 0, 1, true);
-    m_observer->onNoteChange(0, 5, 6, true);
+    observer->onNoteChange(0, 0, 1, true);
+    observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+    noteRgbSource->execute(strip, noteToLightMap);
 
     auto reference = Processing::TRgbStrip(c_StripSize);
     reference[0] = {0, 0, 1};
@@ -281,12 +277,12 @@ TEST_F(NoteRgbSourceTest, otherRgbFunction)
     reference[8] = {1, 0, 0};
     reference[9] = {1, 0, 0};
 
-    EXPECT_EQ(reference, m_strip);
+    EXPECT_EQ(reference, strip);
 }
 
 TEST_F(NoteRgbSourceTest, timePassedToRgbFunction)
 {
-    EXPECT_CALL(m_mockTime, getMilliseconds())
+    EXPECT_CALL(mockTime, getMilliseconds())
         .WillOnce(Return(42))
         .WillOnce(Return(43))
         .WillRepeatedly(Return(44));
@@ -298,40 +294,40 @@ TEST_F(NoteRgbSourceTest, timePassedToRgbFunction)
         EXPECT_CALL(*mockRgbFunction, calculate(_, 43));
         EXPECT_CALL(*mockRgbFunction, calculate(_, 44))
             .Times(AnyNumber());
-        m_noteRgbSource->setRgbFunction(mockRgbFunction);
+        noteRgbSource->setRgbFunction(mockRgbFunction);
 
-        m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+        noteRgbSource->execute(strip, noteToLightMap);
     }
 }
 
 TEST_F(NoteRgbSourceTest, otherNoteToLightMap)
 {
-    m_noteToLightMap.clear();
-    m_noteToLightMap[0] = 9;
-    m_noteToLightMap[5] = 8;
+    noteToLightMap.clear();
+    noteToLightMap[0] = 9;
+    noteToLightMap[5] = 8;
 
     // (channel, number, velocity, on/off)
-    m_observer->onNoteChange(0, 0, 1, true);
-    m_observer->onNoteChange(0, 5, 6, true);
+    observer->onNoteChange(0, 0, 1, true);
+    observer->onNoteChange(0, 5, 6, true);
 
-    m_noteRgbSource->execute(m_strip, m_noteToLightMap);
+    noteRgbSource->execute(strip, noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(c_StripSize);
     reference[9] = {0xff, 0xff, 0xff};
     reference[8] = {0xff, 0xff, 0xff};
 
-    EXPECT_EQ(reference, m_strip);
+    EXPECT_EQ(reference, strip);
 }
 
 TEST_F(NoteRgbSourceTest, doNotWriteOutsideStrip)
 {
     // (channel, number, velocity, on/off)
-    m_observer->onNoteChange(0, 0, 1, true);
-    m_observer->onNoteChange(0, 9, 6, true);
+    observer->onNoteChange(0, 0, 1, true);
+    observer->onNoteChange(0, 9, 6, true);
 
     auto shorterStrip = Processing::TRgbStrip(5);
-    m_noteRgbSource->execute(shorterStrip, m_noteToLightMap);
+    noteRgbSource->execute(shorterStrip, noteToLightMap);
 
     // Default: white, factor 255, so any velocity >0 will cause full on
     auto reference = Processing::TRgbStrip(5);
@@ -351,8 +347,8 @@ TEST_F(NoteRgbSourceTest, deleteRgbFunction)
     ON_CALL(*mock2, calculate(_, _))
         .WillByDefault(Return(Processing::TRgb()));
 
-    m_noteRgbSource->setRgbFunction(mock1);
-    m_noteRgbSource->setRgbFunction(mock2);
+    noteRgbSource->setRgbFunction(mock1);
+    noteRgbSource->setRgbFunction(mock2);
 }
 
 TEST_F(NoteRgbSourceTest, convertToJson)
@@ -367,11 +363,11 @@ TEST_F(NoteRgbSourceTest, convertToJson)
         .WillOnce(Return(mockRgbFunctionJson));
 
     // Set some non-default values
-    m_noteRgbSource->setRgbFunction(mockRgbFunction);
-    m_noteRgbSource->setChannel(6);
-    m_noteRgbSource->setUsingPedal(false);
+    noteRgbSource->setRgbFunction(mockRgbFunction);
+    noteRgbSource->setChannel(6);
+    noteRgbSource->setUsingPedal(false);
 
-    Json::object j = m_noteRgbSource->convertToJson().object_items();
+    Json::object j = noteRgbSource->convertToJson().object_items();
     EXPECT_EQ("NoteRgbSource", j.at("objectType").string_value());
     EXPECT_EQ(6, j.at("channel").int_value());
     EXPECT_EQ(false, j.at("usingPedal").bool_value());
@@ -382,7 +378,7 @@ TEST_F(NoteRgbSourceTest, convertToJson)
 TEST_F(NoteRgbSourceTest, convertFromJson)
 {
     std::string err;
-    Json j(Json::parse(m_exampleJson, err, json11::STANDARD));
+    Json j(Json::parse(exampleJson, err, json11::STANDARD));
     Json::object mockRgbFunctionJson;
     mockRgbFunctionJson["objectType"] = "MockRgbFunction";
     mockRgbFunctionJson["someParameter"] = 42;
@@ -392,18 +388,18 @@ TEST_F(NoteRgbSourceTest, convertFromJson)
     EXPECT_CALL(*mockRgbFunction, calculate(_, _))
         .WillRepeatedly(Return(Processing::TRgb(1, 2, 3)));
 
-    EXPECT_CALL(m_mockRgbFunctionFactory, createRgbFunction(Json(mockRgbFunctionJson)))
+    EXPECT_CALL(mockRgbFunctionFactory, createRgbFunction(Json(mockRgbFunctionJson)))
         .WillOnce(Return(mockRgbFunction));
 
-    m_noteRgbSource->convertFromJson(j);
-    EXPECT_EQ(6, m_noteRgbSource->getChannel());
-    EXPECT_EQ(false, m_noteRgbSource->isUsingPedal());
+    noteRgbSource->convertFromJson(j);
+    EXPECT_EQ(6, noteRgbSource->getChannel());
+    EXPECT_EQ(false, noteRgbSource->isUsingPedal());
 
     Processing::TRgbStrip reference(3);
     reference[0] = {1, 2, 3};
     reference[1] = {1, 2, 3};
     reference[2] = {1, 2, 3};
     Processing::TRgbStrip testStrip(3);
-    m_noteRgbSource->execute(testStrip, m_noteToLightMap);
+    noteRgbSource->execute(testStrip, noteToLightMap);
     EXPECT_EQ(reference, testStrip);
 }

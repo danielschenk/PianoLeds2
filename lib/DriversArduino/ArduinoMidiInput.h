@@ -65,7 +65,7 @@ public:
     virtual void openPort(int number);
 
 private:
-    Stream& m_serial;
+    Stream& serial;
 };
 
 #endif /* DRIVERS_ARDUINO_ARDUINOMIDIINPUT_H_ */

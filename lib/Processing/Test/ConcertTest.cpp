@@ -53,36 +53,36 @@ class ConcertTest
 public:
     ConcertTest()
         : MidiInputObserverTest()
-        , m_mockProcessingBlockFactory()
-        , m_mockTime()
+        , mockProcessingBlockFactory()
+        , mockTime()
     {
-        LoggingEntryPoint::setTime(&m_mockTime);
-        m_concert = new Concert(m_mockMidiInput, m_mockProcessingBlockFactory);
+        LoggingEntryPoint::setTime(&mockTime);
+        concert = new Concert(mockMidiInput, mockProcessingBlockFactory);
 
-        ON_CALL(m_mockProcessingBlockFactory, createPatch())
+        ON_CALL(mockProcessingBlockFactory, createPatch())
             .WillByDefault(ReturnNew<NiceMock<MockPatch>>());
     }
 
     virtual ~ConcertTest()
     {
-        delete m_concert;
+        delete concert;
     }
 
     void sendBankSelectSequence(uint8_t channel, uint16_t bank)
     {
-        m_concert->onControlChange(channel, IMidiInterface::BANK_SELECT_LSB, bank & 0x7f);
-        m_concert->onControlChange(channel, IMidiInterface::BANK_SELECT_MSB, bank >> 7);
+        concert->onControlChange(channel, IMidiInterface::BANK_SELECT_LSB, bank & 0x7f);
+        concert->onControlChange(channel, IMidiInterface::BANK_SELECT_MSB, bank >> 7);
     }
 
     // Should not be default and go beyond the byte range, to test LSB and MSB
     static const uint16_t c_testBankNumber;
 
     // Required mocks
-    NiceMock<MockProcessingBlockFactory> m_mockProcessingBlockFactory;
-    NiceMock<MockTime> m_mockTime;
+    NiceMock<MockProcessingBlockFactory> mockProcessingBlockFactory;
+    NiceMock<MockTime> mockTime;
 
     // Object under test
-    Concert*  m_concert;
+    Concert*  concert;
 };
 
 const uint16_t ConcertTest::c_testBankNumber = 129;
@@ -91,45 +91,45 @@ TEST_F(ConcertTest, bankSelect)
 {
     const uint8_t channel(0);
     
-    m_concert->setListeningToProgramChange(true);
-    m_concert->setProgramChangeChannel(channel);
+    concert->setListeningToProgramChange(true);
+    concert->setProgramChangeChannel(channel);
 
     // Simulate a bank select sequence
     sendBankSelectSequence(channel, c_testBankNumber);
-    m_concert->execute();
+    concert->execute();
 
     // Check stored bank
-    ASSERT_EQ(c_testBankNumber, m_concert->getCurrentBank());
+    ASSERT_EQ(c_testBankNumber, concert->getCurrentBank());
 }
 
 TEST_F(ConcertTest, bankSelectFromOtherChannelIgnored)
 {
     const uint8_t channel(0);
-    const uint16_t bank(m_concert->getCurrentBank());
+    const uint16_t bank(concert->getCurrentBank());
     
-    m_concert->setListeningToProgramChange(true);
-    m_concert->setProgramChangeChannel(channel);
+    concert->setListeningToProgramChange(true);
+    concert->setProgramChangeChannel(channel);
 
     // Simulate a bank select sequence
     sendBankSelectSequence(channel + 1, bank + 1);
 
-    m_concert->execute();
+    concert->execute();
 
     // Check stored bank
-    ASSERT_EQ(bank, m_concert->getCurrentBank());
+    ASSERT_EQ(bank, concert->getCurrentBank());
 }
 
 TEST_F(ConcertTest, execute)
 {
     Processing::TNoteToLightMap map;
     map[42] = 42;
-    m_concert->setNoteToLightMap(map);
+    concert->setNoteToLightMap(map);
 
     MockPatch* mockPatch(new NiceMock<MockPatch>);
-    m_concert->addPatch(mockPatch);
+    concert->addPatch(mockPatch);
 
     MockObserver observer;
-    m_concert->subscribe(observer);
+    concert->subscribe(observer);
 
     Processing::TRgbStrip newStripValues({{42, 43, 44}});
 
@@ -141,35 +141,35 @@ TEST_F(ConcertTest, execute)
     // The new strip values should be notified
     EXPECT_CALL(observer, onStripUpdate(newStripValues));
 
-    m_concert->execute();
+    concert->execute();
 }
 
 TEST_F(ConcertTest, executeWithMultiplePatches)
 {
     auto mockPatch(new NiceMock<MockPatch>);
-    m_concert->addPatch(mockPatch);
+    concert->addPatch(mockPatch);
 
     auto mockPatch2(new NiceMock<MockPatch>);
-    m_concert->addPatch(mockPatch2);
+    concert->addPatch(mockPatch2);
 
     EXPECT_CALL(*mockPatch, execute(_, _));
     EXPECT_CALL(*mockPatch2, execute(_, _))
         .Times(0);
 
-    m_concert->execute();
+    concert->execute();
 }
 
 TEST_F(ConcertTest, executeEmpty)
 {
     // Should not crash
-    m_concert->execute();
+    concert->execute();
 }
 
 TEST_F(ConcertTest, activateFirstPatch)
 {
     auto mockPatch(new NiceMock<MockPatch>);
     EXPECT_CALL(*mockPatch, activate());
-    m_concert->addPatch(mockPatch);
+    concert->addPatch(mockPatch);
 }
 
 TEST_F(ConcertTest, patchChangeOnProgramChange)
@@ -185,26 +185,26 @@ TEST_F(ConcertTest, patchChangeOnProgramChange)
     ON_CALL(*mockPatch2, hasBankAndProgram())
         .WillByDefault(Return(true));
 
-    m_concert->addPatch(mockPatch);
-    m_concert->addPatch(mockPatch2);
+    concert->addPatch(mockPatch);
+    concert->addPatch(mockPatch2);
 
     EXPECT_CALL(*mockPatch, deactivate());
     EXPECT_CALL(*mockPatch2, activate());
     EXPECT_CALL(*mockPatch2, execute(_, _));
 
     uint8_t channel(2);
-    m_concert->setListeningToProgramChange(true);
-    m_concert->setProgramChangeChannel(channel);
+    concert->setListeningToProgramChange(true);
+    concert->setProgramChangeChannel(channel);
     sendBankSelectSequence(channel, c_testBankNumber);
-    m_concert->onProgramChange(channel, program);
-    m_concert->execute();
+    concert->onProgramChange(channel, program);
+    concert->execute();
 }
 
 TEST_F(ConcertTest, addPatch)
 {
-    EXPECT_EQ(0, m_concert->addPatch());
-    EXPECT_EQ(1, m_concert->addPatch());
-    EXPECT_EQ(2, m_concert->addPatch(new NiceMock<MockPatch>));
+    EXPECT_EQ(0, concert->addPatch());
+    EXPECT_EQ(1, concert->addPatch());
+    EXPECT_EQ(2, concert->addPatch(new NiceMock<MockPatch>));
 }
 
 TEST_F(ConcertTest, getPatch)
@@ -217,11 +217,11 @@ TEST_F(ConcertTest, getPatch)
     ON_CALL(*mockPatch2, getName())
         .WillByDefault(Return("second"));
 
-    m_concert->addPatch(mockPatch);
-    m_concert->addPatch(mockPatch2);
+    concert->addPatch(mockPatch);
+    concert->addPatch(mockPatch2);
 
-    EXPECT_EQ("first", m_concert->getPatch(0)->getName());
-    EXPECT_EQ("second", m_concert->getPatch(1)->getName());
+    EXPECT_EQ("first", concert->getPatch(0)->getName());
+    EXPECT_EQ("second", concert->getPatch(1)->getName());
 }
 
 TEST_F(ConcertTest, updateStripSize)
@@ -230,20 +230,20 @@ TEST_F(ConcertTest, updateStripSize)
     map[0] = 42;
     map[1] = 6;
     map[2] = 7;
-    m_concert->setNoteToLightMap(map);
+    concert->setNoteToLightMap(map);
 
-    EXPECT_EQ(43, m_concert->getStripSize());
+    EXPECT_EQ(43, concert->getStripSize());
 }
 
 TEST_F(ConcertTest, convertToJson)
 {
     // Set some non-default values
-    m_concert->setListeningToProgramChange(true);
-    m_concert->setCurrentBank(2);
-    m_concert->setProgramChangeChannel(3);
+    concert->setListeningToProgramChange(true);
+    concert->setCurrentBank(2);
+    concert->setProgramChangeChannel(3);
 
     Processing::TNoteToLightMap map({{1, 10}, {2, 20}});
-    m_concert->setNoteToLightMap(map);
+    concert->setNoteToLightMap(map);
     
     Json::object mockPatchJson, mockPatch2Json;
     mockPatchJson["objectType"] = "MockPatch";
@@ -256,7 +256,7 @@ TEST_F(ConcertTest, convertToJson)
     MockPatch* mockPatch2 = new NiceMock<MockPatch>();
     ASSERT_NE(nullptr, mockPatch2);
 
-    EXPECT_CALL(m_mockProcessingBlockFactory, createPatch())
+    EXPECT_CALL(mockProcessingBlockFactory, createPatch())
         .WillOnce(Return(mockPatch))
         .WillOnce(Return(mockPatch2));
 
@@ -266,10 +266,10 @@ TEST_F(ConcertTest, convertToJson)
         .WillOnce(Return(mockPatch2Json));
 
     // This will use the mock factory to create the patch instances.
-    m_concert->addPatch();
-    m_concert->addPatch();
+    concert->addPatch();
+    concert->addPatch();
 
-    Json::object converted = m_concert->convertToJson().object_items();
+    Json::object converted = concert->convertToJson().object_items();
     EXPECT_EQ(true, converted.at("isListeningToProgramChange").bool_value());
     EXPECT_EQ(2, converted.at("currentBank").number_value());
     EXPECT_EQ(3, converted.at("programChangeChannel").number_value());
@@ -326,24 +326,24 @@ TEST_F(ConcertTest, convertFromJson)
     mockPatch2Json["objectType"] = "MockPatch";
     mockPatch2Json["someParameter"] = 43;
 
-    Expectation first = EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(Json(mockPatch1Json)))
+    Expectation first = EXPECT_CALL(mockProcessingBlockFactory, createPatch(Json(mockPatch1Json)))
         .WillOnce(Return(convertedPatch1));
-    EXPECT_CALL(m_mockProcessingBlockFactory, createPatch(Json(mockPatch2Json)))
+    EXPECT_CALL(mockProcessingBlockFactory, createPatch(Json(mockPatch2Json)))
         .After(first)
         .WillOnce(Return(convertedPatch2));
 
-    m_concert->convertFromJson(j);
-    EXPECT_EQ(true, m_concert->isListeningToProgramChange());
-    EXPECT_EQ(2, m_concert->getCurrentBank());
-    EXPECT_EQ(3, m_concert->getProgramChangeChannel());
+    concert->convertFromJson(j);
+    EXPECT_EQ(true, concert->isListeningToProgramChange());
+    EXPECT_EQ(2, concert->getCurrentBank());
+    EXPECT_EQ(3, concert->getProgramChangeChannel());
 
-    ASSERT_EQ(2, m_concert->size());
-    EXPECT_EQ(name1, m_concert->getPatch(0)->getName());
-    EXPECT_EQ(name2, m_concert->getPatch(1)->getName());
+    ASSERT_EQ(2, concert->size());
+    EXPECT_EQ(name1, concert->getPatch(0)->getName());
+    EXPECT_EQ(name2, concert->getPatch(1)->getName());
 
     Processing::TNoteToLightMap expectedMap;
     expectedMap[1] = 10;
     expectedMap[2] = 20;
-    EXPECT_EQ(expectedMap, m_concert->getNoteToLightMap());
-    EXPECT_EQ(21, m_concert->getStripSize());
+    EXPECT_EQ(expectedMap, concert->getNoteToLightMap());
+    EXPECT_EQ(21, concert->getStripSize());
 }

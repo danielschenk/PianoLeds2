@@ -31,8 +31,8 @@ ProcessingTask::ProcessingTask(Concert& concert,
                                uint32_t stackSize,
                                UBaseType_t priority)
     : BaseTask()
-    , m_concert(concert)
-    , m_lastWakeTime(xTaskGetTickCount())
+    , concert(concert)
+    , lastWakeTime(xTaskGetTickCount())
 {
     start("processing", stackSize, priority);
 }
@@ -44,7 +44,7 @@ ProcessingTask::~ProcessingTask()
 void ProcessingTask::run()
 {
     // Wait for the next cycle.
-    vTaskDelayUntil(&m_lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
+    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(c_runIntervalMs));
 
-    m_concert.execute();
+    concert.execute();
 }

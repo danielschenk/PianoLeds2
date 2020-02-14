@@ -66,7 +66,7 @@ public:
 private:
     void run() override;
 
-    ArduinoMidiInput& m_midiInput;
+    ArduinoMidiInput& midiInput;
 };
 
 #endif /* ESP32APPLICATION_MIDITASK_H_ */

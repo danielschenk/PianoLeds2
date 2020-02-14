@@ -190,40 +190,19 @@ private:
     TPatchPosition addPatchInternal(IPatch* patch);
     void createMinimumAmountOfLights();
 
-    /** The note-to-light mapping. */
-    Processing::TNoteToLightMap m_noteToLightMap;
+    Processing::TNoteToLightMap noteToLightMap;
 
-    /** The actual state of the RGB LED strip. */
-    Processing::TRgbStrip m_strip;
-
-    /** The collection of patches. */
-    TPatches m_patches;
-
-    /** The active patch. */
-    TPatchPosition m_activePatch;
-
-    /** Whether program changes should be able to change the patch. */
-    bool m_listeningToProgramChange;
-
-    /** The channel to listen to for program changes. */
-    uint8_t m_programChangeChannel;
-
-    /** The last selected bank. */
-    uint16_t m_currentBank;
-    
-    /** Reference to the MIDI input. */
-    IMidiInput& m_midiInput;
-
-    /** Reference to the processing block factory. */
-    IProcessingBlockFactory& m_processingBlockFactory;
-
-    /** Scheduler to decouple callbacks */
-    Scheduler m_scheduler;
-
-    std::list<IObserver*> m_observers;
-
-    /** Mutex to protect the members. */
-    mutable std::mutex m_mutex;
+    Processing::TRgbStrip strip;
+    TPatches patches;
+    TPatchPosition activePatchPosition = c_invalidPatchPosition;
+    bool listeningToProgramChange = false;
+    uint8_t programChangeChannel = 0;
+    uint16_t currentBank = 0;
+    IMidiInput& midiInput;
+    IProcessingBlockFactory& processingBlockFactory;
+    Scheduler scheduler;
+    std::list<IObserver*> observers;
+    mutable std::mutex mutex;
 };
 
 #endif /* PROCESSING_CONCERT_H_ */

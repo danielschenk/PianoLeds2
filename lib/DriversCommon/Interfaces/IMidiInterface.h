@@ -43,7 +43,7 @@ public:
         NOTE_OFF = 0x80,
         NOTE_ON = 0x90,
         CONTROL_CHANGE = 0xB0,
-        PROGRAM_CHANGE = 0xC0,
+        PROGRACHANGE = 0xC0,
         /** Channel pressure is also known as after-touch. */
         CHANNEL_PRESSURE_CHANGE = 0xD0,
         PITCH_BEND_CHANGE = 0xE0,

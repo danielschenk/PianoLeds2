@@ -28,20 +28,20 @@
 
 std::string SystemSettingsModel::getWifiAPSsid() const
 {
-    return get(m_wifiAPSsid);
+    return get(wifiAPSsid);
 }
 
 void SystemSettingsModel::setWifiAPSsid(std::string wifiStationSsid)
 {
-    set(m_wifiAPSsid, wifiStationSsid);
+    set(wifiAPSsid, wifiStationSsid);
 }
 
 std::string SystemSettingsModel::getWifiAPPassword() const
 {
-    return get(m_wifiAPPassword);
+    return get(wifiAPPassword);
 }
 
 void SystemSettingsModel::setWifiAPPassword(std::string wifiStationPassword)
 {
-    set(m_wifiAPPassword, wifiStationPassword);
+    set(wifiAPPassword, wifiStationPassword);
 }
